@@ -26,19 +26,19 @@
 
 1. Информация о диске
 
-	$disk = new Mackey\Yandex\Disk('token');
-	
-	$disk->getContents();
-	
-	/* array (size=5)
-	  'trash_size' => int 187017199
-	  'total_space' => float 14495514624
-	  'used_space' => float 14083430863
-	  'system_folders' => 
-		array (size=2)
-		  'applications' => string 'disk:/Приложения' (length=26)
-		  'downloads' => string 'disk:/Загрузки/' (length=23)
-	  'free_space' => float 412083761 */
+		$disk = new Mackey\Yandex\Disk('token');
+		
+		$disk->getContents();
+		
+		/* array (size=5)
+		  'trash_size' => int 187017199
+		  'total_space' => float 14495514624
+		  'used_space' => float 14083430863
+		  'system_folders' => 
+			array (size=2)
+			  'applications' => string 'disk:/Приложения' (length=26)
+			  'downloads' => string 'disk:/Загрузки/' (length=23)
+		  'free_space' => float 412083761 */
 	
 	public mixed Disk::get(string $key [, mixed $default = null])
 	
