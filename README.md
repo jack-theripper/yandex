@@ -40,7 +40,7 @@
 			  'downloads' => string 'disk:/Загрузки/' (length=23)
 		  'free_space' => float 412083761 */
 	
-	public mixed Disk::get(string $key [, mixed $default = null])
+		public mixed Disk::get(string $key [, mixed $default = null])
 	
 	key
 		Индекс
@@ -48,23 +48,23 @@
 	default
 		Значение по умолчанию, может является функцией - функция будет выполнена с параметров текущего контекста (Disk) и возвращен результат
 
-	$disk->get('total_space');
-	 
-	/* float 14495514624 */
-	
-	$disk->used_space;
-	
-	/* float 14083430863 */
-	
-	$disk['system_folders'];
-	
-	/* array (size=2)
-	  'applications' => string 'disk:/Приложения' (length=26)
-	  'downloads' => string 'disk:/Загрузки/' (length=23) */
+		$disk->get('total_space');
+		 
+		/* float 14495514624 */
+		
+		$disk->used_space;
+		
+		/* float 14083430863 */
+		
+		$disk['system_folders'];
+		
+		/* array (size=2)
+		  'applications' => string 'disk:/Приложения' (length=26)
+		  'downloads' => string 'disk:/Загрузки/' (length=23) */
 
 2. Работа с ресурсами на диске
 	
-	public Disk\Resource Disk::resource([string $path = null [, int $limit = 20 [, int $offset = 0]]])
+		public Disk\Resource Disk::resource([string $path = null [, int $limit = 20 [, int $offset = 0]]])
 	
 	path
 		Путь к новому либо уже существующему ресурсу, NULL Список всех файлов
@@ -286,4 +286,4 @@
 	
 	/* string 'disk:/blah.txt' */
 	
-	
+... продолжение следует
