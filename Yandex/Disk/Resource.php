@@ -232,6 +232,9 @@ class Resource extends Container
 
 		if ($this->encryption())
 		{
+			/* Ограничение. Ограничение на длину объекта custom_properties 
+				(имена и значения вложенных ключей, а также синтаксические знаки) — 1024 символа. */
+
 			$put_data = [''];
 			$this->request->setOpt(CURLOPT_UPLOAD, true);
 			$this->request->setOpt(CURLOPT_BINARYTRANSFER, true);
@@ -289,6 +292,15 @@ class Resource extends Container
 			'permanently' => (bool) $permanently
 		));
 
+		/* response_headers' => 
+        object(Curl\CaseInsensitiveArray)[11]
+          private 'container' => 
+            array (size=9)
+              'Status-Line' => string 'HTTP/1.1 204 NO CONTENT' (length=23)
+              'Server' => string 'nginx' (length=5)
+              'Date' => string 'Mon, 15 Jun 2015 19:27:09 GMT'
+			  */
+			  
 		var_dump($result);
 		
 		if ( ! empty($result['operation']))

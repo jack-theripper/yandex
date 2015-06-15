@@ -56,7 +56,7 @@ trait FilterTrait
 	/**
 	 *	Количество ресурсов, вложенных в папку, описание которых следует вернуть в ответе
 	 *
-	 *	@param	integer	$limit	ксли NULL получает текущее значение
+	 *	@param	integer	$limit	если NULL получает текущее значение
 	 *	@param	integer	$offset	установить начало
 	 *	@return	mixed
 	 */
@@ -239,7 +239,7 @@ trait FilterTrait
 
 		if ( ! in_array($type, ['file', 'dir']))
 		{
-			throw new \UnexpectedValueException('Допустимые значения сортировки - file, dir');
+			throw new \UnexpectedValueException('Допустимые значения - file, dir');
 		}
 
 		$this->request_params['type'] = $type;

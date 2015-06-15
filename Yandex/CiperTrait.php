@@ -116,8 +116,10 @@ trait CiperTrait
 			
 			return $vector;
 		}
-
-		return $this->iv = (string) $property;
+		
+		$this->iv = (string) $property;
+		
+		return $this;
 	}
 
 	/**
