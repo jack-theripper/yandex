@@ -25,24 +25,29 @@ trait CiperTrait
 	protected $encryption = false;
 	
 	/**
-	 *	@var	string	Алгоритм шифрования
-	 */
-	protected $algorithm = MCRYPT_TWOFISH;
-	
-	/**
 	 *	@var	string	Фраза
 	 */
-	protected $passphrase = null;
+	protected $passphrase;
 	
 	/**
-	 *	@var	resource	Mcrypt
+	 *	@var	string	Вектор
 	 */
-	protected $ciper = null;
+	protected $iv;
+	
+	/**
+	 *	@var	string	Длина
+	 */
+	protected $ivSize;
+
+	/**
+	 *	@var	string	Алгоритм шифрования
+	 */
+	protected $cipher = 'AES-256-OFB';
 	
 	/**
 	 *	Включает отключает шифрование
 	 *
-	 *	@param	mixed	$encryption	NULL или boolean
+	 *	@param	mixed	$encryption	NULL или boolean или string пароль
 	 *	@return	mixed
 	 */
 	public function encryption($encryption = null)
@@ -51,19 +56,22 @@ trait CiperTrait
 		{
 			return $this->encryption;
 		}
-		
-		$this->ciper = null;
-		
+
 		if (($this->encryption = (bool) $encryption))
 		{
+			if ( ! extension_loaded('openssl'))
+			{
+				throw new \RuntimeException('Для поддержки шифрования нужно PHP расширение OpenSSL.');
+			}
+			
 			if (is_string($encryption))
 			{
 				$this->phrase($encryption);
 			}
-			
-			$this->ciper = mcrypt_module_open($this->algorithm, '', MCRYPT_MODE_CBC, '');
+
+			$this->ivSize = openssl_cipher_iv_length($this->cipher);
 		}
-		
+
 		return $this;
 	}
 
@@ -77,88 +85,41 @@ trait CiperTrait
 	{
 		if ($phrase === null)
 		{
-			return $this->passphrase;
+			return $this->passphrase ?: $this->cipher;
 		}
 
 		$this->passphrase = (string) $phrase;
 
 		return $this;
 	}
-	
+
 	/**
-	 *	Получить используемый шифровальщик
+	 *	Получить новый вектор инициализации
 	 *
-	 *	@return	mixed
+	 *	@param	$property	mixed	NULL получить текущий вектор, TRUE установить случайный, FALSE получить и стереть вектор, или строка
+	 *	@return	
 	 */
-	public function getCiper()
+	public function vector($property = null)
 	{
-		return $this->ciper;
-	}
-	
-	/**
-	 *	Получить IV
-	 *
-	 *	@return	string|false
-	 */
-	public function getEncryptionIV()
-	{
-		if ($this->ciper)
+		if ($property === null)
 		{
-			return substr(
-				str_repeat(md5('iv'.$this->phrase(), 1), max(mcrypt_enc_get_supported_key_sizes($this->ciper)) / 16),
-				0,
-				mcrypt_enc_get_iv_size($this->ciper)
-			);
+			return $this->iv;
 		}
-		
-		return false;
-	}
-	
-	/**
-	 *	Получить key
-	 *
-	 *	@return	string|false
-	 */
-	public function getEncryptionKey()
-	{
-		if ($this->ciper)
+		else if ($property === true)
 		{
-			return substr(
-				str_repeat(md5('key'.$this->phrase(), 1), max(mcrypt_enc_get_supported_key_sizes($this->ciper)) / 16),
-				0,
-				mcrypt_enc_get_key_size($this->ciper)
-			);
+			return $this->iv = openssl_random_pseudo_bytes($this->ivSize);
 		}
-		
-		return false;
-	}
-	
-	/**
-	 *	Получить размер блока
-	 *
-	 *	@return	integer|false
-	 */
-	public function getEncryptionSize()
-	{
-		if ($this->ciper)
+		else if ($property === false)
 		{
-			return mcrypt_enc_get_block_size($this->ciper);
+			$vector = $this->iv;
+			$this->iv = null;
+			
+			return $vector;
 		}
-		
-		return false;
+
+		return $this->iv = (string) $property;
 	}
-	
-	/**
-	 *	Деструктор
-	 */
-	public function __destruct()
-	{
-		if ($this->ciper)
-		{
-			mcrypt_module_close($this->ciper);
-		}	
-	}
-	
+
 	/**
 	 *	Выполняет шифрование
 	 *
@@ -166,20 +127,17 @@ trait CiperTrait
 	 *	@return	string
 	 *	@throws	\InvalidArgumentException
 	 */
-	public function encrypt($data)
+	public function encrypt($data, $raw = true)
 	{
+		// TODO	 serialize($data)
 		if ( ! is_string($data) or empty($data))
 		{
-			throw \InvalidArgumentException('Ожидается не пустая строка.');
+			throw new \InvalidArgumentException('Ожидается не пустая строка.');
 		}
 
-		mcrypt_generic_init($this->ciper, $this->getEncryptionKey(), $this->getEncryptionIV());
-		$data = mcrypt_generic($this->ciper, $data);
-        mcrypt_generic_deinit($this->ciper);
-
-		return $data;
+		return openssl_encrypt($data, $this->cipher, $this->phrase() ?: $this->cipher, OPENSSL_RAW_DATA, $this->vector() ?: $this->vector(true));
 	}
-	
+
 	/**
 	 *	Выполняет расшифровывание
 	 *
@@ -191,27 +149,43 @@ trait CiperTrait
 	{
 		if ( ! is_string($data) or empty($data))
 		{
-			throw \InvalidArgumentException('Ожидается не пустая строка.');
+			throw new \InvalidArgumentException('Ожидается не пустая строка.');
+		}
+		
+		if ( ! $this->vector())
+		{
+			throw new \RuntimeException('Не установлен вектор инициализации, который был использован при кодировании.');
 		}
 
-		mcrypt_generic_init($this->ciper, $this->getEncryptionKey(), $this->getEncryptionIV());
-		$data = mdecrypt_generic($this->ciper, $data);
-        mcrypt_generic_deinit($this->ciper);
-
-		return $data;
+		// TODO	unserialize()
+		return openssl_decrypt($data, $this->cipher, $this->phrase() ?: $this->cipher, OPENSSL_RAW_DATA, $this->vector());
 	}
 	
+	/**
+	 *	Проверяет этот файл зашифрован или нет
+	 *
+	 */
 	public function hasEncrypted()
 	{
 		try
 		{
-			$this->get('custom_properties', []);
-			
-			return 'encrypted' == true;
+			return ! empty($this->get('custom_properties', ['ecnrypted' => false])['encrypted']);
 		}
 		catch (\Exception $exc)
 		{
 			return false;
 		}
 	}
+
+	/**
+     *	MAC хэш
+     *
+     *	@param  string  $iv
+     *	@param  string  $value
+     *	@return string
+     */
+    protected function hash($iv, $value)
+    {
+        return hash_hmac('sha256', $iv.$value, $this->phrase());
+    }
 }

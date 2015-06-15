@@ -144,7 +144,7 @@ class Resource extends Container
 		{
 			throw new \OutOfBoundsException('Передайте нормальные значения чтобы добавить метаинформацию для ресурса.');
 		}
-
+		
 		$this->setContents($this->request->patch($this->parent_disk->getRequestUrl('resources', array('path' => $this->resource_path)), json_encode(array(
 				'custom_properties' => $data_set
 			))
@@ -224,88 +224,53 @@ class Resource extends Container
 			});
 		}
 
+		$put_data = null;
 		$file_path = realpath($file_path);
-		
-		if ($this->encryption())
-		{
-			/*$blocks = array();
-			$fopen = fopen($file_path, 'rb');
-			$fopen_e = fopen($file_path.'.enc', 'wb+');*/
-			/*$enc_stream = function ($fd, $length) {
-				global $blocks;
-				
-				static $iter = 0;
-				static $iter_last = 0;
-				static $prepend = '';
-
-				$data = $prepend;
-				
-				if (feof($fd))
-				{
-					if (empty($prepend))
-					{
-						return;
-					}
-				}
-				else
-				{
-					$data = fread($fd, $length);
-					$length_data = strlen($data);
-					$data = $prepend.enc(pad($data));
-					
-					if ($iter_last != $length_data)
-					{
-						$blocks[$iter] = $iter_last = $length_data;
-					}
-
-					$iter++;
-				}
-
-				$length_data = strlen($data);
-
-				if ($length_data < $length)
-				{
-					$length = $length_data;
-				}
-				
-				$prepend = substr($data, $length);
-
-				return $data;
-			};*/
-
-			/*while ( ! feof($fopen))
-			{
-				fwrite($fopen_e, fread($fopen, 16372)); // block size 16kb
-			}
-			
-			fclose($fopen);
-			fclose($fopen_e);*/
-			
-			// память на сервере не резиновая
-			if (file_put_contents($file_path.'.enc', $this->encrypt(file_get_contents($file_path))))
-			{
-				$file_path .= '.enc';
-			}	
-		}
-
-		
-			
 		$this->request->setTimeout(null);
 		$this->request->unsetHeader('Content-Type');
-		//$this->request->setOpt(CURLOPT_INFILESIZE, filesize($file_path));
-		@$this->request->put($access_upload['href'], array('file' => "@{$file_path}")); // Curl\Curl: strlen пытается посчитать массив
-		//$this->request->setOpt(CURLOPT_INFILESIZE, null);
+		$this->request->setOpt(CURLOPT_INFILESIZE, filesize($file_path)); 
+
+		if ($this->encryption())
+		{
+			$put_data = [''];
+			$this->request->setOpt(CURLOPT_UPLOAD, true);
+			$this->request->setOpt(CURLOPT_BINARYTRANSFER, true);
+			$this->request->setOpt(CURLOPT_INFILE, fopen($file_path, 'rb'));
+			$this->request->setOpt(CURLOPT_READFUNCTION, function ($ch, $fh, $length) use (&$block_length) {
+				try
+				{
+					return $this->encrypt(fread($fh, ($block_length = $length)), true);
+				}
+				catch (\Exception $exc)
+				{
+					return;
+				}
+			});
+		}
+
+		$this->request->put($access_upload['href'], $put_data ?: ['file' => new \CurlFile($file_path)]);
+		$this->request->setOpt(CURLOPT_INFILESIZE, null);
 		$this->request->setHeader('Content-Type', $this->parent_disk->contentType());
 		$this->request->setDefaultTimeout();
 		$this->request->progress(null);
 		$this->request->setOpt(CURLOPT_NOPROGRESS, true);
-		
 		$result = $this->request->http_status_code;
 
 		if ($this->encryption())
 		{
-			unlink($file_path);
-			$this->set('encrypted', true);
+			$this->request->setOpt([
+				CURLOPT_UPLOAD => false,
+				CURLOPT_BINARYTRANSFER => false,
+				CURLOPT_INFILE => null,
+				CURLOPT_READFUNCTION => null
+			]);
+			
+			$this->set([
+				'encrypted' 		=> md5_file($file_path),
+				'encrypted_block'	=> $block_length,
+				'encrypted_phrase'	=> (string) $this->phrase(),
+				'encrypted_vector'	=> base64_encode($this->vector(false))
+			]);
 		}
 
 		return $result == 201;		
@@ -382,32 +347,36 @@ class Resource extends Container
 			});
 		}
 
-		$properties = $this->get('custom_properties', []);
-		
-		if ( ! empty($properties['encrypted']))
-		{
-			$path_put = $path;
-			$path .= '.enc';
-		}
-		
+		$put_data = $path;
 		$this->request->setTimeout(null);
 		$this->request->setOpt(CURLOPT_FOLLOWLOCATION, true);
-		$this->request->download($response['href'], $path);
+
+		if ($this->hasEncrypted())
+		{
+			$encrypted = $this->get('custom_properties', []);
+			$this->phrase($encrypted['encrypted_phrase'])
+				->vector(base64_decode($encrypted['encrypted_vector']));
+			$put_data = function ($instance, $fh) use ($path, $encrypted) {
+				$fp = fopen($path, 'wb');
+				
+				while ( ! feof($fh))
+				{
+					fwrite($fp, $this->decrypt(fread($fh, $encrypted['encrypted_block'])));
+				}
+				
+				fclose($fp);
+			};
+		}
+
+		$this->request->download($response['href'], $put_data);
 		$this->request->setDefaultTimeout();
 		$this->request->progress(null);
 
-		if (isset($path_put))
-		{
-			if (file_put_contents($path_put, $this->decrypt(file_get_contents($path))))
-			{
-				unlink($path);
-			}
-		}
-		else if (md5_file($path) != $this->md5)
+		if ((isset($encrypted['encrypted']) && (($hash_file = $encrypted['encrypted']) || ($hash_file = $md5))) && $hash_file !== md5_file($path))
 		{
 			throw new \RangeException('Файл скачан, но контрольные суммы различаются.');
 		}
-		
+
 		return $this->request->http_status_code == 200;
 	}
 

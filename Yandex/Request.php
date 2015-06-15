@@ -34,6 +34,11 @@ class Request extends \Curl\Curl
 	];
 	
 	/**
+	 *	@var	array
+	 */
+	protected $options = array();
+	
+	/**
 	 *	Конструктор
 	 *
 	 *	@param	string	$base_url
@@ -171,6 +176,27 @@ class Request extends \Curl\Curl
         $this->headers[$key] = $value;
 
 		return $this;
+    }
+	
+	/**
+     *	Set Opt
+     *
+     *	@access public
+     *	@param  $option
+     *	@param  $value
+     *
+     *	@return boolean
+     */
+    public function setOpt($option, $value = null)
+    {
+        if (is_array($option))
+		{
+			return array_walk($option, function ($val, $key) {
+				parent::setOpt($key, $val);
+			});
+		}
+		
+		return parent::setOpt($option, $value);
     }
 	
 	/**
