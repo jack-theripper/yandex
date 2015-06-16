@@ -97,19 +97,13 @@ class Request extends \Curl\Curl
 		
 		$response = parent::exec($ch);
 
-		/*array (size=2)
-  'code' => int 401
-  'message' => string 'API key is invalid' (length=18)*/
-  
- // var_dump($this->http_status_code, $this->exceptions[$this->http_status_code]);
-  
+		// TODO совместимость с другими API
 		if ($this->http_status_code && isset($this->exceptions[$this->http_status_code]))
 		{
 			$response['error'] = true;
 			$response['message'] = implode('; ', $this->response);
 		}
-		
-		
+
 		if (isset($response['error']))
 		{
 			$exception = 'Exception';

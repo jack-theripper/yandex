@@ -436,17 +436,8 @@ class Resource extends Container
 		}
 		else if ($path_to instanceof ResourcePublish)
 		{
-		/*	$path_to->has()
-			->getLink
-			
-			->upload($link, $overwrite)
-			*/
-			// взять публик кеу
-			// если нет то опубликовать
-			// сохранить на диске $path_to->save()
-			// если мы сами публиковали то закрыть ресурс			
+			return false;
 		}
-		
 		
 		$response = $this->request->post($this->parent_disk->getRequestUrl('resources/move', array(
 				'from' => $this->resource_path,
