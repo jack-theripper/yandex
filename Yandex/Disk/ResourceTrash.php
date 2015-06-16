@@ -130,7 +130,7 @@ class ResourceTrash extends Container
 	 *
 	 *	@return	mixed
 	 */
-	public function delete()
+	public function delete($not_use_var = null)
 	{
 		try
 		{

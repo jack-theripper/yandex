@@ -112,7 +112,7 @@ trait FilterTrait
 		
 		$sort = (string) $sort;
 
-		if ( ! in_array($sort, ['name', 'path', 'created', 'modified', 'size']))
+		if ( ! in_array($sort, ['name', 'path', 'created', 'modified', 'size', 'deleted']))
 		{
 			throw new \UnexpectedValueException('Допустимые значения сортировки - name, path, created, modified, size');
 		}

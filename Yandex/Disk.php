@@ -234,7 +234,7 @@ class Disk extends Client implements \ArrayAccess, \IteratorAggregate
 	 *	@param	string	путь к файлу в корзине
 	 *	@param	boolean
 	 */
-	public function trash($parameter = null)
+	public function trash($parameter = null, $limit = 20, $offset = 0)
 	{
 		if ($parameter === null or (is_string($parameter) && ! strlen($parameter)))
 		{
@@ -255,7 +255,8 @@ class Disk extends Client implements \ArrayAccess, \IteratorAggregate
 				
 				return [];
 			}))
-			->sorting('created');
+			->sorting('created')
+			->limit($limit, $offset);
 		}
 		
 		if ($parameter === true)

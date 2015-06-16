@@ -291,17 +291,6 @@ class Resource extends Container
 			'path' => $this->resource_path,
 			'permanently' => (bool) $permanently
 		));
-
-		/* response_headers' => 
-        object(Curl\CaseInsensitiveArray)[11]
-          private 'container' => 
-            array (size=9)
-              'Status-Line' => string 'HTTP/1.1 204 NO CONTENT' (length=23)
-              'Server' => string 'nginx' (length=5)
-              'Date' => string 'Mon, 15 Jun 2015 19:27:09 GMT'
-			  */
-			  
-		var_dump($result);
 		
 		if ( ! empty($result['operation']))
 		{
@@ -309,8 +298,23 @@ class Resource extends Container
 		}
 		
 		$this->setContents(array());
+		$status = $this->request->http_status_code;
 
-		return $this->request->http_status_code == 204;
+		try
+		{
+			$trash = $this->parent_disk
+				->trash(null, 1)
+				->sorting('deleted', true)
+				->get(0, false);
+			
+			if ($trash && $trash->get('origin_path') == $this->getPath())
+			{
+				return $trash;
+			}
+		}
+		catch (\Exception $exc) { }
+		
+		return $status == 204;
 	}
 	
 	/**

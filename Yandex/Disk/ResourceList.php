@@ -43,11 +43,10 @@ class ResourceList extends Container
 	 */
 	public function getContents()
 	{
-		if ( ! parent::getContents() or $this->previous_params != $this->request_params)
+		if ( ! parent::getContents() or ($this->previous_params && $this->previous_params != $this->request_params))
 		{
-			$this->setReadonly(false)
-				->setContents(call_user_func($this->closure, $this->request_params))
-				->setReadonly(true);
+			parent::__construct(call_user_func($this->closure, $this->request_params), true);
+			
 			$this->previous_params = $this->request_params;
 		}
 

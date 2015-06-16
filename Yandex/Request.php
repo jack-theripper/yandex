@@ -97,8 +97,6 @@ class Request extends \Curl\Curl
 		
 		$response = parent::exec($ch);
 
-		var_dump($response);
-		
 		/*array (size=2)
   'code' => int 401
   'message' => string 'API key is invalid' (length=18)*/
