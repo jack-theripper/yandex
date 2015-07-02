@@ -228,6 +228,7 @@ class Resource extends Container
 		$file_path = realpath($file_path);
 		$this->request->setTimeout(null);
 		$this->request->unsetHeader('Content-Type');
+		$this->request->unsetHeader('Content-Length');
 		$this->request->setOpt(CURLOPT_INFILESIZE, filesize($file_path)); 
 
 		if ($this->encryption())
