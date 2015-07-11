@@ -31,6 +31,11 @@ class Resource extends Container
 	protected $resource_path;
 	
 	/**
+	 *	@var	string	имя ресурса в корзине, если он был удалён
+	 */
+	protected $resource_path_trash;
+	
+	/**
 	 *	@var	Yandex\Disk
 	 */
 	private $parent_disk;
@@ -310,6 +315,8 @@ class Resource extends Container
 			
 			if ($trash && $trash->get('origin_path') == $this->getPath())
 			{
+				$this->resource_path_trash = $trash->get('path');
+				
 				return $trash;
 			}
 		}
@@ -535,12 +542,13 @@ class Resource extends Container
 		}
 
 		$this->request->put($this->parent_disk->getRequestUrl('trash/resources/restore', array(
-				'path' =>  str_replace('disk:/', 'trash:/', $this->getPath()),
+				'path' => $this->getPath(true),
 				'name' => (string) $name,
 				'overwrite' => (bool) $overwrite
 			)
 		), '');
-
+		$this->resource_path_trash = null;
+		
 		if ( ! empty($response['operation']))
 		{
 			return $response['operation'];
@@ -562,7 +570,7 @@ class Resource extends Container
 		}
 		
 		return $this->parent_disk
-			->trash(str_replace('disk:/', 'trash:/', $this->getPath()))
+			->trash($this->getPath(true))
 			->delete();	
 	}
 	
@@ -571,8 +579,13 @@ class Resource extends Container
 	 *
 	 *	@return	string
 	 */
-	public function getPath()
+	public function getPath($has_trash = false)
 	{
+		if ($has_trash)
+		{
+			return $this->resource_path_trash ?: $this->resource_path;
+		}
+		
 		return $this->resource_path;	
 	}
 }
