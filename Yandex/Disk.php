@@ -166,6 +166,10 @@ class Disk extends Client implements \ArrayAccess, \IteratorAggregate
 			$path = substr($path, 6);
 		}
 
+		if(stripos($path, 'app:/') === 0){
+			return new Disk\Resource($path, $this, $this->request);
+		}
+
 		return new Disk\Resource('disk:/'.ltrim($path, ' /'), $this, $this->request);
 	}
 
