@@ -11,6 +11,7 @@
       "email": "lovesosabitch@yandex.ru"
     }
   ],
+  "version": "1.1",
   "autoload": {
       "psr-4": {
           "Mackey\\Yandex\\": "yandex",
