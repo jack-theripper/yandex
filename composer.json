@@ -18,8 +18,8 @@
     },
 	"autoload": {
         "psr-4": {
-            "Mackey\Yandex": "yandex",
-            "Mackey\DataContainer": "datacontainer"
+            "Mackey\\Yandex": "yandex",
+            "Mackey\\DataContainer": "datacontainer"
         }
     }
 }
