@@ -8,7 +8,9 @@
 * Curl
 * либа с репозитория php-curl-class
 
-	composer require arhitector/yandex
+## Composer
+
+$ composer require arhitector/yandex dev-master
 	
 после получения OAuth-токена его можно использовать следующим образом
 
