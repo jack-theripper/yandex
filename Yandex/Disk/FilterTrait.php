@@ -148,6 +148,11 @@ trait FilterTrait
 			
 			if (in_array($preview, ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']) or (is_numeric(str_replace('X', '', $preview, $count_replace)) && $count_replace < 2))
 			{
+
+				if(is_numeric(str_replace('X', '', $preview))) {
+					$preview = strtolower($preview);
+				}
+
 				$this->request_params['preview_size'] = $preview;
 
 				return $this;
