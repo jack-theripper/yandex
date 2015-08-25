@@ -121,6 +121,10 @@ class Resource extends Container
 				$response['items'] = array_map(function ($item) {
 					return new self($item, $this->parent_disk, $this->request);
 				}, $response['_embedded']['items']);
+
+				foreach($response['_embedded'] as $prop => $value) {
+					if($prop != 'items') $response[$prop] = $value;
+				}
 			}
 			
 			unset($response['_links'], $response['_embedded']);
