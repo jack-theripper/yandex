@@ -19,6 +19,8 @@ namespace Mackey\Yandex;
  */
 class Client
 {
+	const OAUTH_API = 'https://oauth.yandex.ru/';
+
 	/**
 	 *	@var	Request	подготовленный экземпляр
 	 */
@@ -32,7 +34,7 @@ class Client
 	/**
      *	@var	string	скомпилированный HTTP адрес к API
      */
-    protected $api_request = 'https://cloud-api.yandex.net/v1/';
+    protected $api_request = 'https://oauth.yandex.ru/';
 	
 	/**
 	 *	@var	string	формат обмена данными
@@ -43,7 +45,17 @@ class Client
      *	@var	string	OAuth-токен
      */
     protected $token = null;
-
+	
+	/**
+     *	@var string
+     */
+    private $client = '';
+	
+    /**
+     *	@var string
+     */
+    private $clientSecret = '';
+	
 	/**
 	 *	Конструктор
 	 *
@@ -100,10 +112,7 @@ class Client
 	{
 		// TODO
 	}
-	
-	// scheme
-	// host
-	
+
 	/**
 	 *	Получить URL запроса к API
 	 *
@@ -135,4 +144,67 @@ class Client
 	{
 		return $this->content_type;
 	}
+	
+	public function setClient($client_id)
+	{
+		$this->client = (string) $client_id;
+		
+		return $this;
+	}
+	
+	public function getClient()
+	{
+		return $this->client;
+	}
+	
+	public function getClientSecret()
+	{
+		return $this->clientSecret;
+	}
+	
+	public function setClientSecret($client_secret)
+	{
+		$this->clientSecret = (string) $client_secret;
+		
+		return $this;
+	}
+	
+	public function requestToken($username, $password, $onlyToken = false)
+	{
+		try
+		{
+			$a = $this->required_token;
+			$this->required_token = false;
+			// RFC 6749
+			$data = (array) $this->request->post($this->api_request.'/token', array(
+				'grant_type'	=> 'password',
+				'client_id'		=> $this->getClient(),
+				'client_secret' => $this->getClientSecret(),
+				'username'		=> (string) $username,
+				'password'		=> (string) $password
+			));
+			$this->required_token = $a;
+			
+			if (isset($data['error']))
+			{
+				throw new Exception($data['error']);
+			}
+			
+			if ($onlyToken)
+			{
+				return (string) $data['access_token'];
+			}
+
+			return $data + array(
+				'token' 		=> $data['access_token'],
+				'ttl'			=> (int) $data['expires_in'],
+				'created_at'	=> time()
+			);
+		}
+		catch (Exception $exc)
+		{
+			return false;
+		}
+	}
+	
 }

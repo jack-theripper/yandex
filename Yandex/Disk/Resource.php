@@ -118,9 +118,11 @@ class Resource extends Container
 
 			if (isset($response['_embedded'], $response['_embedded']['items']))
 			{
-				$response['items'] = array_map(function ($item) {
-					return new self($item, $this->parent_disk, $this->request);
-				}, $response['_embedded']['items']);
+				$response += [
+					'items' => array_map(function ($item) {
+						return new self($item, $this->parent_disk, $this->request);
+					}, $response['_embedded']['items'])
+				] + $response['_embedded'];
 			}
 			
 			unset($response['_links'], $response['_embedded']);
