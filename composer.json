@@ -1,12 +1,12 @@
 {
     "name": "arhitector/yandex",
     "description": "PHP SDK for Yandex disk. SDK для Яндекс диска.",
-	"license": "MIT",
-	"keywords": [
+    "license": "MIT",
+    "keywords": [
         "php", "curl", "yandex", "api", "client", "sdk", "disk",
         "yandex disk", "яндекс диск", "диск", "rest", "restful", "яндекс"
     ],
-	"authors": [
+    "authors": [
         {
             "name": "Dmitry Arhitector",
             "email": "lovesosabitch@yandex.ru"
@@ -16,10 +16,10 @@
         "php": ">=5.5",
         "php-curl-class/php-curl-class": "^3.4"
     },
-	"autoload": {
+    "autoload": {
         "psr-4": {
-            "Mackey\\Yandex\\": "yandex",
-            "Mackey\\DataContainer\\": "datacontainer"
+            "Mackey\\Yandex\\": "Yandex",
+            "Mackey\\DataContainer\\": "DataContainer"
         }
     }
 }
