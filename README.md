@@ -1,3 +1,6 @@
+
+**В скором времени будет доступна новая версия https://github.com/jack-theripper/yandex**
+
 ### Содержание
 SDK Яндекс.Диск REST API. Яндекс.Диск использует OAuth-токен для аунтификации, зарегистрировать приложение и получить токен [https://oauth.yandex.ru](https://oauth.yandex.ru/)
 
