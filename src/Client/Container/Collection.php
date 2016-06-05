@@ -39,7 +39,9 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getFirst()
 	{
-		return reset($this->toArray());
+		$elements = $this->toArray();
+
+		return reset($elements);
 	}
 
 	/**
@@ -49,7 +51,9 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getLast()
 	{
-		return end($this->toArray());
+		$elements = $this->toArray();
+
+		return end($elements);
 	}
 
 }

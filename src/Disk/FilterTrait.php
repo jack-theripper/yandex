@@ -160,7 +160,7 @@ trait FilterTrait
 	 *
 	 * @return    $this
 	 */
-	public function setPath($path)
+	public function setRelativePath($path)
 	{
 		if ( ! is_string($path))
 		{

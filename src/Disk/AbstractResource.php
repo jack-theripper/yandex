@@ -107,5 +107,14 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 		return $this->has('public_key');
 	}
 
+	/**
+	 * Получить путь к ресурсу
+	 *
+	 * @return    string
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}
 
 }

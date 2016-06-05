@@ -18,9 +18,14 @@ $disk->setAccessToken('c760916b09034aff9a6a7ca765eb39b8');
 //$resources = $disk->getResources();
 //$resources = $disk->getTrashResources();
 //$resources = $disk->cleanTrash();
+//$resources = $disk->uploaded();
 
-$resources = $disk->uploaded();
+$resources = $disk->getResource('disk:/applications_swagga/100/Lucky Luke - Мой мир_trapsound.ru.mp3');
 
-var_dump($resources->toObject());
+$resources->set('nama', 'fe');
+
+
+
+var_dump($resources->toArray());
 
 var_dump($disk);

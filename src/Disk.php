@@ -20,6 +20,8 @@ use League\Event\EmitterTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Request;
+use Zend\Diactoros\Stream;
+use Zend\Diactoros\Uri;
 
 /**
  * Клиент для Яндекс.Диска
@@ -522,6 +524,8 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function send(RequestInterface $request/*, StreamInterface $stream = null*/)
 	{
+		echo $request->getUri();
+		
 		/*if ($stream !== null)
 		{
 			$this->client->getResponseParser()
@@ -543,9 +547,11 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 
 				if ( ! $operation->getQuery())
 				{
-					$this->operations[] = $responseBody['operation'] = substr(strrchr($operation->getPath(), '/'), 1);
+					$responseBody['operation'] = substr(strrchr($operation->getPath(), '/'), 1);
 					$stream = new Stream('php://temp', 'w');
 					$stream->write(json_encode($responseBody));
+					$this->addOperation($responseBody['operation']);
+					$this->emit('operation', $responseBody['operation'], $this);
 
 					return $response->withBody($stream);
 				}

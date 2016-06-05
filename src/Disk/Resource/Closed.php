@@ -11,13 +11,20 @@ namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
+use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
-//use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
-//use Arhitector\Yandex\Disk\Stream\GzipDecode;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
+//use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+//use Arhitector\Yandex\Disk\Stream\GzipDecode;
+
+/**
+ * Закрытый ресурс.
+ *
+ * @package Arhitector\Yandex\Disk\Resource
+ */
 class Closed extends AbstractResource
 {
 
@@ -25,10 +32,10 @@ class Closed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $resource путь к существующему либо новому ресурсу
-	 * @param \Mackey\Yandex\Disk            $parent
+	 * @param \Arhitector\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($resource, \Arhitector\Yandex\Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($resource, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($resource))
 		{
@@ -74,16 +81,20 @@ class Closed extends AbstractResource
 	/**
 	 * Получает информацию о ресурсе
 	 *
-	 * @return    mixed
+	 * @param array $allowed    выбрать ключи
+	 *
+	 * @return mixed
+	 *
+	 * @TODO    добавить clearModify(), тем самым сделать возможность получать списки ресурсов во вложенных папках.
 	 */
 	public function toArray(array $allowed = null)
 	{
 		if ( ! $this->_toArray() || $this->isModified())
 		{
 			$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
-			                                                      ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-				                                                      'path' => $this->getPath()
-			                                                      ]), null, '&')), 'GET'));
+				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+					'path' => $this->getPath()
+				]), null, '&')), 'GET'));
 
 			if ($response->getStatusCode() == 200)
 			{
@@ -93,16 +104,18 @@ class Closed extends AbstractResource
 				{
 					$this->isModified = false;
 
-					if (isset($response['_embedded'], $response['_embedded']['items']))
+					$response['items'] = [];
+
+					if (isset($response['_embedded']))
 					{
-						$response += [
-							'items' => new Container(array_map(function($item) {
-								return new self($item, $this->parent, $this->uri);
-							}, $response['_embedded']['items']))
-						];
+						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
+
+					$response['items'] = new Container\Collection(array_map(function($item) {
+						return new self($item, $this->parent, $this->uri);
+					}, $response['items']));
 
 					$this->setContents($response);
 				}
@@ -138,6 +151,16 @@ class Closed extends AbstractResource
 	}
 
 	/**
+	 * Получает всю метаинформацию и custom_properties
+	 *
+	 * @return  array
+	 */
+	public function getProperties()
+	{
+		return $this->get('custom_properties', []);
+	}
+
+	/**
 	 * Добавление метаинформации для ресурса
 	 *
 	 * @param    mixed $meta  строка либо массив значений
@@ -169,7 +192,7 @@ class Closed extends AbstractResource
 		}*/
 
 		$request = (new Request($this->uri->withPath($this->uri->getPath().'resources')
-		                                  ->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PATCH'));
+			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PATCH'));
 
 		$request->getBody()
 		        ->write(json_encode(['custom_properties' => $meta]));
