@@ -72,7 +72,7 @@ class Removed extends AbstractResource
 					if (isset($response['_embedded'], $response['_embedded']['items']))
 					{
 						$response += [
-								'items' => new Container(array_map(function($item) {
+								'items' => new Container\Collection(array_map(function($item) {
 									return new self($item, $this->parent, $this->uri);
 								}, $response['_embedded']['items']))
 							] + $response['_embedded'];

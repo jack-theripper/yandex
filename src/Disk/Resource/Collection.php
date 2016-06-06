@@ -12,10 +12,9 @@
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-
 use Arhitector\Yandex\Client\Container\Collection as CollectionContainer;
+use Arhitector\Yandex\Disk\Filter\MediaTypeTrait;
 use Arhitector\Yandex\Disk\FilterTrait;
-
 
 /**
  * Коллекция ресурсов.
@@ -24,7 +23,7 @@ use Arhitector\Yandex\Disk\FilterTrait;
  */
 class Collection extends CollectionContainer
 {
-	use FilterTrait;
+	use FilterTrait, MediaTypeTrait;
 
 	/**
 	 * @var    Callable

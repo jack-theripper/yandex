@@ -25,6 +25,16 @@ class Operation
 {
 
 	/**
+	 * @const
+	 */
+	const SUCCESS = 'success';
+
+	/**
+	 * @const
+	 */
+	const PROGRESS = 'in-progress';
+
+	/**
 	 * @var \Psr\Http\Message\UriInterface
 	 */
 	protected $uri;
@@ -52,6 +62,8 @@ class Operation
 			throw new \InvalidArgumentException('Ожидается строковый идентификатор асинхронной операции.');
 		}
 
+		$this->uri = $uri;
+		$this->parent = $disk;
 		$this->identifier = $identifier;
 	}
 

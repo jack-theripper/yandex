@@ -45,26 +45,7 @@ class Closed extends AbstractResource
 			}
 
 			$this->setContents($resource);
-
-			if ($this->isFile())
-			{
-				$docviewer = [
-					'url'  => $this->get('path'),
-					'name' => $this->get('name')
-				];
-
-				if (strpos($docviewer['url'], 'disk:/') === 0)
-				{
-					$docviewer['url'] = substr($docviewer['url'], 6);
-				}
-
-				//?url=ya-disk-public://PIGz1fuuXxttFlS3EU9XKOIl28e4+H7kYZqddBBSVB0=&name=catalog.zip
-
-				$docviewer['url']  = "ya-disk:///disk/{$docviewer['url']}";
-				$this->store['docviewer'] = (string) (new Uri('https://docviewer.yandex.ru'))
-					->withQuery(http_build_query($docviewer, null, '&'));
-			}
-
+			$this->store['docviewer'] = $this->createDocViewerUrl();
 			$resource = $resource['path'];
 		}
 
@@ -104,8 +85,6 @@ class Closed extends AbstractResource
 				{
 					$this->isModified = false;
 
-					$response['items'] = [];
-
 					if (isset($response['_embedded']))
 					{
 						$response = array_merge($response, $response['_embedded']);
@@ -113,11 +92,15 @@ class Closed extends AbstractResource
 
 					unset($response['_links'], $response['_embedded']);
 
-					$response['items'] = new Container\Collection(array_map(function($item) {
-						return new self($item, $this->parent, $this->uri);
-					}, $response['items']));
+					if (isset($response['items']))
+					{
+						$response['items'] = new Container\Collection(array_map(function($item) {
+							return new self($item, $this->parent, $this->uri);
+						}, $response['items']));
+					}
 
 					$this->setContents($response);
+					$this->store['docviewer'] = $this->createDocViewerUrl();
 				}
 			}
 		}
@@ -166,7 +149,7 @@ class Closed extends AbstractResource
 	 * @param    mixed $meta  строка либо массив значений
 	 * @param    mixed $value NULL чтобы удалить определённую метаинформаию когда $meta строка
 	 *
-	 * @return $this
+	 * @return \Arhitector\Yandex\Disk
 	 * @throws \LengthException
 	 */
 	public function set($meta, $value = null)
@@ -212,6 +195,8 @@ class Closed extends AbstractResource
 	 *
 	 * @param    string $key
 	 * @param    mixed  $value
+	 *
+	 * @return  void
 	 */
 	public function offsetSet($key, $value)
 	{
@@ -231,9 +216,10 @@ class Closed extends AbstractResource
 	/**
 	 * Разрешает использование unset() к метаинформации
 	 *
-	 * @param    string $key
+	 * @param   string $key
 	 *
-	 * @throws    \RuntimeException
+	 * @return  void
+	 * @throws  \RuntimeException
 	 */
 	public function offsetUnset($key)
 	{
@@ -253,23 +239,24 @@ class Closed extends AbstractResource
 	/**
 	 * Удаление файла или папки
 	 *
-	 * @param    boolean $permanently TRUE Признак безвозвратного удаления
+	 * @param   boolean $permanently TRUE Признак безвозвратного удаления
 	 *
-	 * @return    mixed
+	 * @return  bool|\Arhitector\Yandex\Disk\Operation|\Arhitector\Yandex\Disk\Resource\Removed
 	 */
 	public function delete($permanently = false)
 	{
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
-		                                                      ->withQuery(http_build_query([
-			                                                      'path'        => $this->getPath(),
-			                                                      'permanently' => (bool) $permanently
-		                                                      ])), 'DELETE'));
+			->withQuery(http_build_query([
+				'path'        => $this->getPath(),
+				'permanently' => (bool) $permanently
+			])), 'DELETE'));
 
 		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 204)
 		{
 			$this->setContents([]);
 
-			$this->emit('disk.delete', $this);
+			$this->emit('delete', $this, $this->parent);
+			$this->parent->emit('delete', $this, $this->parent);
 
 			if ($response->getStatusCode() == 202)
 			{
@@ -277,8 +264,9 @@ class Closed extends AbstractResource
 
 				if (isset($response['operation']))
 				{
-					$this->emit('disk.operation', $this);
-					$this->parent->emit('disk.operation', $this);
+					$response['operation'] = $this->parent->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->parent);
+					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 					return $response['operation'];
 				}
@@ -286,17 +274,12 @@ class Closed extends AbstractResource
 
 			try
 			{
-				/*$trash = $this->parent->trash(null, 1)
-					->setSort('deleted', true)
-					->getFirst();
+				/*$resource = $this->parent->getTrashResource('/', 0);
+				$resource = $this->parent->getTrashResources(1, $resource->get('total', 0) - 1)->getFirst();
 
-				// любая папка в корзине всегда будет в начале списка
-				// $this->parent->trash(null, 0)->get('total')
-				// $this->parent->trash(null, 1, total - 1)->getFirst()
-
-				if ($trash && $trash->get('origin_path') == $this->getPath())
+				if ($resource->has() && $resource->get('origin_path') == $this->getPath())
 				{
-					return $trash;
+					return $resource;
 				}*/
 			}
 			catch (\Exception $exc)
@@ -368,7 +351,7 @@ class Closed extends AbstractResource
 		try
 		{
 			$this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
-			                                          ->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
+				->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
 			$this->setContents([]);
 		}
 		catch (\Exception $exc)
@@ -386,7 +369,7 @@ class Closed extends AbstractResource
 	 *
 	 * @return Closed|Opened
 	 */
-	public function publish($publish = true)
+	public function setPublish($publish = true)
 	{
 		$request = 'resources/unpublish';
 
@@ -396,7 +379,7 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().$request)
-		                                                      ->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
+			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -410,7 +393,7 @@ class Closed extends AbstractResource
 
 		return $this;
 	}
-
+	
 	/**
 	 * Скачивает файл
 	 *
@@ -598,6 +581,34 @@ class Closed extends AbstractResource
 		$this->parent->emit('disk.uploaded', $this);
 
 		return $response->getStatusCode() == 201;
+	}
+
+	/**
+	 * Получает ссылку для просмотра документа. Достпно владельцу аккаунта.
+	 *
+	 * @return bool|string
+	 */
+	protected function createDocViewerUrl()
+	{
+		if ($this->isFile())
+		{
+			$docviewer = [
+				'url'  => $this->get('path'),
+				'name' => $this->get('name')
+			];
+
+			if (strpos($docviewer['url'], 'disk:/') === 0)
+			{
+				$docviewer['url'] = substr($docviewer['url'], 6);
+			}
+
+			$docviewer['url']  = "ya-disk:///disk/{$docviewer['url']}";
+
+			return (string) (new Uri('https://docviewer.yandex.ru'))
+				->withQuery(http_build_query($docviewer, null, '&'));
+		}
+
+		return false;
 	}
 
 }

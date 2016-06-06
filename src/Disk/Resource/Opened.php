@@ -60,6 +60,25 @@ class Opened extends AbstractResource
 
 			$this->setContents($public_key);
 			$public_key = $public_key['public_key'];
+
+			/*if ($this->isFile())
+			{
+				$docviewer = [
+					'url'  => $this->get('path'),
+					'name' => $this->get('name')
+				];
+
+				if (strpos($docviewer['url'], 'disk:/') === 0)
+				{
+					$docviewer['url'] = substr($docviewer['url'], 6);
+				}
+
+				//?url=ya-disk-public://PIGz1fuuXxttFlS3EU9XKOIl28e4+H7kYZqddBBSVB0=&name=catalog.zip
+
+				$docviewer['url']  = "ya-disk:///disk/{$docviewer['url']}";
+				$this->store['docviewer'] = (string) (new Uri('https://docviewer.yandex.ru'))
+					->withQuery(http_build_query($docviewer, null, '&'));
+			}*/
 		}
 
 		if ( ! is_scalar($public_key))

@@ -539,6 +539,8 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 		             ->getStreamFactory()
 		             ->useStream();*/
 
+		var_dump($response->getStatusCode());
+
 		if ($response->getStatusCode() == 202)
 		{
 			if (($responseBody = json_decode($response->getBody(), true)) && isset($responseBody['href']))
@@ -551,7 +553,6 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 					$stream = new Stream('php://temp', 'w');
 					$stream->write(json_encode($responseBody));
 					$this->addOperation($responseBody['operation']);
-					$this->emit('operation', $responseBody['operation'], $this);
 
 					return $response->withBody($stream);
 				}

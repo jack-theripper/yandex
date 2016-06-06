@@ -30,180 +30,51 @@ trait FilterTrait
 	 */
 	protected $isModified = false;
 
-	/**
-	 * @var array   доступные типы
-	 */
-	protected $mediaTypes = [
-
-		/**
-		 * аудио-файлы
-		 */
-		'audio',
-
-		/**
-		 * файлы резервных и временных копий
-		 */
-		'backup',
-
-		/**
-		 * электронные книги
-		 */
-		'book',
-
-		/**
-		 * сжатые и архивированные файлы
-		 */
-		'compressed',
-
-		/**
-		 * файлы с базами данных
-		 */
-		'data',
-
-		/**
-		 * файлы с кодом (C++, Java, XML и т. п.), а также служебные файлы IDE
-		 */
-		'development',
-
-		/**
-		 * образы носителей информации в различных форматах и сопутствующие файлы (например, CUE)
-		 */
-		'diskimage',
-
-		/**
-		 * документы офисных форматов (Word, OpenOffice и т. п.)
-		 */
-		'document',
-
-		/**
-		 * зашифрованные файлы
-		 */
-		'encoded',
-
-		/**
-		 * исполняемые файлы
-		 */
-		'executable',
-
-		/**
-		 * файлы с флэш-видео или анимацией
-		 */
-		'flash',
-
-		/**
-		 * файлы шрифтов.
-		 */
-		'font',
-
-		/**
-		 * изображения
-		 */
-		'image',
-
-		/**
-		 * файлы настроек для различных программ
-		 */
-		'settings',
-
-		/**
-		 * файлы офисных таблиц (Numbers, Lotus)
-		 */
-		'spreadsheet',
-
-		/**
-		 * текстовые файлы
-		 */
-		'text',
-
-		/**
-		 * неизвестный тип
-		 */
-		'unknown',
-
-		/**
-		 * видео-файлы
-		 */
-		'video',
-
-		/**
-		 * различные файлы, используемые браузерами и сайтами (CSS, сертификаты, файлы закладок)
-		 */
-		'web'
-	];
-
 
 	/**
-	 * Тип ресурса
+	 * Количество ресурсов, вложенных в папку, описание которых следует вернуть в ответе
 	 *
-	 * @param    string $type
+	 * @param    integer $limit
+	 * @param    integer $offset установить смещение
 	 *
-	 * @return    $this
-	 * @throws    \UnexpectedValueException
+	 * @return   $this
 	 */
-	public function setType($type)
+	public function setLimit($limit, $offset = null)
 	{
-		if ( ! is_string($type) || ! in_array($type, ['file', 'dir']))
+		if (filter_var($limit, FILTER_VALIDATE_INT) === false)
 		{
-			throw new \UnexpectedValueException('Тип ресурса, допустимые значения - "file", "dir".');
+			throw new \InvalidArgumentException('Параметр "limit" должен быть целым числом.');
 		}
 
 		$this->isModified = true;
-		$this->parameters['type'] = $type;
+		$this->parameters['limit'] = (int) $limit;
+
+		if ($offset !== null)
+		{
+			$this->setOffset($offset);
+		}
 
 		return $this;
 	}
 
 	/**
-	 * Относительный путь к ресурсу внутри публичной папки
+	 * Количество вложенных ресурсов с начала списка, которые следует опустить в ответе
 	 *
-	 * @param    string $path
+	 * @param    integer $offset
 	 *
 	 * @return    $this
 	 */
-	public function setRelativePath($path)
+	public function setOffset($offset)
 	{
-		if ( ! is_string($path))
+		if (filter_var($offset, FILTER_VALIDATE_INT) === false)
 		{
-			throw new \InvalidArgumentException('Относительный путь к ресурсу должен быть строкового типа.');
+			throw new \InvalidArgumentException('Параметр "offset" должен быть целым числом.');
 		}
 
 		$this->isModified = true;
-		$this->parameters['path'] = '/'.ltrim($path, ' /');
+		$this->parameters['offset'] = (int) $offset;
 
 		return $this;
-	}
-
-	/**
-	 * Тип файлов, которые нужно включить в список
-	 *
-	 * @param    string $media_type
-	 *
-	 * @return    $this
-	 * @throws    \UnexpectedValueException
-	 */
-	public function setMediaType($media_type)
-	{
-		$media_type = (string) $media_type;
-
-		if ( ! in_array($media_type, $this->getMediaTypes()))
-		{
-			throw new \UnexpectedValueException('Тип файла, значения - "'.implode('", "', $this->getMediaTypes()).'".');
-		}
-
-		$this->isModified = true;
-		$this->parameters['media_type'] = $media_type;
-
-		return $this;
-	}
-
-	/**
-	 * Все возможные типы файлов
-	 *
-	 * @return array
-	 */
-	public function getMediaTypes()
-	{
-		return $this->mediaTypes;
 	}
 
 	/**
@@ -256,7 +127,7 @@ trait FilterTrait
 	/**
 	 * Атрибут, по которому сортируется список ресурсов, вложенных в папку.
 	 *
-	 * @param    integer $sort
+	 * @param    string  $sort
 	 * @param    boolean $inverse TRUE чтобы сортировать в обратном порядке
 	 *
 	 * @return    $this
@@ -278,52 +149,6 @@ trait FilterTrait
 
 		$this->isModified = true;
 		$this->parameters['sort'] = $sort;
-
-		return $this;
-	}
-
-	/**
-	 * Количество ресурсов, вложенных в папку, описание которых следует вернуть в ответе
-	 *
-	 * @param    integer $limit
-	 * @param    integer $offset установить смещение
-	 *
-	 * @return   $this
-	 */
-	public function setLimit($limit, $offset = null)
-	{
-		if (filter_var($limit, FILTER_VALIDATE_INT) === false)
-		{
-			throw new \InvalidArgumentException('Параметр "limit" должен быть целым числом.');
-		}
-
-		$this->isModified = true;
-		$this->parameters['limit'] = (int) $limit;
-
-		if ($offset !== null)
-		{
-			$this->setOffset($offset);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Количество вложенных ресурсов с начала списка, которые следует опустить в ответе
-	 *
-	 * @param    integer $offset
-	 *
-	 * @return    $this
-	 */
-	public function setOffset($offset)
-	{
-		if (filter_var($offset, FILTER_VALIDATE_INT) === false)
-		{
-			throw new \InvalidArgumentException('Параметр "offset" должен быть целым числом.');
-		}
-
-		$this->isModified = true;
-		$this->parameters['offset'] = (int) $offset;
 
 		return $this;
 	}
