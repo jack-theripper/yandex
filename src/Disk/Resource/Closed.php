@@ -1,11 +1,15 @@
 <?php
 
 /**
- * Created by Arhitector.
- * Date: 08.03.2016
- * Time: 14:29
+ * Часть библиотеки для работы с сервисами Яндекса
+ *
+ * @package    Arhitector\Yandex\Disk
+ * @version    2.0
+ * @author     Arhitector
+ * @license    MIT License
+ * @copyright  2016 Arhitector
+ * @link       https://github.com/jack-theripper
  */
-
 namespace Arhitector\Yandex\Disk\Resource;
 
 
@@ -13,12 +17,10 @@ use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
+use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
-
-//use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
-//use Arhitector\Yandex\Disk\Stream\GzipDecode;
 
 /**
  * Закрытый ресурс.
@@ -301,11 +303,11 @@ class Closed extends AbstractResource
 	 * возвращается подходящий код ответа, а тело ответа содержит описание ошибки).
 	 * Приложения должны самостоятельно следить за статусами запрошенных операций.
 	 *
-	 * @param    string|Closed $destination новый путь.
-	 * @param   boolean        $overwrite   признак перезаписи файлов. Учитывается, если ресурс перемещается в папку, в
-	 *                                      которой уже есть ресурс с таким именем.
+	 * @param   string|\Arhitector\Yandex\Disk\Resource\Closed $destination новый путь.
+	 * @param   boolean                                        $overwrite   признак перезаписи файлов. Учитывается, если ресурс перемещается в папку, в
+	 *                                                                      которой уже есть ресурс с таким именем.
 	 *
-	 * @return bool
+	 * @return bool|\Arhitector\Yandex\Disk\Operation
 	 */
 	public function move($destination, $overwrite = false)
 	{
@@ -315,11 +317,11 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/move')
-		                                                      ->withQuery(http_build_query([
-			                                                      'from'      => $this->getPath(),
-			                                                      'path'      => $destination,
-			                                                      'overwrite' => (bool) $overwrite
-		                                                      ], null, '&')), 'POST'));
+			->withQuery(http_build_query([
+				'from'      => $this->getPath(),
+				'path'      => $destination,
+				'overwrite' => (bool) $overwrite
+			], null, '&')), 'POST'));
 
 		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
 		{
@@ -328,8 +330,9 @@ class Closed extends AbstractResource
 
 			if (isset($response['operation']))
 			{
-				$this->emit('disk.operation', $this);
-				$this->parent->emit('disk.operation', $this);
+				$response['operation'] = $this->parent->getOperation($response['operation']);
+				$this->emit('operation', $response['operation'], $this, $this->parent);
+				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 				return $response['operation'];
 			}
@@ -343,7 +346,7 @@ class Closed extends AbstractResource
 	/**
 	 *	Создание папки, если ресурса с таким же именем нет
 	 *
-	 *	@return	Closed
+	 *	@return	\Arhitector\Yandex\Disk\Resource\Closed
 	 *	@throws	mixed
 	 */
 	public function create()
@@ -351,7 +354,9 @@ class Closed extends AbstractResource
 		try
 		{
 			$this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
-				->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
+				->withQuery(http_build_query([
+					'path' => $this->getPath()
+				], null, '&')), 'PUT'));
 			$this->setContents([]);
 		}
 		catch (\Exception $exc)
@@ -365,9 +370,9 @@ class Closed extends AbstractResource
 	/**
 	 * Публикация ресурса\Закрытие доступа
 	 *
-	 * @param    string|Resource
+	 * @param   boolean $publish    TRUE открыть доступ, FALSE закрыть доступ
 	 *
-	 * @return Closed|Opened
+	 * @return  \Arhitector\Yandex\Disk\Resource\Closed|\Arhitector\Yandex\Disk\Resource\Opened
 	 */
 	public function setPublish($publish = true)
 	{
@@ -379,7 +384,9 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().$request)
-			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PUT'));
+			->withQuery(http_build_query([
+				'path' => $this->getPath()
+			], null, '&')), 'PUT'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -425,7 +432,7 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/download')
-		                                                      ->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'GET'));
+			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'GET'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -433,8 +440,7 @@ class Closed extends AbstractResource
 
 			if (isset($response['href']))
 			{
-				$response = $this->parent->send(new Request($response['href'], 'GET'),
-					new GzipDecode('php://temp', 'r'));
+				$response = $this->parent->send(new Request($response['href'], 'GET'));
 
 				if ($response->getStatusCode() == 200)
 				{
@@ -444,8 +450,8 @@ class Closed extends AbstractResource
 
 					fclose($path);
 
-					$this->emit('disk.downloaded', $this);
-					$this->parent->emit('disk.downloaded', $this);
+					$this->emit('downloaded', $this, $this->parent);
+					$this->parent->emit('downloaded', $this, $this->parent);
 
 					return true;
 				}
@@ -460,7 +466,8 @@ class Closed extends AbstractResource
 	/**
 	 * Копирование файла или папки
 	 *
-	 * @param    string|Closed
+	 * @param   string|\Arhitector\Yandex\Disk\Resource\Closed $destination
+	 * @param   bool                                           $overwrite
 	 *
 	 * @return bool
 	 */
@@ -472,22 +479,21 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/copy')
-		                                                      ->withQuery(http_build_query([
-			                                                      'from'      => $this->getPath(),
-			                                                      'path'      => $destination,
-			                                                      'overwrite' => (bool) $overwrite
-		                                                      ], null, '&')), 'POST'));
+			->withQuery(http_build_query([
+				'from'      => $this->getPath(),
+				'path'      => $destination,
+				'overwrite' => (bool) $overwrite
+			], null, '&')), 'POST'));
 
 		if ($response->getStatusCode() == 201)
 		{
 			$response = json_decode($response->getBody(), true);
 
-			//var_dump($response);
-
 			if (isset($response['operation']))
 			{
-				$this->emit('disk.operation', $this);
-				$this->parent->emit('disk.operation', $this);
+				$response['operation'] = $this->parent->getOperation($response['operation']);
+				$this->emit('operation', $response['operation'], $this, $this->parent);
+				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 				return $response['operation'];
 			}
@@ -518,12 +524,11 @@ class Closed extends AbstractResource
 			{
 				try
 				{
-					$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath()
-						.'resources/upload')
-					                                                      ->withQuery(http_build_query([
-						                                                      'url'  => $file_path,
-						                                                      'path' => $this->getPath()
-					                                                      ], null, '&')), 'POST'));
+					$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/upload')
+						->withQuery(http_build_query([
+							'url'  => $file_path,
+							'path' => $this->getPath()
+						], null, '&')), 'POST'));
 				}
 				catch (AlreadyExistsException $exc)
 				{
@@ -535,8 +540,9 @@ class Closed extends AbstractResource
 
 				if (isset($response['operation']))
 				{
-					$this->emit('disk.operation', $this);
-					$this->parent->emit('disk.operation', $this);
+					$response['operation'] = $this->parent->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->parent);
+					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 					return $response['operation'];
 				}
@@ -553,19 +559,14 @@ class Closed extends AbstractResource
 		}
 		else if ( ! is_resource($file_path))
 		{
-			throw new \InvalidArgumentException('Параметр "путь к файлу" должен быть строкового типа.');
-		}
-		else
-		{
-			//stream_copy_to_stream($file_path, fopen('php://temp', 'wb'));
+			throw new \InvalidArgumentException('Параметр "путь к файлу" должен быть строкового типа или открытый файловый дескриптор на чтение.');
 		}
 
-		$access_upload = json_decode($this->parent->send(new Request($this->uri->withPath($this->uri->getPath()
-			.'resources/upload')
-		                                                                       ->withQuery(http_build_query([
-			                                                                       'path'      => $this->getPath(),
-			                                                                       'overwrite' => (int) ((boolean) $overwrite),
-		                                                                       ], null, '&')), 'GET'))->getBody(), true);
+		$access_upload = json_decode($this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/upload')
+			->withQuery(http_build_query([
+				'path'      => $this->getPath(),
+				'overwrite' => (int) ((boolean) $overwrite),
+			], null, '&')), 'GET'))->getBody(), true);
 
 		if ( ! isset($access_upload['href']))
 		{
@@ -573,12 +574,10 @@ class Closed extends AbstractResource
 			throw new \RuntimeException('Не возможно загрузить локальный файл - не получено разрешение.');
 		}
 
-		//$stream = new GzipEncode($file_path, 'rb');
 		$stream = new Stream($file_path, 'rb');
 		$response = $this->parent->send((new Request($access_upload['href'], 'PUT', $stream)));
-
-		$this->emit('disk.uploaded', $this);
-		$this->parent->emit('disk.uploaded', $this);
+		$this->emit('uploaded', $this, $this->parent);
+		$this->parent->emit('uploaded', $this, $this->parent);
 
 		return $response->getStatusCode() == 201;
 	}

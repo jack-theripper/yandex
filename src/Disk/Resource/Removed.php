@@ -1,11 +1,15 @@
 <?php
 
 /**
- * Created by Arhitector.
- * Date: 02.03.2016
- * Time: 7:44
+ * Часть библиотеки для работы с сервисами Яндекса
+ *
+ * @package    Arhitector\Yandex\Disk
+ * @version    2.0
+ * @author     Arhitector
+ * @license    MIT License
+ * @copyright  2016 Arhitector
+ * @link       https://github.com/jack-theripper
  */
-
 namespace Arhitector\Yandex\Disk\Resource;
 
 
@@ -13,6 +17,11 @@ use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Zend\Diactoros\Request;
 
+/**
+ * Ресурс в корзине.
+ * 
+ * @package Arhitector\Yandex\Disk\Resource
+ */
 class Removed extends AbstractResource
 {
 
@@ -20,7 +29,7 @@ class Removed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $path путь к ресурсу в корзине
-	 * @param \Mackey\Yandex\Disk            $parent
+	 * @param \Arhitector\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
 	public function __construct($path, \Arhitector\Yandex\Disk $parent, \Psr\Http\Message\UriInterface $uri)
@@ -57,9 +66,9 @@ class Removed extends AbstractResource
 		if ( ! $this->_toArray() || $this->isModified())
 		{
 			$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-				                                                       'path' => $this->getPath()
-			                                                       ]), null, '&')), 'GET')));
+				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+					'path' => $this->getPath()
+				]), null, '&')), 'GET')));
 
 			if ($response->getStatusCode() == 200)
 			{
