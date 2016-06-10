@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Arhitector\Yandex\Disk\Resource
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -12,14 +12,27 @@
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-
 use Arhitector\Yandex\Client\Container;
+use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Zend\Diactoros\Request;
 
 /**
  * Ресурс в корзине.
- * 
+ *
+ * @property-read   string     $name
+ * @property-read   string     $created
+ * @property-read   string     $deleted
+ * @property-read   array|null $custom_properties
+ * @property-read   string     $origin_path
+ * @property-read   string     $modified
+ * @property-read   string     $media_type
+ * @property-read   string     $path
+ * @property-read   string     $md5
+ * @property-read   string     $type
+ * @property-read   string     $mime_type
+ * @property-read   integer    $size
+ *
  * @package Arhitector\Yandex\Disk\Resource
  */
 class Removed extends AbstractResource
@@ -32,7 +45,7 @@ class Removed extends AbstractResource
 	 * @param \Arhitector\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($path, \Arhitector\Yandex\Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($path, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($path))
 		{
@@ -78,17 +91,20 @@ class Removed extends AbstractResource
 				{
 					$this->isModified = false;
 
-					if (isset($response['_embedded'], $response['_embedded']['items']))
+					if (isset($response['_embedded']))
 					{
-						$response += [
-								'items' => new Container\Collection(array_map(function($item) {
-									return new self($item, $this->parent, $this->uri);
-								}, $response['_embedded']['items']))
-							] + $response['_embedded'];
+						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
 
+					if (isset($response['items']))
+					{
+						$response['items'] = new Container\Collection(array_map(function($item) {
+							return new self($item, $this->parent, $this->uri);
+						}, $response['items']));
+					}
+					
 					$this->setContents($response);
 				}
 			}
@@ -124,11 +140,11 @@ class Removed extends AbstractResource
 		}
 
 		$request = new Request($this->uri->withPath($this->uri->getPath().'trash/resources/restore')
-		                                 ->withQuery(http_build_query([
-			                                 'path'      => $this->getPath(),
-			                                 'name'      => (string) $name,
-			                                 'overwrite' => (bool) $overwrite
-		                                 ], null, '&')), 'PUT');
+			->withQuery(http_build_query([
+				'path'      => $this->getPath(),
+				'name'      => (string) $name,
+				'overwrite' => (bool) $overwrite
+			], null, '&')), 'PUT');
 
 		$response = $this->parent->send($request);
 
@@ -142,14 +158,15 @@ class Removed extends AbstractResource
 
 				if (isset($response['operation']))
 				{
-					$this->emit('disk.operation', $this);
-					$this->parent->emit('disk.operation', $this);
+					$response['operation'] = $this->parent->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->parent);
+					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 					return $response['operation'];
 				}
 			}
 
-			return $this->parent->resource($name);
+			return $this->parent->getResource($name);
 		}
 
 		return false;
@@ -165,7 +182,9 @@ class Removed extends AbstractResource
 		try
 		{
 			$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                      ->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'DELETE'));
+				->withQuery(http_build_query([
+					'path' => $this->getPath()
+				], null, '&')), 'DELETE'));
 
 			if ($response->getStatusCode() == 202)
 			{
@@ -174,8 +193,9 @@ class Removed extends AbstractResource
 
 				if ( ! empty($response['operation']))
 				{
-					$this->emit('disk.operation', $this);
-					$this->parent->emit('disk.operation', $this);
+					$response['operation'] = $this->parent->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->parent);
+					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 					return $response['operation'];
 				}

@@ -525,19 +525,9 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	public function send(RequestInterface $request/*, StreamInterface $stream = null*/)
 	{
 		echo $request->getUri();
-		
-		/*if ($stream !== null)
-		{
-			$this->client->getResponseParser()
-			             ->getStreamFactory()
-			             ->useStream($stream);
-		}*/
 
 		$response = parent::send($request)->wait();
 
-		/*$this->client->getResponseParser()
-		             ->getStreamFactory()
-		             ->useStream();*/
 
 		var_dump($response->getStatusCode());
 

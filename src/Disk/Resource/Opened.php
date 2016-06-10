@@ -18,7 +18,6 @@ use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
 /**
@@ -187,23 +186,24 @@ class Opened extends AbstractResource
 
 		if ( ! is_writable(dirname($path)))
 		{
-			throw new \OutOfBoundsException('Запись в директорию где должен быть располоен файл не возможна.');
+			throw new \OutOfBoundsException('Запись в директорию где должен быть расположен файл не возможна.');
 		}
 
-		$resource = fopen($path, 'wb+');
-		$response = $this->parent->send(new Request($this->getLink(), 'GET'), new Stream($resource, 'w'));
+		$path = fopen($path, 'wb+');
+		$response = $this->parent->send(new Request($this->getLink(), 'GET'));
 
-		fclose($resource);
+		stream_copy_to_stream($response->getBody()->detach(), $path);
+		fclose($path);
 
 		if ($this->isFile() && md5_file($path) !== $this->get('md5', null))
 		{
 			throw new \RangeException('Файл скачан, но контрольные суммы различаются.');
 		}
 
-		$this->emit('disk.downloaded', $this);
-		$this->parent->emit('disk.downloaded', $this);
+		$this->emit('downloaded', $this, $this->parent);
+		$this->parent->emit('downloaded', $this, $this->parent);
 
-		return $response->getStatusCode() == 200;
+		return true;
 	}
 
 	/**
@@ -286,8 +286,9 @@ class Opened extends AbstractResource
 
 			if (isset($response['operation']))
 			{
-				$this->emit('disk.operation', $this);
-				$this->parent->emit('disk.operation', $this);
+				$response['operation'] = $this->parent->getOperation($response['operation']);
+				$this->emit('operation', $response['operation'], $this, $this->parent);
+				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 				return $response['operation'];
 			}
@@ -298,7 +299,7 @@ class Opened extends AbstractResource
 
 				if (isset($path['path']))
 				{
-					return $this->parent->resource($path['path']);
+					return $this->parent->getResource($path['path']);
 				}
 			}
 		}
