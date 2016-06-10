@@ -18,7 +18,7 @@ Composer
 --------
 
 ```
-$ composer require arhitector/yandex dev-master
+$ composer require arhitector/yandex 1.2
 ```
 
 ## Начало
