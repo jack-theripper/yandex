@@ -13,8 +13,10 @@
 namespace Arhitector\Yandex\Client;
 
 use Arhitector\Yandex\AbstractClient;
+use Arhitector\Yandex\Client\Exception\UnauthorizedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Zend\Diactoros\Request;
 
 /**
  * Клиент для Access Token
@@ -143,6 +145,81 @@ class OAuth extends AbstractClient
 	public function getAccessToken()
 	{
 		return (string) $this->token;
+	}
+
+	/**
+	 * Запрашивает или обновляет токен
+	 *
+	 * @param string $username  имя пользователя yandex
+	 * @param string $password  пароль от аккаунта
+	 * @param bool   $onlyToken вернуть только строковый токен
+	 *
+	 * @return object|string
+	 * @throws UnauthorizedException
+	 * @throws \Exception
+	 * @example
+	 *
+	 * $client->refreshAccessToken('username', 'password');
+	 *
+	 * object(stdClass)[28]
+	 * public 'token_type' => string 'bearer' (length=6)
+	 * public 'access_token' => string 'c7621`6b09032dwf9a6a7ca765eb39b8' (length=32)
+	 * public 'expires_in' => int 31536000
+	 * public 'uid' => int 241`68329
+	 * public 'created_at' => int 1456882032
+	 *
+	 * @example
+	 *
+	 * $client->refreshAccessToken('username', 'password', true);
+	 *
+	 * string 'c7621`6b09032dwf9a6a7ca765eb39b8' (length=32)
+	 */
+	public function refreshAccessToken($username, $password = null, $onlyToken = false)
+	{
+		if ( ! is_scalar($username) || ! is_scalar($password))
+		{
+			throw new \InvalidArgumentException('Параметры "имя пользователя" и "пароль" должны быть простого типа.');
+		}
+
+		$previous = $this->setAccessTokenRequired(false);
+		$request = new Request(rtrim(self::API_BASEPATH, ' /').'/token', 'POST');
+		$request->getBody()
+		        ->write(http_build_query([
+			        'grant_type'    => 'password',
+			        'client_id'     => $this->getClientOauth(),
+			        'client_secret' => $this->getClientOauthSecret(),
+			        'username'      => (string) $username,
+			        'password'      => (string) $password
+		        ]));
+
+		try
+		{
+			$response = json_decode($this->send($request)->wait()->getBody());
+
+			if ($onlyToken)
+			{
+				return (string) $response->access_token;
+			}
+
+			$response->created_at = time();
+
+			return $response;
+		}
+		catch (\Exception $exc)
+		{
+			$response = json_decode($exc->getMessage());
+
+			if (isset($response->error_description))
+			{
+				throw new UnauthorizedException($response->error_description);
+			}
+
+			throw $exc;
+		}
+		finally
+		{
+			$this->setAccessTokenRequired($previous);
+		}
 	}
 
 	/**
