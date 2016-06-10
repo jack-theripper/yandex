@@ -307,7 +307,6 @@ class HttpClient implements HttpClientInterface, HttpAsyncClientInterface
 			else
 			{
 				$options[CURLOPT_READFUNCTION] = function($curl, $handler, $length) use ($body) {
-					echo $length;
 					return $body->read($length);
 				};
 			}

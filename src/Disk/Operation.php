@@ -25,14 +25,19 @@ class Operation
 {
 
 	/**
-	 * @const
+	 * @const   успешно
 	 */
 	const SUCCESS = 'success';
 
 	/**
-	 * @const
+	 * @const   выполняется
 	 */
-	const PROGRESS = 'in-progress';
+	const PENDING = 'in-progress';
+
+	/**
+	 * @const   неудача
+	 */
+	const FAILED = 'failed';
 
 	/**
 	 * @var \Psr\Http\Message\UriInterface
@@ -107,7 +112,7 @@ class Operation
 	 */
 	public function isSuccess()
 	{
-		return $this->getStatus() == 'success';
+		return $this->getStatus() == self::SUCCESS;
 	}
 
 	/**
@@ -118,6 +123,16 @@ class Operation
 	public function isFailure()
 	{
 		return $this->getStatus() != 'success';
+	}
+
+	/**
+	 * Операция в процессе выполнения.
+	 *
+	 * @return bool
+	 */
+	public function isPending()
+	{
+		return $this->getStatus() == self::PENDING;
 	}
 	
 }

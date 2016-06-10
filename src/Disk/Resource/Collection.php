@@ -54,6 +54,7 @@ class Collection extends CollectionContainer
 		if ( ! parent::toArray() || $this->isModified())
 		{
 			$this->setContents(call_user_func($this->closure, $this->getParameters($this->parametersAllowed)));
+			$this->isModified = false;
 		}
 
 		return parent::toArray();

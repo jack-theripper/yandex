@@ -47,7 +47,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Получает последний элемент в списке
 	 *
-	 * @return mixed
+	 * @return  \Arhitector\Yandex\Disk\AbstractResource
 	 */
 	public function getLast()
 	{

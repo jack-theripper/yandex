@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Arhitector\Yandex\Disk\Resource
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -24,6 +24,18 @@ use Zend\Diactoros\Uri;
 
 /**
  * Закрытый ресурс.
+ *
+ * @property-read   string     $name
+ * @property-read   string     $created
+ * @property-read   array|null $custom_properties
+ * @property-read   string     $modified
+ * @property-read   string     $media_type
+ * @property-read   string     $path
+ * @property-read   string     $md5
+ * @property-read   string     $type
+ * @property-read   string     $mime_type
+ * @property-read   integer    $size
+ * @property-read   string     $docviewer
  *
  * @package Arhitector\Yandex\Disk\Resource
  */
@@ -187,6 +199,7 @@ class Closed extends AbstractResource
 		if ($response->getStatusCode() == 200)
 		{
 			$this->setContents(json_decode($response->getBody(), true));
+			$this->store['docviewer'] = $this->createDocViewerUrl();
 		}
 
 		return $this;
@@ -505,16 +518,19 @@ class Closed extends AbstractResource
 	}
 
 	/**
-	 *	Загрузить файл на диск
+	 * Загрузить файл на диск
 	 *
-	 *	@param	string	$file_path	может быть как путь к локальному файлу, так и URL к файлу
-	 *	@param	mixed	$overwrite
+	 * @param   string  $file_path может быть как путь к локальному файлу, так и URL к файлу.
+	 * @param   bool    $overwrite  если ресурс существует на Яндекс.Диске TRUE перезапишет ресурс.
+	 * @param   bool    $disable_redirects  помогает запретить редиректы по адресу, TRUE запретит пере адресацию.
 	 *
-	 *	@return	mixed
+	 * @return  bool|\Arhitector\Yandex\Disk\Operation
 	 *
-	 *	@throws	mixed
+	 * @throws    mixed
+	 *
+	 * @TODO    Добавить, если передана папка - сжать папку в архив и загрузить.
 	 */
-	public function upload($file_path, $overwrite = false)
+	public function upload($file_path, $overwrite = false, $disable_redirects = false)
 	{
 		if (is_string($file_path))
 		{

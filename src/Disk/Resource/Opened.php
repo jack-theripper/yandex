@@ -1,23 +1,28 @@
 <?php
 
 /**
- * Created by Arhitector.
- * Date: 02.03.2016
- * Time: 7:17
+ * Часть библиотеки для работы с сервисами Яндекса
+ *
+ * @package    Arhitector\Yandex\Disk\Resource
+ * @version    2.0
+ * @author     Arhitector
+ * @license    MIT License
+ * @copyright  2016 Arhitector
+ * @link       https://github.com/jack-theripper
  */
-
 namespace Arhitector\Yandex\Disk\Resource;
 
 
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
+use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
 /**
- * Класс Opened.
+ * Публичный ресурс.
  *
  * @package Arhitector\Yandex\Disk\Resource
  *
@@ -45,11 +50,11 @@ class Opened extends AbstractResource
 	/**
 	 * Конструктор.
 	 *
-	 * @param string|array                   $path путь к публичному ресурсу
-	 * @param \Mackey\Yandex\Disk            $parent
+	 * @param string|array                   $public_key URL адрес или публичный ключ ресурса.
+	 * @param \Arhitector\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($public_key, \Arhitector\Yandex\Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($public_key, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($public_key))
 		{
@@ -60,25 +65,7 @@ class Opened extends AbstractResource
 
 			$this->setContents($public_key);
 			$public_key = $public_key['public_key'];
-
-			/*if ($this->isFile())
-			{
-				$docviewer = [
-					'url'  => $this->get('path'),
-					'name' => $this->get('name')
-				];
-
-				if (strpos($docviewer['url'], 'disk:/') === 0)
-				{
-					$docviewer['url'] = substr($docviewer['url'], 6);
-				}
-
-				//?url=ya-disk-public://PIGz1fuuXxttFlS3EU9XKOIl28e4+H7kYZqddBBSVB0=&name=catalog.zip
-
-				$docviewer['url']  = "ya-disk:///disk/{$docviewer['url']}";
-				$this->store['docviewer'] = (string) (new Uri('https://docviewer.yandex.ru'))
-					->withQuery(http_build_query($docviewer, null, '&'));
-			}*/
+			$this->store['docviewer'] = $this->createDocViewerUrl();
 		}
 
 		if ( ! is_scalar($public_key))
@@ -111,9 +98,9 @@ class Opened extends AbstractResource
 		if ( ! $this->_toArray() || $this->isModified())
 		{
 			$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath().'public/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-				                                                       'public_key' => $this->getPublicKey()
-			                                                       ]), null, '&')), 'GET')));
+				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+					'public_key' => $this->getPublicKey()
+				]), null, '&')), 'GET')));
 
 			if ($response->getStatusCode() == 200)
 			{
@@ -123,16 +110,22 @@ class Opened extends AbstractResource
 				{
 					$this->isModified = false;
 
-					if (isset($response['_embedded'], $response['_embedded']['items']))
+					if (isset($response['_embedded']))
 					{
-						$response['items'] = new Container(array_map(function ($item) {
-							return new self($item, $this->parent, $this->uri);
-						}, $response['_embedded']['items']));
+						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
 
+					if (isset($response['items']))
+					{
+						$response['items'] = new Container\Collection(array_map(function($item) {
+							return new self($item, $this->parent, $this->uri);
+						}, $response['items']));
+					}
+
 					$this->setContents($response);
+					$this->store['docviewer'] = $this->createDocViewerUrl();
 				}
 			}
 		}
@@ -145,6 +138,8 @@ class Opened extends AbstractResource
 	 *
 	 * @return    string
 	 * @throws    mixed
+	 *
+	 * @TODO    Не работает для файлов вложенных в публичную папку.
 	 */
 	public function getLink()
 	{
@@ -154,10 +149,10 @@ class Opened extends AbstractResource
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'public/resources/download')
-		                                                      ->withQuery(http_build_query([
-			                                                      'public_key' => $this->getPublicKey(),
-			                                                      'path'       => (string) $this->getPath()
-		                                                      ], null, '&')), 'GET'));
+			->withQuery(http_build_query([
+				'public_key' => $this->getPublicKey(),
+				'path'       => (string) $this->getPath()
+			], null, '&')), 'GET'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -175,8 +170,8 @@ class Opened extends AbstractResource
 	/**
 	 * Скачивание публичного файла или папки
 	 *
-	 * @param string  $path Путь, по которому будет сохранён файл
-	 * @param boolean $overwrite
+	 * @param string  $path      путь, по которому будет сохранён файл
+	 * @param boolean $overwrite перезаписать
 	 *
 	 * @return    boolean
 	 *
@@ -223,8 +218,8 @@ class Opened extends AbstractResource
 		{
 			try
 			{
-				return $this->parent->resource(((string) $this->get('path')).'/'.$path)
-				                    ->get('md5', false) === $this->get('md5');
+				return $this->parent->getResource(((string) $this->get('path')).'/'.$path)
+					->get('md5', false) === $this->get('md5');
 			}
 			catch (\Exception $exc)
 			{
@@ -281,9 +276,9 @@ class Opened extends AbstractResource
 		 */
 		$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath()
 			.'public/resources/save-to-disk')
-		                                                       ->withQuery(http_build_query([
-				                                                       'public_key' => $this->getPublicKey()
-			                                                       ] + $parameters, null, '&')), 'POST')));
+			->withQuery(http_build_query([
+					'public_key' => $this->getPublicKey()
+				] + $parameters, null, '&')), 'POST')));
 
 		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
 		{
@@ -328,6 +323,34 @@ class Opened extends AbstractResource
 		$this->path = (string) $path;
 
 		return $this;
+	}
+
+	/**
+	 * Получает ссылку для просмотра документа.
+	 *
+	 * @return bool|string
+	 */
+	protected function createDocViewerUrl()
+	{
+		if ($this->isFile())
+		{
+			$docviewer = [
+				'url'  => $this->get('public_key'),
+				'name' => $this->get('name')
+			];
+
+			if ($this->get('path', '/') != '/')
+			{
+				$docviewer['url'] .= ':/'.ltrim($this->get('path'), '/ ');
+			}
+
+			$docviewer['url']  = "ya-disk-public://{$docviewer['url']}";
+
+			return (string) (new Uri('https://docviewer.yandex.ru/'))
+				->withQuery(http_build_query($docviewer, null, '&'));
+		}
+
+		return false;
 	}
 
 }

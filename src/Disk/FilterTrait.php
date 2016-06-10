@@ -12,13 +12,17 @@
  */
 namespace Arhitector\Yandex\Disk;
 
+use Arhitector\Yandex\Disk\Filter\PreviewTrait;
+
 /**
  * Опции, доступные при получении списка ресурсов.
+ * Эти фильтры используют возможности Яндекс.Диска.
  *
  * @package Arhitector\Yandex\Disk
  */
 trait FilterTrait
 {
+	use PreviewTrait;
 
 	/**
 	 * @var array   параметры в запросе
@@ -76,54 +80,7 @@ trait FilterTrait
 
 		return $this;
 	}
-
-	/**
-	 * Обрезать превью согласно размеру
-	 *
-	 * @param    boolean $crop
-	 *
-	 * @return    $this
-	 */
-	public function setPreviewCrop($crop)
-	{
-		$this->isModified = true;
-		$this->parameters['preview_crop'] = (bool) $crop;
-
-		return $this;
-	}
-
-	/**
-	 * Размер уменьшенного превью файла
-	 *
-	 * @param    mixed $preview S, M, L, XL, XXL, XXXL, <ширина>, <ширина>x, x<высота>, <ширина>x<высота>
-	 *
-	 * @return    $this
-	 * @throws    \UnexpectedValueException
-	 */
-	public function setPreview($preview)
-	{
-		if (is_scalar($preview))
-		{
-			$preview = strtoupper($preview);
-			$previewNum = str_replace('X', '', $preview, $replaces);
-
-			if (in_array($preview, ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']) || (is_numeric($previewNum) && $replaces < 2))
-			{
-				if (is_numeric($previewNum))
-				{
-					$preview = strtolower($preview);
-				}
-
-				$this->isModified = true;
-				$this->parameters['preview_size'] = $preview;
-
-				return $this;
-			}
-		}
-
-		throw new \UnexpectedValueException('Допустимые значения размера превью - S, M, L, XL, XXL, XXXL, <ширина>, <ширина>x, x<высота>, <ширина>x<высота>');
-	}
-
+	
 	/**
 	 * Атрибут, по которому сортируется список ресурсов, вложенных в папку.
 	 *
