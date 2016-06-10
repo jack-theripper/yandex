@@ -3,14 +3,14 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Mackey\Yandex\Client
+ * @package    Arhitector\Yandex\Client
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Mackey\Yandex\Client;
+namespace Arhitector\Yandex\Client;
 
 use Arhitector\Yandex\AbstractClient;
 use Psr\Http\Message\RequestInterface;
@@ -18,7 +18,7 @@ use Psr\Http\Message\RequestInterface;
 /**
  * Ключ API
  *
- * @package Mackey\Yandex\Client
+ * @package Arhitector\Yandex\Client
  */
 class SimpleKey extends AbstractClient
 {
