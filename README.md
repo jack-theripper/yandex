@@ -23,7 +23,7 @@ SDK работает только с отладочными токенами. OA
 - Работа с публичными ресурсами (публикация, скачивание, копирование на свой Яндекс.Диск, и т.п.)
 - Работа с ресурсами в корзине (список файлов в корзине, очистка корзины, восстановление файла из корзины и прочие возможности)
 - Поддерживает события: operation, downloaded, uploaded, delete
-x Шифрование файлов (более не поддерживается)
+- ~~Шифрование файлов более не поддерживается~~, используйте ветку "v1.0"
 - Получение ссылки DocViewer
 - возможно это не весь список
 
@@ -120,24 +120,24 @@ SDK различает общий доступ доступ и доступ пр
 
 ## 1. Начало
 
-Обращение к диску происходит через **Mackey\Yandex\Disk**. После получения OAuth-токена его можно использовать следующим образом, есть несколько вариантов:
+Обращение к диску происходит через **Arhitector\Yandex\Disk**. После получения OAuth-токена его можно использовать следующим образом, есть несколько вариантов:
 
 - Инициализировать клиент
 
 ```php
-$client = new Mackey\Yandex\Client('OAuth-токен');
+$client = new Arhitector\Yandex\Client\OAuth('OAuth-токен');
 ```
 
 - Инициализировать клиент диска
 
 ```php
-$disk = new Mackey\Yandex\Disk('OAuth-токен');
+$disk = new Arhitector\Yandex\Disk('OAuth-токен');
 ```
 
 - Инициализировать клиент диска и передать клиент
 
 ```php
-$disk = new Mackey\Yandex\Disk($client);
+$disk = new Arhitector\Yandex\Disk($client);
 ```
 
 - Установить токен в ранее инициализированный объект
@@ -156,8 +156,8 @@ $disk->setAccessToken('OAuth-токен');
 
 ```php
 /**
- * @var Mackey\Yandex\Client  $client
- * @var Mackey\Yandex\Disk    $disk
+ * @var Arhitector\Yandex\Client\OAuth  $client
+ * @var Arhitector\Yandex\Disk    	$disk
  */
 ```
 
@@ -726,10 +726,10 @@ public function delete($permanently = false)
 
 Ресурсы поддерживают свои события. Чтобы получить больше информации читайте описание событий клиента (описано ниже). Список доступных событий:
 
-- **disk.downloaded** - событие наступает всякий раз когда именно этот ресурс был скачан.
-- **disk.uploaded** - событие наступает когда ресурс загружен.
-- **disk.operation** - наступает когда Яндекс.Диск выполняет асинхронную операцию с ресурсом (например, перемещение большой папки).
-- **disk.delete** - наступает тогда, когда именно этот ресурс удаляется, может отменить удаление.
+- **downloaded** - событие наступает всякий раз когда именно этот ресурс был скачан.
+- **uploaded** - событие наступает когда ресурс загружен.
+- **operation** - наступает когда Яндекс.Диск выполняет асинхронную операцию с ресурсом (например, перемещение большой папки).
+- **delete** - наступает тогда, когда именно этот ресурс удаляется, может отменить удаление.
 
 Отличие от событий делигируемых клиентом заключается в видимости этих событий. Клиент устанавливает события для всех ресурсов, не смотря на это каждый ресурс может принимать свои собственные события.
 
@@ -1030,7 +1030,7 @@ public this Client::addListener(string $event, mixed $listener [, int $priority 
 **Примеры**
 
 ```php
-$client->addListener('disk.downloaded', function (Event $event, $resource) {
+$client->addListener('downloaded', function (Event $event, $resource) {
   // скачивание файла завершено
 });
 ```
@@ -1050,7 +1050,7 @@ public this Client::removeListener(string $event, mixed $listener)
 **Примеры**
 
 ```php
-$client->removeListener('disk.downloaded', function (Event $event, $resource) {
+$client->removeListener('downloaded', function (Event $event, $resource) {
 
 });
 ```
@@ -1075,7 +1075,7 @@ public this addOneTimeListener(string $event, mixed $listener [, int $priority =
 **Примеры**
 
 ```php
-$client->addOneTimeListener('disk.downloaded', function (Event $event, $resource) {
+$client->addOneTimeListener('downloaded', function (Event $event, $resource) {
   // скачивание файла завершено
 });
 ```
@@ -1092,7 +1092,7 @@ public this removeAllListeners(string $event)
 **Примеры**
 
 ```php
-$client->removeAllListeners('disk.downloaded');
+$client->removeAllListeners('downloaded');
 ```
 
 ### 1.13. Обработчик события на основе класса
