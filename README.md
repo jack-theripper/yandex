@@ -50,8 +50,6 @@ $ composer test
 ## Пример кода
 
 ```php
-try
-{
   // передать OAuth-токен зарегистрированного приложения
   $disk = new Arhitector\Yandex\Disk('OAuth-токен');
 
