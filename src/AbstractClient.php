@@ -142,8 +142,10 @@ abstract class AbstractClient
 		}
 
 		$response = $this->client->sendAsyncRequest($request)
-			->then(function (ResponseInterface $response) use ($request) {
+			->then(function(ResponseInterface $response) use ($request) {
 				return $this->transformResponseToException($request, $response);
+			}, function(\Http\Client\Exception\RequestException $exception) {
+				throw $exception->getPrevious();
 			});
 
 		return $response;
