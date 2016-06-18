@@ -174,7 +174,7 @@ class OAuth extends AbstractClient
 	 *
 	 * string 'c7621`6b09032dwf9a6a7ca765eb39b8' (length=32)
 	 */
-	public function refreshAccessToken($username, $password = null, $onlyToken = false)
+	public function refreshAccessToken($username, $password, $onlyToken = false)
 	{
 		if ( ! is_scalar($username) || ! is_scalar($password))
 		{
