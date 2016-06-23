@@ -17,7 +17,10 @@ use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
+use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Request;
+use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
 /**
@@ -169,41 +172,96 @@ class Opened extends AbstractResource
 	/**
 	 * Скачивание публичного файла или папки
 	 *
-	 * @param string  $path      путь, по которому будет сохранён файл
-	 * @param boolean $overwrite перезаписать
+	 * @param resource|StreamInterface|string $destination Путь, по которому будет сохранён файл
+	 *                                                     StreamInterface будет записан в поток
+	 *                                                     resource открытый на запись
+	 * @param boolean                         $overwrite   флаг перезаписи
+	 * @param boolean                         $check_hash  провести проверку целостности скачанного файла
+	 *                                                     на основе хэша MD5
 	 *
-	 * @return    boolean
-	 *
-	 * @throws    \OutOfBoundsException
-	 * @throws    \RangeException
+	 * @return bool
 	 */
-	public function download($path, $overwrite = false)
+	public function download($destination, $overwrite = false, $check_hash = false)
 	{
-		if (is_file($path) && ! $overwrite)
+		$destination_type = gettype($destination);
+
+		if (is_resource($destination))
 		{
-			throw new \OutOfBoundsException('Такой файл существует, преедайте true Чтобы перезаписать его');
+			$destination = new Stream($destination);
 		}
 
-		if ( ! is_writable(dirname($path)))
+		if ($destination instanceof StreamInterface)
 		{
-			throw new \OutOfBoundsException('Запись в директорию где должен быть расположен файл не возможна.');
+			if ( ! $destination->isWritable())
+			{
+				throw new \OutOfBoundsException('Дескриптор файла должен быть открыт с правами на запись.');
+			}
+		}
+		else if ($destination_type == 'string')
+		{
+			if (is_file($destination) && ! $overwrite)
+			{
+				throw new AlreadyExistsException('По указанному пути "'.$destination.'" уже существует ресурс.');
+			}
+
+			if ( ! is_writable(dirname($destination)))
+			{
+				throw new \OutOfBoundsException('Запрещена запись в директорию, в которой должен быть расположен файл.');
+			}
+
+			$destination = new Stream($destination, 'w+b');
+		}
+		else
+		{
+			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 		}
 
-		$path = fopen($path, 'wb+');
 		$response = $this->parent->send(new Request($this->getLink(), 'GET'));
 
-		stream_copy_to_stream($response->getBody()->detach(), $path);
-		fclose($path);
-
-		if ($this->isFile() && md5_file($path) !== $this->get('md5', null))
+		if ($response->getStatusCode() == 200)
 		{
-			throw new \RangeException('Файл скачан, но контрольные суммы различаются.');
+			$stream = $response->getBody();
+
+			if ($check_hash)
+			{
+				$ctx = hash_init('md5');
+
+				while ( ! $stream->eof())
+				{
+					$read_data = $stream->read(1048576);
+					$destination->write($read_data);
+
+					hash_update($ctx, $read_data);
+				}
+			}
+			else
+			{
+				while ( ! $stream->eof())
+				{
+					$destination->write($stream->read(16384));
+				}
+			}
+
+			$stream->close();
+			$this->emit('downloaded', $this, $destination, $this->parent);
+			$this->parent->emit('downloaded', $this, $destination, $this->parent);
+
+			if ($destination_type == 'object')
+			{
+				return $destination;
+			}
+			else if ($check_hash && $destination_type == 'string' && $this->isFile())
+			{
+				if (hash_final($ctx, false) !== $this->get('md5', null))
+				{
+					throw new \RangeException('Ресурс скачан, но контрольные суммы различаются.');
+				}
+			}
+
+			return $destination->getSize();
 		}
 
-		$this->emit('downloaded', $this, $this->parent);
-		$this->parent->emit('downloaded', $this, $this->parent);
-
-		return true;
+		return false;
 	}
 
 	/**
