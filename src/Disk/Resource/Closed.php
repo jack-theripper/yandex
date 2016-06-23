@@ -18,6 +18,7 @@ use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
@@ -413,12 +414,14 @@ class Closed extends AbstractResource
 
 		return $this;
 	}
-	
+
 	/**
 	 * Скачивает файл
 	 *
-	 * @param string $path Путь, по которому будет сохранён файл
-	 * @param mixed  $overwrite
+	 * @param resource|StreamInterface|string $destination Путь, по которому будет сохранён файл
+	 *                                                     StreamInterface будет записан в поток
+	 *                                                     resource открытый на запись
+	 * @param mixed                           $overwrite
 	 *
 	 * @return bool
 	 *
@@ -427,21 +430,44 @@ class Closed extends AbstractResource
 	 * @throws \OutOfBoundsException
 	 * @throws \UnexpectedValueException
 	 */
-	public function download($path, $overwrite = false)
+	public function download($destination, $overwrite = false)
 	{
+		$destination_type = gettype($destination);
+
 		if ( ! $this->has())
 		{
 			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
 		}
 
-		if (is_file($path) && ! $overwrite)
+		if (is_resource($destination))
 		{
-			throw new AlreadyExistsException('Запрошенный ресурс существует.');
+			$destination = new Stream($destination);
 		}
 
-		if ( ! is_writable(dirname($path)))
+		if ($destination instanceof StreamInterface)
 		{
-			throw new \OutOfBoundsException('Запись в директорию где должен быть расположен файл не возможна.');
+			if ( ! $destination->isWritable())
+			{
+				throw new \OutOfBoundsException('Дескриптор файла должен быть открыт с правами на запись.');
+			}
+		}
+		else if ($destination_type == 'string')
+		{
+			if (is_file($destination) && ! $overwrite)
+			{
+				throw new AlreadyExistsException('По указанному пути "'.$destination.'" уже существует ресурс.');
+			}
+
+			if ( ! is_writable(dirname($destination)))
+			{
+				throw new \OutOfBoundsException('Запрещена запись в директорию, в которой должен быть расположен файл.');
+			}
+
+			$destination = new Stream($destination, 'w+b');
+		}
+		else
+		{
+			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 		}
 
 		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'resources/download')
@@ -457,23 +483,30 @@ class Closed extends AbstractResource
 
 				if ($response->getStatusCode() == 200)
 				{
-					$path = fopen($path, 'wb+');
+					$stream = $response->getBody();
 
-					stream_copy_to_stream($response->getBody()->detach(), $path);
+					while ( ! $stream->eof())
+					{
+						$destination->write($stream->read(16384));
+					}
 
-					fclose($path);
+					$stream->close();
+					$this->emit('downloaded', $this, $destination, $this->parent);
+					$this->parent->emit('downloaded', $this, $destination, $this->parent);
 
-					$this->emit('downloaded', $this, $this->parent);
-					$this->parent->emit('downloaded', $this, $this->parent);
+					if ($destination_type == 'object')
+					{
+						return $destination;
+					}
 
-					return true;
+					return $destination->getSize();
 				}
 
 				return false;
 			}
 		}
 
-		throw new \UnexpectedValueException('Не удалось запросить закачку, повторите заново');
+		throw new \UnexpectedValueException('Не удалось запросить разрешение на скачивание, повторите заново.');
 	}
 
 	/**
