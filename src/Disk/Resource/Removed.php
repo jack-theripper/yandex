@@ -64,7 +64,7 @@ class Removed extends AbstractResource
 		}
 
 		$this->path = (string) $path;
-		$this->parent = $parent;
+		$this->client = $parent;
 		$this->uri = $uri;
 		$this->setSort('created');
 	}
@@ -78,8 +78,8 @@ class Removed extends AbstractResource
 	{
 		if ( ! $this->_toArray() || $this->isModified())
 		{
-			$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
+			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'path' => $this->getPath()
 				]), null, '&')), 'GET')));
 
@@ -101,7 +101,7 @@ class Removed extends AbstractResource
 					if (isset($response['items']))
 					{
 						$response['items'] = new Container\Collection(array_map(function($item) {
-							return new self($item, $this->parent, $this->uri);
+							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
 					
@@ -146,7 +146,7 @@ class Removed extends AbstractResource
 				'overwrite' => (bool) $overwrite
 			], null, '&')), 'PUT');
 
-		$response = $this->parent->send($request);
+		$response = $this->client->send($request);
 
 		if ($response->getStatusCode() == 201 || $response->getStatusCode() == 202)
 		{
@@ -158,15 +158,15 @@ class Removed extends AbstractResource
 
 				if (isset($response['operation']))
 				{
-					$response['operation'] = $this->parent->getOperation($response['operation']);
-					$this->emit('operation', $response['operation'], $this, $this->parent);
-					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
+					$response['operation'] = $this->client->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->client);
+					$this->client->emit('operation', $response['operation'], $this, $this->client);
 
 					return $response['operation'];
 				}
 			}
 
-			return $this->parent->getResource($name);
+			return $this->client->getResource($name);
 		}
 
 		return false;
@@ -181,8 +181,8 @@ class Removed extends AbstractResource
 	{
 		try
 		{
-			$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-				->withQuery(http_build_query([
+			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
+			                                                      ->withQuery(http_build_query([
 					'path' => $this->getPath()
 				], null, '&')), 'DELETE'));
 
@@ -193,9 +193,9 @@ class Removed extends AbstractResource
 
 				if ( ! empty($response['operation']))
 				{
-					$response['operation'] = $this->parent->getOperation($response['operation']);
-					$this->emit('operation', $response['operation'], $this, $this->parent);
-					$this->parent->emit('operation', $response['operation'], $this, $this->parent);
+					$response['operation'] = $this->client->getOperation($response['operation']);
+					$this->emit('operation', $response['operation'], $this, $this->client);
+					$this->client->emit('operation', $response['operation'], $this, $this->client);
 
 					return $response['operation'];
 				}
