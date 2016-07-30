@@ -518,13 +518,12 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * Отправляет запрос.
 	 *
 	 * @param \Psr\Http\Message\RequestInterface $request
-	 * @param \Psr\Http\Message\StreamInterface  $stream
 	 *
 	 * @return \Psr\Http\Message\ResponseInterface
 	 */
-	public function send(RequestInterface $request/*, StreamInterface $stream = null*/)
+	public function send(RequestInterface $request)
 	{
-		$response = parent::send($request)->wait();
+		$response = parent::send($request);
 
 		if ($response->getStatusCode() == 202)
 		{
