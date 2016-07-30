@@ -12,7 +12,6 @@
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Disk;
@@ -76,7 +75,7 @@ class Opened extends AbstractResource
 		}
 
 		$this->publicKey = (string) $public_key;
-		$this->parent = $parent;
+		$this->client = $parent;
 		$this->uri = $uri;
 	}
 
@@ -99,8 +98,8 @@ class Opened extends AbstractResource
 	{
 		if ( ! $this->_toArray() || $this->isModified())
 		{
-			$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath().'public/resources')
-				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'public/resources')
+			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'public_key' => $this->getPublicKey()
 				]), null, '&')), 'GET')));
 
@@ -122,7 +121,7 @@ class Opened extends AbstractResource
 					if (isset($response['items']))
 					{
 						$response['items'] = new Container\Collection(array_map(function($item) {
-							return new self($item, $this->parent, $this->uri);
+							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
 
@@ -150,8 +149,8 @@ class Opened extends AbstractResource
 			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
 		}
 
-		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'public/resources/download')
-			->withQuery(http_build_query([
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'public/resources/download')
+		                                                      ->withQuery(http_build_query([
 				'public_key' => $this->getPublicKey(),
 				'path'       => (string) $this->getPath()
 			], null, '&')), 'GET'));
@@ -216,7 +215,7 @@ class Opened extends AbstractResource
 			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 		}
 
-		$response = $this->parent->send(new Request($this->getLink(), 'GET'));
+		$response = $this->client->send(new Request($this->getLink(), 'GET'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -243,8 +242,8 @@ class Opened extends AbstractResource
 			}
 
 			$stream->close();
-			$this->emit('downloaded', $this, $destination, $this->parent);
-			$this->parent->emit('downloaded', $this, $destination, $this->parent);
+			$this->emit('downloaded', $this, $destination, $this->client);
+			$this->client->emit('downloaded', $this, $destination, $this->client);
 
 			if ($destination_type == 'object')
 			{
@@ -276,8 +275,8 @@ class Opened extends AbstractResource
 		{
 			try
 			{
-				return $this->parent->getResource(((string) $this->get('path')).'/'.$path)
-					->get('md5', false) === $this->get('md5');
+				return $this->client->getResource(((string) $this->get('path')).'/'.$path)
+				                    ->get('md5', false) === $this->get('md5');
 			}
 			catch (\Exception $exc)
 			{
@@ -332,9 +331,9 @@ class Opened extends AbstractResource
 		 * ссылку на сохраненный файл в теле ответа (в объекте Link).
 		 * Если операция сохранения была запущена, но еще не завершилась, Яндекс.Диск отвечает кодом 202 Accepted.
 		 */
-		$response = $this->parent->send((new Request($this->uri->withPath($this->uri->getPath()
+		$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath()
 			.'public/resources/save-to-disk')
-			->withQuery(http_build_query([
+		                                                       ->withQuery(http_build_query([
 					'public_key' => $this->getPublicKey()
 				] + $parameters, null, '&')), 'POST')));
 
@@ -344,9 +343,9 @@ class Opened extends AbstractResource
 
 			if (isset($response['operation']))
 			{
-				$response['operation'] = $this->parent->getOperation($response['operation']);
-				$this->emit('operation', $response['operation'], $this, $this->parent);
-				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
+				$response['operation'] = $this->client->getOperation($response['operation']);
+				$this->emit('operation', $response['operation'], $this, $this->client);
+				$this->client->emit('operation', $response['operation'], $this, $this->client);
 
 				return $response['operation'];
 			}
@@ -357,7 +356,7 @@ class Opened extends AbstractResource
 
 				if (isset($path['path']))
 				{
-					return $this->parent->getResource($path['path']);
+					return $this->client->getResource($path['path']);
 				}
 			}
 		}

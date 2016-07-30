@@ -123,7 +123,7 @@ abstract class AbstractClient
 	 *
 	 * @param \Psr\Http\Message\RequestInterface $request
 	 *
-	 * @return \Http\Promise\Promise
+	 * @return \Psr\Http\Message\ResponseInterface
 	 */
 	public function send(RequestInterface $request)
 	{
@@ -141,17 +141,8 @@ abstract class AbstractClient
 			}
 		}
 
-		$response = $this->client->sendAsyncRequest($request)
-			->then(function (ResponseInterface $response) use ($request) {
-				return $this->transformResponseToException($request, $response);
-			}, function (\Http\Client\Exception\RequestException $exception) {
-				if ( ! $exception->getPrevious())
-				{
-					throw new ServiceException($exception->getMessage());
-				}
-
-				throw $exception->getPrevious();
-			});
+		$response = $this->client->sendRequest($request);
+		$response = $this->transformResponseToException($request, $response);
 
 		return $response;
 	}

@@ -40,7 +40,7 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 	/**
 	 * @var \Arhitector\Yandex\Disk объект диска, породивший ресурс.
 	 */
-	protected $parent;
+	protected $client;
 
 	/**
 	 * @var array   допустимые фильтры.

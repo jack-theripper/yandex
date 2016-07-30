@@ -277,7 +277,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Работа с опубликованными ресурсами
 	 *
-	 * @param	mixed $public_key Публичный ключ к опубликованному ресрсу
+	 * @param	mixed $public_key Публичный ключ к опубликованному ресурсу.
 	 *
 	 * @return	\Arhitector\Yandex\Disk\Resource\Opened
 	 *
@@ -343,7 +343,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * Очистка Корзины\Удаление файла из корзины
+	 * Ресурсы в корзине.
 	 *
 	 * @param    string $path путь к файлу в корзине
 	 * @param int       $limit
@@ -470,7 +470,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * Получить статус операции либо
+	 * Получить статус операции.
 	 *
 	 * @param   string $identifier идентификатор операции или NULL
 	 *
@@ -518,13 +518,12 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * Отправляет запрос.
 	 *
 	 * @param \Psr\Http\Message\RequestInterface $request
-	 * @param \Psr\Http\Message\StreamInterface  $stream
 	 *
 	 * @return \Psr\Http\Message\ResponseInterface
 	 */
-	public function send(RequestInterface $request/*, StreamInterface $stream = null*/)
+	public function send(RequestInterface $request)
 	{
-		$response = parent::send($request)->wait();
+		$response = parent::send($request);
 
 		if ($response->getStatusCode() == 202)
 		{
