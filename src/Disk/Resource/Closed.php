@@ -12,12 +12,13 @@
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
+use Arhitector\Yandex\Client\Stream\Progress;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use League\Event\Event;
 use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
@@ -165,7 +166,7 @@ class Closed extends AbstractResource
 	 * @param    mixed $meta  строка либо массив значений
 	 * @param    mixed $value NULL чтобы удалить определённую метаинформаию когда $meta строка
 	 *
-	 * @return \Arhitector\Yandex\Disk
+	 * @return Closed
 	 * @throws \LengthException
 	 */
 	public function set($meta, $value = null)
@@ -581,7 +582,8 @@ class Closed extends AbstractResource
 					$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/upload')
 						->withQuery(http_build_query([
 							'url'  => $file_path,
-							'path' => $this->getPath()
+							'path' => $this->getPath(),
+							'disable_redirects' => (int) $disable_redirects
 						], null, '&')), 'POST'));
 				}
 				catch (AlreadyExistsException $exc)
@@ -632,8 +634,19 @@ class Closed extends AbstractResource
 			// $this->client->setRetries = 1
 			throw new \RuntimeException('Не возможно загрузить локальный файл - не получено разрешение.');
 		}
+		
+		if ($this->getEmitter()->hasListeners('progress'))
+		{
+			$stream = new Progress($file_path, 'rb');
+			$stream->addListener('progress', function (Event $event, $percent) {
+				$this->emit('progress', $percent);
+			});
+		}
+		else
+		{
+			$stream = new Stream($file_path, 'rb');
+		}
 
-		$stream = new Stream($file_path, 'rb');
 		$response = $this->client->send((new Request($access_upload['href'], 'PUT', $stream)));
 		$this->emit('uploaded', $this, $this->client);
 		$this->client->emit('uploaded', $this, $this->client);
