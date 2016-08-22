@@ -1,7 +1,15 @@
 
 ## Введение
 
-Неофициальное PHP SDK для некоторых сервисов Яндекса:, поддерживаются сервисы: Яндекс.Диск.
+Неофициальное PHP SDK для некоторых сервисов Яндекса: сервис Яндекс.Диск.
+
+## Список изменений
+
+23/08/2016
+
+- метод `upload` поддерживает событие `progress`, слушатель принимает `float` значение в процентах.
+- возвращена ранее удалённая опция `disable_redirects`.
+- исправление грамматических ошибок в `README.md`
 
 ## Требования
 
@@ -99,6 +107,8 @@ $removed = $resource->delete();
 SDK вызывает исключения по каждой ситуации, следующий пример показывает как это можно использовать.
 
 ```php
+try
+{
   try
   {
     /**
@@ -156,7 +166,7 @@ $disk = new Arhitector\Yandex\Disk($client);
 $disk = new Arhitector\Yandex\Disk('OAuth-токен');
 ```
 
-- Вариант 3. Инициализировать клиент Яндес.Диска без передачи Oauth-токена.
+- Вариант 3. Инициализировать клиент Яндекс.Диска без передачи OAuth-токена.
 
 Вы можете установить или изменить OAuth-токен в ранее инициализированном объекте.
 
@@ -380,7 +390,7 @@ public integer Объект::count( void )
 **Примеры**
 
 ```php
-// возвращает float свободное место
+// Возвращает количество асинхронных операций экземпляра.
 $disk->count();
 
 // в других случаях размер контейнера
@@ -396,7 +406,7 @@ $resource->items->count();
 > Примечание: возможно в будущем поведение метода будет упрощено.
 
 ```php
-public boolean Объект::has([string $key = NULL])
+public bool Объект::has([string $key = NULL])
 ```
 
 `$key` - необязательный параметр, индекс.
@@ -417,7 +427,7 @@ $resource->has(); // true
 
 #### Метод hasProperty
 
-Метод является алиасом метода `has` но выполняет только одно действие - проверка свойства на существование и доступен только в контексте ресурса `Resource\\*`
+Тоже самое что и метод `has`, но выполняет только одно действие - проверка свойства на существование и доступен только в контексте ресурса `Resource\\*`
 
 ```php
 public boolean Объект::hasProperty(string $key)
@@ -854,7 +864,7 @@ $resource->move($resource2);
 Если ресурс уже существует будет вызвано исключение `AlreadyExists`.
 
 ```php
-pubic $this Closed::create( void )
+public $this Closed::create( void )
 ```
 
 **Примеры**
@@ -900,7 +910,7 @@ $resource->public_url; // URL адрес
 Метод `download` безопасен от переполнения памяти и может быть использован для скачивания файлов и папок (автоматически в виде zip-архива).  
 
 ```php
-public bool download(mixed $destination [, bool $overwrite = false])
+public bool Closed::download(mixed $destination [, bool $overwrite = false])
 ```
 
 `$destination` - позволяет указать куда будет сохранён ресурс.
@@ -962,14 +972,14 @@ var_dump($stream->getSize());
 Сделать копию ресурса.
 
 ```php
-public bool copy(mixed $destination [,bool  $overwrite = false])
+public bool Closed::copy(mixed $destination [,bool  $overwrite = false])
 ```
 
 `$destination` - путь до нового ресурса.
 
 Может принимать значения:
 
-- `string` - строка, путь от корня папки приложения или  каорня Яндекс.Диска.
+- `string` - строка, путь от корня папки приложения или  корня Яндекс.Диска.
 - `Arhitector\Yandex\Disk\Resource\Closed` - инициализированный объект другого ресурса.
 
 `$overwrite` - признак перезаписи, если по указанному пути существует ресурс. Поведение по умолчанию `FALSE`.
@@ -1060,9 +1070,7 @@ public Resource\Closed Disk::getPublishResource(string $public_key [, int $limit
 
 `$public_key` - публичный ключ или URL-адрес ресурса с открытым доступом.
 
-
 `$limit` - Количество ресурсов в ответе, если это папка.
-
 
 `$offset` - Смещение. Задаётся для списка всех файлов или если ресурс является папка, то задаёт смещение вложенных в папку ресурсов.
 
@@ -1155,20 +1163,61 @@ $publicResource->getLink();
 ```
 
 ### 1.3.9.3. Скачивание публичного файла или папки.
-/**
-	 * Скачивание публичного файла или папки
-	 *
-	 * @param resource|StreamInterface|string $destination Путь, по которому будет сохранён файл
-	 *                                                     StreamInterface будет записан в поток
-	 *                                                     resource открытый на запись
-	 * @param boolean                         $overwrite   флаг перезаписи
-	 * @param boolean                         $check_hash  провести проверку целостности скачанного файла
-	 *                                                     на основе хэша MD5
-	 *
-	 * @return bool
-	 */
-	 public function download($destination, $overwrite = false, $check_hash = false)
-	 
+
+Скачивание публичного файла или папки (в виде zip-архива).
+
+```php
+public bool Opened::download(mixed $destination [, bool $overwrite = false [, bool $check_hash = false]])
+```
+
+`$destination` - Путь, по которому будет сохранён файл
+
+Принимает значения:
+
+- `string` - файловый путь.
+- `resource` - открытый на запись дескриптор файла.
+- `StreamInterface` - поток, открытый на запись.
+
+`$overwrite` - флаг перезаписи, если `$destination` является файловым путем. `FALSE` - поведение по умолчанию.
+
+`$check_hash` - провести проверку целостности скачанного файла. Значение `TRUE` позволяет проверить `md5` хеш скачанного файла. По умолчанию `FALSE`.
+
+**Примеры**
+
+```php
+$publicResource->download(__DIR__.'/file.txt');
+
+$publicResource->download(__DIR__.'/file.txt', true);
+
+$publicResource->download(__DIR__.'/file.txt', true, true);
+```
+
+Запись в открытый дескриптор.
+
+```php
+// открыть любой дескриптор
+$fp = fopen(__DIR__.'/файл.txt', 'wb+');
+
+// или и т.д.
+$fp = fopen('php://memory', 'r+b');
+
+// true - провести проверку целостности скачанного файла
+$publicResource->download($fp, false, true);
+
+// продолжить работу ...
+fseek($fp, 0);
+```
+
+Использовать обертку над потоком так же просто.
+
+```php
+$stream = new Stream('php://temp', 'r+');
+
+$publicResource->download($stream);
+
+var_dump($stream->getSize());
+```
+
 ### 1.3.9.4. Есть ли доступ к этому файлу от имени владельца.
 
 /**
@@ -1202,6 +1251,9 @@ $publicResource->getLink();
 	 * @return $this
 	 */
 	 public function setPath($path)
+
+
+
 
 
 ## 1.3.10. Работа с файлами в корзине.
