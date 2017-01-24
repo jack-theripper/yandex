@@ -508,7 +508,7 @@ $disk->get('не существующее свойство', 'default value'); /
 public Resource\Closed Disk::getResource(string $path [, int $limit = 20 [, int $offset = 0]])
 ```
 
-`$path` - Путь к новому либо уже существующему ресурсу, NULL Список всех файлов.
+`$path` - Путь к новому либо уже существующему ресурсу.
 
 
 `$limit` - Количество ресурсов в ответе.
