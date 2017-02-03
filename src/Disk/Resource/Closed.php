@@ -654,6 +654,39 @@ class Closed extends AbstractResource
 		return $response->getStatusCode() == 201;
 	}
 
+    /**
+     * Получает прямую ссылку
+     *
+     * @return    string
+     * @throws    mixed
+     *
+     * @TODO    Не работает для файлов вложенных в публичную папку.
+     */
+    public function getLink()
+    {
+        if ( ! $this->has())
+        {
+            throw new NotFoundException('Не удалось найти запрошенный ресурс.');
+        }
+
+        $response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/download')
+                                                              ->withQuery(http_build_query([
+                                                                  'path'       => (string) $this->getPath()
+                                                              ], null, '&')), 'GET'));
+
+        if ($response->getStatusCode() == 200)
+        {
+            $response = json_decode($response->getBody(), true);
+
+            if (isset($response['href']))
+            {
+                return $response['href'];
+            }
+        }
+
+        throw new \UnexpectedValueException('Не удалось запросить разрешение на скачивание, повторите заново');
+    }
+
 	/**
 	 * Получает ссылку для просмотра документа. Достпно владельцу аккаунта.
 	 *
