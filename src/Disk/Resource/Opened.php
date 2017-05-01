@@ -46,8 +46,7 @@ class Opened extends AbstractResource
 	 * @var    string    ресурс
 	 */
 	protected $publicKey;
-
-
+	
 	/**
 	 * Конструктор.
 	 *
@@ -382,28 +381,22 @@ class Opened extends AbstractResource
 
 		return $this;
 	}
-
+	
 	/**
 	 * Получает ссылку для просмотра документа.
 	 *
 	 * @return bool|string
+	 * @throws \InvalidArgumentException
 	 */
 	protected function createDocViewerUrl()
 	{
 		if ($this->isFile())
 		{
 			$docviewer = [
-				'url'  => $this->get('public_key'),
-				'name' => $this->get('name')
+				'name' => $this->get('name'),
+				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
 			];
-
-			if ($this->get('path', '/') != '/')
-			{
-				$docviewer['url'] .= ':/'.ltrim($this->get('path'), '/ ');
-			}
-
-			$docviewer['url']  = "ya-disk-public://{$docviewer['url']}";
-
+			
 			return (string) (new Uri('https://docviewer.yandex.ru/'))
 				->withQuery(http_build_query($docviewer, null, '&'));
 		}
