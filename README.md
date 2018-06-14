@@ -22,7 +22,7 @@
 
 ## Установка
 
-Поддерживается установка с помощью [менеджера пакетов](https://composer.org).
+Поддерживается установка с помощью [менеджера пакетов](https://getcomposer.org).
 
 ```
 $ composer require arhitector/yandex dev-master
