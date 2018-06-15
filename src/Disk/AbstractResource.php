@@ -69,12 +69,10 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 				return $this->hasProperty($index);
 			}
 		}
-		catch (\Exception $exc)
+		catch (\Arhitector\Yandex\Client\Exception\NotFoundException $exc)
 		{
-
+			return false;
 		}
-
-		return false;
 	}
 
 	/**
