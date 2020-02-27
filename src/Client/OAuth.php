@@ -12,7 +12,7 @@
  */
 namespace Arhitector\Yandex\Client;
 
-use Arhitector\Yandex\AbstractClient;
+use Arhitector\Yandex\Client\AbstractClient;
 use Arhitector\Yandex\Client\Exception\UnauthorizedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

@@ -12,7 +12,7 @@
  */
 namespace Arhitector\Yandex\Client;
 
-use Arhitector\Yandex\AbstractClient;
+use Arhitector\Yandex\Client\AbstractClient;
 use Psr\Http\Message\RequestInterface;
 
 /**

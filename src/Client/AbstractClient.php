@@ -10,7 +10,7 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex;
+namespace Arhitector\Yandex\Client;
 
 use Arhitector\Yandex\Client\Exception\ServiceException;
 use Arhitector\Yandex\Client\HttpClient;

@@ -12,6 +12,7 @@
  */
 namespace Arhitector\Yandex;
 
+use Arhitector\Yandex\Client\AbstractClient;
 use Arhitector\Yandex\Client\Container\ContainerTrait;
 use Arhitector\Yandex\Client\Exception\UnsupportedException;
 use Arhitector\Yandex\Client\OAuth;
