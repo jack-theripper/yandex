@@ -113,7 +113,7 @@ class HttpClient implements HttpClientInterface, HttpAsyncClientInterface
 	 *
 	 * @since 1.0
 	 */
-	public function sendRequest(RequestInterface $request)
+	public function sendRequest(RequestInterface $request): ResponseInterface
 	{
 		$responseBuilder = $this->createResponseBuilder();
 		$options = $this->createCurlOptions($request, $responseBuilder);
