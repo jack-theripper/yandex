@@ -142,7 +142,7 @@ abstract class AbstractClient
 		}
 
 		$response = $this->client->sendRequest($request);
-		$response = $this->transformResponseToException($request, $response);
+		$response = $this->transformResponseToException($response, $request);
 
 		return $response;
 	}
@@ -165,13 +165,12 @@ abstract class AbstractClient
 	/**
 	 * Трансформирует ответ в исключения
 	 *
+     * @param \Psr\Http\Message\ResponseInterface $response
 	 * @param \Psr\Http\Message\RequestInterface  $request
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface если статус код не является ошибочным, то вернуть объект ответа
-	 * @throws \Arhitector\Yandex\Client\Exception\ServiceException
-	 */
-	protected function transformResponseToException(RequestInterface $request, ResponseInterface $response)
+     * @return \Psr\Http\Message\ResponseInterface если статус код не является ошибочным, то вернуть объект ответа
+     * @throws ServiceException
+     */
+	protected function transformResponseToException(ResponseInterface $response, RequestInterface $request)
 	{
 		if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500)
 		{

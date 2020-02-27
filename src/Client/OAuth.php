@@ -238,17 +238,17 @@ class OAuth extends AbstractClient
 
 		return $request;
 	}
-	
-	/**
-	 * Трансформирует ответ в исключения.
-	 * Ответ API, где использует OAuth, отличается от других сервисов.
-	 *
-	 * @param \Psr\Http\Message\RequestInterface  $request
-	 * @param \Psr\Http\Message\ResponseInterface $response
-	 *
-	 * @return \Psr\Http\Message\ResponseInterface если статус код не является ошибочным, то вернуть объект ответа
-	 */
-	protected function transformResponseToException(RequestInterface $request, ResponseInterface $response)
+    
+    /**
+     * Трансформирует ответ в исключения.
+     * Ответ API, где использует OAuth, отличается от других сервисов.
+     *
+     * @param \Psr\Http\Message\ResponseInterface $response
+     *
+     * @param \Psr\Http\Message\RequestInterface  $request
+     * @return \Psr\Http\Message\ResponseInterface если статус код не является ошибочным, то вернуть объект ответа
+     */
+	protected function transformResponseToException(ResponseInterface $response, RequestInterface $request)
 	{
 		if (isset($this->exceptions[$response->getStatusCode()]))
 		{
@@ -269,7 +269,7 @@ class OAuth extends AbstractClient
 				{
 					if ( ! isset($responseBody['error'], $exception[$responseBody['error']]))
 					{
-						return parent::transformResponseToException($request, $response);
+						return parent::transformResponseToException($response, $request);
 					}
 
 					$exception = $exception[$responseBody['error']];
@@ -279,7 +279,7 @@ class OAuth extends AbstractClient
 			}
 		}
 
-		return parent::transformResponseToException($request, $response);
+		return parent::transformResponseToException($response, $request);
 	}
 	
 }
