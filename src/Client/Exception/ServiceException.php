@@ -10,12 +10,13 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Client\Exception;
 
 use Http\Client\Exception;
 
 /**
- * Исключение сервис недоступен.
+ * Exception the service is not available.
  */
 class ServiceException extends \RuntimeException implements Exception
 {
