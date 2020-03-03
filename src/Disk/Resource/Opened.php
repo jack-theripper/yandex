@@ -14,7 +14,7 @@ namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
-use Arhitector\Yandex\Disk;
+use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use Psr\Http\Message\StreamInterface;
@@ -51,10 +51,10 @@ class Opened extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $public_key URL адрес или публичный ключ ресурса.
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Arhitector\Yandex\DiskClient  $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($public_key, Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($public_key, DiskClient $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($public_key))
 		{

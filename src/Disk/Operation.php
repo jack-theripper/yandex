@@ -12,7 +12,7 @@
  */
 namespace Arhitector\Yandex\Disk;
 
-use Arhitector\Yandex\Disk;
+use Arhitector\Yandex\DiskClient;
 use Psr\Http\Message\UriInterface;
 use Zend\Diactoros\Request;
 
@@ -45,7 +45,7 @@ class Operation
 	protected $uri;
 
 	/**
-	 * @var \Arhitector\Yandex\Disk объект диска, породивший ресурс.
+	 * @var \Arhitector\Yandex\DiskClient объект диска, породивший ресурс.
 	 */
 	protected $parent;
 
@@ -60,7 +60,7 @@ class Operation
 	 *
 	 * @param string    $identifier   идентификатор операции.
 	 */
-	public function __construct($identifier, Disk $disk, UriInterface $uri)
+	public function __construct($identifier, DiskClient $disk, UriInterface $uri)
 	{
 		if ( ! is_string($identifier))
 		{
@@ -74,7 +74,7 @@ class Operation
 
 	/**
 	 * Текстовый статус операции.
-	 * 
+	 *
 	 * @return  string|null NULL если не удалось получить статус.
 	 */
 	public function getStatus()

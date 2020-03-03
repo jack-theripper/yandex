@@ -13,7 +13,7 @@
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Disk;
+use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Zend\Diactoros\Request;
 
@@ -42,10 +42,10 @@ class Removed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $path путь к ресурсу в корзине
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Arhitector\Yandex\DiskClient  $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($path, Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($path, DiskClient $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($path))
 		{

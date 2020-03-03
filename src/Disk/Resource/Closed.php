@@ -15,7 +15,7 @@ namespace Arhitector\Yandex\Disk\Resource;
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Client\Exception\NotFoundException;
 use Arhitector\Yandex\Client\Stream\Progress;
-use Arhitector\Yandex\Disk;
+use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use League\Event\Event;
@@ -48,10 +48,10 @@ class Closed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $resource путь к существующему либо новому ресурсу
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Arhitector\Yandex\DiskClient  $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
-	public function __construct($resource, Disk $parent, \Psr\Http\Message\UriInterface $uri)
+	public function __construct($resource, DiskClient $parent, \Psr\Http\Message\UriInterface $uri)
 	{
 		if (is_array($resource))
 		{

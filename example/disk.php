@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$disk = new Arhitector\Yandex\Disk();
+$disk = new Arhitector\Yandex\DiskClient();
 $disk->setAccessToken('');
 
 /**

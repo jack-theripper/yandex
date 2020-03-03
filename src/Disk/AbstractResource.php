@@ -38,7 +38,7 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 	protected $uri;
 
 	/**
-	 * @var \Arhitector\Yandex\Disk объект диска, породивший ресурс.
+	 * @var \Arhitector\Yandex\DiskClient объект диска, породивший ресурс.
 	 */
 	protected $client;
 

@@ -38,7 +38,7 @@ class YDiskBackup
         $this->backup_src_dir = $backup_src_dir;
         $this->disk_dest_resrouce = $disk_dest_resource;
 
-        $this->disk = new Arhitector\Yandex\Disk();
+        $this->disk = new Arhitector\Yandex\DiskClient();
         $this->disk->setAccessToken($auth_token);
 
         $this->is_md5_check_enabled = $verify_md5;

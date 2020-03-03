@@ -28,7 +28,7 @@ use Zend\Diactoros\Uri;
  *
  * @package Arhitector\Yandex
  */
-class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
+class DiskClient extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 	use ContainerTrait, EmitterTrait {
 		toArray as protected _toArray;
@@ -562,7 +562,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @param $identifier
 	 *
-	 * @return \Arhitector\Yandex\Disk
+	 * @return \Arhitector\Yandex\DiskClient
 	 */
 	protected function addOperation($identifier)
 	{
