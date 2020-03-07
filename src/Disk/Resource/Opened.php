@@ -13,150 +13,118 @@
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Client\Exception\NotFoundException;
+use Arhitector\Yandex\Disk\FilterTrait;
+use Arhitector\Yandex\Entity;
+use Arhitector\Yandex\Entity\PublicResource;
+use Arhitector\Yandex\Exception\NotFoundException;
 use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use InvalidArgumentException;
 use Psr\Http\Message\StreamInterface;
 use Zend\Diactoros\Request;
 use Zend\Diactoros\Stream;
 use Zend\Diactoros\Uri;
 
 /**
- * Публичный ресурс.
+ * It is a public resource.
  *
  * @package Arhitector\Yandex\Disk\Resource
- *
- * @property-read   string    $public_key публичный ключ
- * @property-read   string    $name       название файла
- * @property-read   string    $created    дата создания
- * @property-read   string    $public_url публичный URL
- * @property-read   string    $modified   дата изменения
- * @property-read   string    $media_type медиа тип файла
- * @property-read   string    $path       путь к папке
- * @property-read   string    $md5        MD5 хэш сумма файла
- * @property-read   string    $type       это файл или папка
- * @property-read   string    $mime_type
- * @property-read   int|float $size       размер файла в байтах
+ * @mixin PublicResource
  */
 class Opened extends AbstractResource
 {
 
+    /**
+     * @var string Published resource key.
+     */
+    protected $publicKey;
+
+    /**
+     * It is a public resource.
+     *
+     * @param mixed $url_or_public_key URL-address or published resource key.
+     * @param DiskClient $client
+     */
+    public function __construct($url_or_public_key, DiskClient $client)
+    {
+        if (is_array($url_or_public_key))
+        {
+            if (empty($url_or_public_key['public_key']))
+            {
+                throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
+            }
+
+//            $this->setContents($url_or_public_key);
+            $url_or_public_key = $url_or_public_key['public_key'];
+//            $this->store['docviewer'] = $this->createDocViewerUrl();
+        }
+
+        if ( ! is_scalar($url_or_public_key) || trim($url_or_public_key) == '')
+        {
+            throw new InvalidArgumentException('The "public_key" parameter must not be an empty string.');
+        }
+
+        $this->publicKey = (string) $url_or_public_key;
+        $this->client = $client;
+    }
+
+    /**
+     * Returns the public key.
+     *
+     * @return string
+     */
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
+    }
+
+    /**
+     * Getting and returns the current entity. If needed it will be refresh from api.
+     *
+     * @return Entity|PublicResource
+     */
+    public function getEntity(): PublicResource
+    {
+        var_dump(__METHOD__);
+        if ( ! $this->entity || $this->isModified())
+        {
+            $this->entity = new PublicResource($this->getRawContents());
+        }
+
+        return $this->entity;
+    }
+
 	/**
-	 * @var    string    ресурс
-	 */
-	protected $publicKey;
-	
-	/**
-	 * Конструктор.
+	 * Returns a direct link to the file.
 	 *
-	 * @param string|array                   $public_key URL адрес или публичный ключ ресурса.
-	 * @param \Arhitector\Yandex\DiskClient  $parent
-	 * @param \Psr\Http\Message\UriInterface $uri
+	 * @return string
 	 */
-	public function __construct($public_key, DiskClient $parent, \Psr\Http\Message\UriInterface $uri)
+	public function getLink(): string
 	{
-		if (is_array($public_key))
-		{
-			if (empty($public_key['public_key']))
-			{
-				throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
-			}
 
-			$this->setContents($public_key);
-			$public_key = $public_key['public_key'];
-			$this->store['docviewer'] = $this->createDocViewerUrl();
-		}
+//		if ( ! $this->has())
+//		{
+//			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
+//		}
 
-		if ( ! is_scalar($public_key))
-		{
-			throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
-		}
+        $parameters = [
+            'public_key' => $this->getPublicKey(),
+            'path'       => (string) $this->getResourcePath()
+        ];
 
-		$this->publicKey = (string) $public_key;
-		$this->client = $parent;
-		$this->uri = $uri;
-	}
+        $uri = $this->client->createUri('/public/resources/download')
+            ->withQuery(http_build_query($parameters));
 
-	/**
-	 * Получить публичный ключ
-	 *
-	 * @return    string|null
-	 */
-	public function getPublicKey()
-	{
-		return $this->publicKey;
-	}
+        $request = $this->client->createRequest('GET', $uri);
 
-	/**
-	 * Получает информацию о ресурсе
-	 *
-	 * @return    mixed
-	 */
-	public function toArray(array $allowed = null)
-	{
-		if ( ! $this->_toArray() || $this->isModified())
-		{
-			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'public/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-					'public_key' => $this->getPublicKey()
-				]), null, '&')), 'GET')));
-
-			if ($response->getStatusCode() == 200)
-			{
-				$response = json_decode($response->getBody(), true);
-
-				if ( ! empty($response))
-				{
-					$this->isModified = false;
-
-					if (isset($response['_embedded']))
-					{
-						$response = array_merge($response, $response['_embedded']);
-					}
-
-					unset($response['_links'], $response['_embedded']);
-
-					if (isset($response['items']))
-					{
-						$response['items'] = new Container\Collection(array_map(function($item) {
-							return new self($item, $this->client, $this->uri);
-						}, $response['items']));
-					}
-
-					$this->setContents($response);
-					$this->store['docviewer'] = $this->createDocViewerUrl();
-				}
-			}
-		}
-
-		return $this->_toArray($allowed);
-	}
-
-	/**
-	 * Получает прямую ссылку
-	 *
-	 * @return    string
-	 * @throws    mixed
-	 *
-	 * @TODO    Не работает для файлов вложенных в публичную папку.
-	 */
-	public function getLink()
-	{
-		if ( ! $this->has())
-		{
-			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
-		}
-
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'public/resources/download')
-		                                                      ->withQuery(http_build_query([
-				'public_key' => $this->getPublicKey(),
-				'path'       => (string) $this->getPath()
-			], null, '&')), 'GET'));
+		$response = $this->client->sendRequest($request);
 
 		if ($response->getStatusCode() == 200)
 		{
 			$response = json_decode($response->getBody(), true);
+
+			var_dump($response);
 
 			if (isset($response['href']))
 			{
@@ -214,7 +182,7 @@ class Opened extends AbstractResource
 			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 		}
 
-		$response = $this->client->send(new Request($this->getLink(), 'GET'));
+		$response = $this->parent->sendRequest(new Request($this->getLink(), 'GET'));
 
 		if ($response->getStatusCode() == 200)
 		{
@@ -241,8 +209,8 @@ class Opened extends AbstractResource
 			}
 
 			$stream->close();
-			$this->emit('downloaded', $this, $destination, $this->client);
-			$this->client->emit('downloaded', $this, $destination, $this->client);
+			$this->emit('downloaded', $this, $destination, $this->parent);
+			$this->parent->emit('downloaded', $this, $destination, $this->parent);
 
 			if ($destination_type == 'object')
 			{
@@ -270,11 +238,11 @@ class Opened extends AbstractResource
 	 */
 	public function hasEqual()
 	{
-		if ($this->has() && ($path = $this->get('name')))
+		if ($this->isExists() && ($path = $this->get('name')))
 		{
 			try
 			{
-				return $this->client->getResource(((string) $this->get('path')).'/'.$path)
+				return $this->parent->getResource(((string) $this->get('path')).'/'.$path)
 				                    ->get('md5', false) === $this->get('md5');
 			}
 			catch (\Exception $exc)
@@ -320,9 +288,9 @@ class Opened extends AbstractResource
 		{
 			$parameters['path'] = $path;
 		}
-		else if ($this->getPath() !== null)
+		else if ($this->getResourcePath() !== null)
 		{
-			$parameters['path'] = $this->getPath();
+			$parameters['path'] = $this->getResourcePath();
 		}
 
 		/**
@@ -330,7 +298,7 @@ class Opened extends AbstractResource
 		 * ссылку на сохраненный файл в теле ответа (в объекте Link).
 		 * Если операция сохранения была запущена, но еще не завершилась, Яндекс.Диск отвечает кодом 202 Accepted.
 		 */
-		$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath()
+		$response = $this->parent->sendRequest((new Request($this->uri->withPath($this->uri->getPath()
 			.'public/resources/save-to-disk')
 		                                                       ->withQuery(http_build_query([
 					'public_key' => $this->getPublicKey()
@@ -342,9 +310,9 @@ class Opened extends AbstractResource
 
 			if (isset($response['operation']))
 			{
-				$response['operation'] = $this->client->getOperation($response['operation']);
-				$this->emit('operation', $response['operation'], $this, $this->client);
-				$this->client->emit('operation', $response['operation'], $this, $this->client);
+				$response['operation'] = $this->parent->getOperation($response['operation']);
+				$this->emit('operation', $response['operation'], $this, $this->parent);
+				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
 
 				return $response['operation'];
 			}
@@ -355,7 +323,7 @@ class Opened extends AbstractResource
 
 				if (isset($path['path']))
 				{
-					return $this->client->getResource($path['path']);
+					return $this->parent->getResource($path['path']);
 				}
 			}
 		}
@@ -377,11 +345,11 @@ class Opened extends AbstractResource
 			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 		}
 
-		$this->path = (string) $path;
+		$this->resourcePath = (string) $path;
 
 		return $this;
 	}
-	
+
 	/**
 	 * Получает ссылку для просмотра документа.
 	 *
@@ -390,18 +358,66 @@ class Opened extends AbstractResource
 	 */
 	protected function createDocViewerUrl()
 	{
-		if ($this->isFile())
-		{
-			$docviewer = [
-				'name' => $this->get('name'),
-				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
-			];
-			
-			return (string) (new Uri('https://docviewer.yandex.ru/'))
-				->withQuery(http_build_query($docviewer, null, '&'));
-		}
+//		if ($this->isFile())
+//		{
+//			$docviewer = [
+//				'name' => $this->get('name'),
+//				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
+//			];
+//
+//			return (string) (new Uri('https://docviewer.yandex.ru/'))
+//				->withQuery(http_build_query($docviewer, null, '&'));
+//		}
 
 		return false;
 	}
+
+    /**
+     * @return array Make a request to the API and return all the received data how it is.
+     */
+    protected function getRawContents(): array
+    {
+var_dump(__METHOD__);
+        $request = $this->client->createRequest('GET',
+            $this->client->createUri('/public/resources')
+                ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+                    'public_key' => $this->getPublicKey()
+                ]), null, '&'))
+        );
+
+        $response = $this->client->sendRequest($request);
+
+        if ($response->getStatusCode() == 200)
+        {
+            $response = json_decode($response->getBody(), true);
+
+            var_dump($response);
+            if ( ! empty($response))
+            {
+                $this->isModified = false;
+
+                if (isset($response['_embedded']))
+                {
+                    $response = array_merge($response, $response['_embedded']);
+                }
+
+                unset($response['_links'], $response['_embedded']);
+
+                if (isset($response['items']))
+                {
+                    $response['items'] = new Container\Collection(array_map(function($item) {
+                        return new self($item, $this->client);
+                    }, $response['items']));
+                }
+
+                $response['docviewer'] = $this->createDocViewerUrl();
+
+                $this->entity = new PublicResource($response);
+            }
+        }
+
+        return $response;
+    }
+
 
 }

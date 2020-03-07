@@ -27,7 +27,7 @@ use Zend\Diactoros\Request;
  * @property-read   string     $origin_path
  * @property-read   string     $modified
  * @property-read   string     $media_type
- * @property-read   string     $path
+ * @property-read   string     $resourcePath
  * @property-read   string     $md5
  * @property-read   string     $type
  * @property-read   string     $mime_type
@@ -63,7 +63,7 @@ class Removed extends AbstractResource
 			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 		}
 
-		$this->path = (string) $path;
+		$this->resourcePath = (string) $path;
 		$this->client = $parent;
 		$this->uri = $uri;
 		$this->setSort('created');
@@ -78,9 +78,9 @@ class Removed extends AbstractResource
 	{
 		if ( ! $this->_toArray() || $this->isModified())
 		{
-			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
+			$response = $this->client->sendRequest((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
 			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-					'path' => $this->getPath()
+					'path' => $this->getResourcePath()
 				]), null, '&')), 'GET')));
 
 			if ($response->getStatusCode() == 200)
@@ -104,7 +104,7 @@ class Removed extends AbstractResource
 							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
-					
+
 					$this->setContents($response);
 				}
 			}
@@ -131,7 +131,7 @@ class Removed extends AbstractResource
 
 		if ($name instanceof Closed)
 		{
-			$name = $name->getPath();
+			$name = $name->getResourcePath();
 		}
 
 		if ( ! empty($name) && ! is_string($name))
@@ -141,12 +141,12 @@ class Removed extends AbstractResource
 
 		$request = new Request($this->uri->withPath($this->uri->getPath().'trash/resources/restore')
 			->withQuery(http_build_query([
-				'path'      => $this->getPath(),
+				'path'      => $this->getResourcePath(),
 				'name'      => (string) $name,
 				'overwrite' => (bool) $overwrite
 			], null, '&')), 'PUT');
 
-		$response = $this->client->send($request);
+		$response = $this->client->sendRequest($request);
 
 		if ($response->getStatusCode() == 201 || $response->getStatusCode() == 202)
 		{
@@ -181,9 +181,9 @@ class Removed extends AbstractResource
 	{
 		try
 		{
-			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
+			$response = $this->client->sendRequest(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
 			                                                      ->withQuery(http_build_query([
-					'path' => $this->getPath()
+					'path' => $this->getResourcePath()
 				], null, '&')), 'DELETE'));
 
 			if ($response->getStatusCode() == 202)

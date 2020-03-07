@@ -60,14 +60,13 @@ class Operation
 	 *
 	 * @param string    $identifier   идентификатор операции.
 	 */
-	public function __construct($identifier, DiskClient $disk, UriInterface $uri)
+	public function __construct($identifier, DiskClient $disk)
 	{
 		if ( ! is_string($identifier))
 		{
 			throw new \InvalidArgumentException('Ожидается строковый идентификатор асинхронной операции.');
 		}
-
-		$this->uri = $uri;
+		
 		$this->parent = $disk;
 		$this->identifier = $identifier;
 	}
@@ -79,7 +78,7 @@ class Operation
 	 */
 	public function getStatus()
 	{
-		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'operations/'
+		$response = $this->parent->sendRequest(new Request($this->uri->withPath($this->uri->getPath().'operations/'
 			.$this->getIdentifier()), 'GET'));
 
 		if ($response->getStatusCode() == 200)

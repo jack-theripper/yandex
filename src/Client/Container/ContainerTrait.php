@@ -115,7 +115,7 @@ trait ContainerTrait
 	 */
 	protected function hasByIndex($index)
 	{
-		return array_key_exists($index, $this->toArray());
+		return array_key_exists($index, $this->toArray()); // <- в этом месте происходит обновление контейнера с помощью вызова toArray с isModified()
 	}
 
 	/**

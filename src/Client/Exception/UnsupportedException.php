@@ -12,12 +12,12 @@
  */
 namespace Arhitector\Yandex\Client\Exception;
 
-use Http\Client\Exception;
+use Arhitector\Yandex\Exception\ClientException;
 
 /**
- * Исключение некорректные данные.
+ * Incorrect data (400).
  */
-class UnsupportedException extends \RuntimeException implements Exception
+class UnsupportedException extends ClientException
 {
 
 }

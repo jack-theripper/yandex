@@ -10,15 +10,12 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-
-namespace Arhitector\Yandex\Client\Exception;
-
-use Http\Client\Exception;
+namespace Arhitector\Yandex\Exception;
 
 /**
- * Exception the service is not available.
+ * The requested resource could not be found (404).
  */
-class ServiceException extends \RuntimeException implements Exception
+class NotFoundException extends ClientException
 {
 
 }

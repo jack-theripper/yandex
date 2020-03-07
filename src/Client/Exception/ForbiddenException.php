@@ -10,14 +10,16 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Client\Exception;
 
+use Arhitector\Yandex\Exception\ClientException;
 use Http\Client\Exception;
 
 /**
- * Исключение доступ запрещён.
+ * Access is denied for various reasons (403).
  */
-class ForbiddenException extends \RuntimeException implements Exception
+class ForbiddenException extends ClientException
 {
 
 }

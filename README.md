@@ -92,7 +92,7 @@ $disk = new Arhitector\Yandex\Disk('OAuth-токен');
 $resource = $disk->getResource('новый файл.txt');
 
 // проверить сущестует такой файл на диске ?
-$resource->has(); // вернет, например, false
+$resource->isExists(); // вернет, например, false
 
 // загрузить файл на диск под имененм "новый файл.txt".
 $resource->upload(__DIR__.'/файл в локальной папке.txt');
@@ -122,7 +122,7 @@ try
     // Вывести информацию. Когда ресурс не найден будет вызвано исключение NotFoundException
     $resource->toArray();
   }
-  catch (Arhitector\Yandex\Client\Exception\NotFoundException $exc)
+  catch (Arhitector\Yandex\Exception\NotFoundException $exc)
   {
     // Ресурс на Диске отсутствует, загрузить под именем 'новый файл.txt'
     $resource->upload(__DIR__.'/файл в локальной папке.txt');
@@ -416,13 +416,13 @@ public bool Объект::has([string $key = NULL])
 ```php
 $disk->has('total_space_123'); // false
 
-$resource->has('name'); // true
+$resource->isExists(); // true
 ```
 
 - Вызов без параметров поддерживается только в контексте ресурса `Resource\\*` и проверяет ресурс на существование.
 
 ```php
-$resource->has(); // true
+$resource->isExists(); // true
 ```
 
 #### Метод hasProperty
@@ -627,9 +627,9 @@ $collection->getLast(); // object 'Resource/Opened'
 **Примеры**
 
 ```php
-$resource->has();
+$resource->isExists();
 
-$resource->has('name'); // проверить, есть ли 'name'
+$resource->isExists(); // проверить, есть ли 'name'
 ```
 
 ### 1.3.8.2. Получение информации о ресурсе
@@ -645,7 +645,7 @@ $resource->get('items');
 
 $resource->hasProperty('name');
 
-$resource->has('type');
+$resource->isExists();
 
 $resource->toArray(['name', 'type', 'size']);
 

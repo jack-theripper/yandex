@@ -58,7 +58,7 @@ class YDiskBackup
         $this->info("Backing $src_path up to $dest_resource...");
         $res = $this->disk->getResource($dest_resource);
 
-        if ( $res->has() === true
+        if ( $res->isExists() === true
             and $this->is_overwrite_enabled === false
             and $this->is_md5_check_enabled === false )
         {
@@ -66,7 +66,7 @@ class YDiskBackup
             return;
         }
 
-        if ( $res->has() === false )
+        if ( $res->isExists() === false )
         {
             $result = $res->upload($src_path);
             $this->info("Upload request status: $result");
@@ -117,7 +117,7 @@ class YDiskBackup
 
                 $res = $this->disk->getResource($target_resource_path);
 
-                if ( $res->has() === false )
+                if ( $res->isExists() === false )
                 {
                     $this->info("The Dir resource '$target_resource_path' doesn't exist. Going to create one");
                     $res->create();

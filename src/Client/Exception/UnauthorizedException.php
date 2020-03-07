@@ -10,26 +10,15 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Client\Exception;
 
-use Http\Client\Exception;
+use Arhitector\Yandex\Exception\ClientException;
 
 /**
- * Исключение не авторизован.
+ * The client is not authorized (401).
  */
-class UnauthorizedException extends \RuntimeException implements Exception
+class UnauthorizedException extends ClientException
 {
-	/**
-	 * Конструктор.
-	 *
-	 * @access  public
-	 *
-	 * @param   int        $code     Код исключения
-	 * @param   string     $message  Сообщение исключения
-	 * @param   \Exception $previous Предыдущее исключение
-	 */
-	public function __construct($message, $code = 401, \Exception $previous = null)
-	{
-		parent::__construct($message, $code, $previous);
-	}
+
 }

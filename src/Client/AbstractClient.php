@@ -10,133 +10,114 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Client;
 
-use Arhitector\Yandex\Client\Exception\ForbiddenException;
-use Arhitector\Yandex\Client\Exception\NotFoundException;
-use Arhitector\Yandex\Client\Exception\ServiceException;
-use Arhitector\Yandex\Client\Exception\UnauthorizedException;
-use Arhitector\Yandex\Client\HttpClient;
-use Arhitector\Yandex\Client\Stream\Factory;
+use Arhitector\Yandex\Client\Plugin\ResponseErrorPlugin;
+use Arhitector\Yandex\Exception;
+use Arhitector\Yandex\Exception\ClientException;
+use Http\Client\Common\Plugin\BaseUriPlugin;
 use Http\Client\Common\Plugin\RedirectPlugin;
 use Http\Client\Common\PluginClient;
-use Http\Message\MessageFactory\DiactorosMessageFactory;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Uri;
+use Psr\Http\Message\UriFactoryInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Abstraction layer over the HTTP-client.
  *
  * @package Arhitector\Yandex\Client
  */
-abstract class AbstractClient
+abstract class AbstractClient implements RequestFactoryInterface, UriFactoryInterface
 {
-    
+
     /**
-     * The base address of API
+     * The base address of API. The default path component of the URI.
      */
-    const API_BASEPATH = 'https://oauth.yandex.ru/';
-    
+    const API_BASE_PATH = '';
+
     /**
-     * @var ClientInterface The HTTP-client that is used
+     * @var ClientInterface The HTTP-client that is used.
      */
-    protected $httpClient;
-    
+    private $httpClient;
+
     /**
-     * @var \Psr\Http\Message\UriInterface
+     * @var RequestFactoryInterface Factory for creating new requests.
      */
-    protected $uri;
-    
+    private $requestFactory;
+
     /**
-     * @var string  формат обмена данными
+     * @var UriFactoryInterface Factory for creating new uri object.
      */
-    protected $contentType = 'application/json; charset=utf-8';
-    
+    private $uriFactory;
+
     /**
-     * @var    array   соответствие кодов ответа к типу исключения
+     * You can use your HTTP-client otherwise any of the available ones will be found.
+     *
+     * @param ClientInterface|null $httpClient The HTTP-client or `NULL`
      */
-    protected $exceptions = [
-        
-        /**
-         * Не авторизован.
-         */
-        401 => UnauthorizedException::class,
-        
-        /**
-         * Доступ запрещён. Возможно, у приложения недостаточно прав для данного действия.
-         */
-        403 => ForbiddenException::class,
-        
-        /**
-         * Не удалось найти запрошенный ресурс.
-         */
-        404 => NotFoundException::class
-    ];
-    
-    /**
-     * @var    string    для обращения к API требуется маркер доступа
-     */
-    protected $tokenRequired = true;
-    
-    /**
-     * Конструктор
-     */
-    public function __construct()
+    public function __construct(?ClientInterface $httpClient = null)
     {
-        $this->uri = new Uri(static::API_BASEPATH);
-        $this->client = new PluginClient(new HttpClient(new DiactorosMessageFactory, new Factory, [
-            CURLOPT_SSL_VERIFYPEER => false
-        ]), [
-            new RedirectPlugin
+        $this->requestFactory = Psr17FactoryDiscovery::findRequestFactory();
+        $this->uriFactory = Psr17FactoryDiscovery::findUrlFactory();
+        $this->httpClient = new PluginClient($httpClient ?? Psr18ClientDiscovery::find(), [
+            new BaseUriPlugin($this->createUri(static::API_BASE_PATH)), // Ensure the base path for api
+            new RedirectPlugin(), // Ensure the redirects if needed
+            new ResponseErrorPlugin(), // Transform response to an error if possible
         ]);
     }
-    
+
     /**
-     * Текущий Uri
+     * Create a new request.
      *
-     * @return \Psr\Http\Message\UriInterface|Uri
+     * @param string              $method The HTTP method associated with the request.
+     * @param UriInterface|string $uri    The URI associated with the request. If
+     *                                    the value is a string, the factory MUST create a UriInterface
+     *                                    instance based on it.
+     *
+     * @return RequestInterface
      */
-    public function getUri()
+    public function createRequest(string $method, $uri): RequestInterface
     {
-        return $this->uri;
+        return $this->requestFactory->createRequest($method, $uri);
     }
-    
+
     /**
-     * Провести аунтификацию в соостветствии с типом сервиса
+     * Create a new URI.
      *
-     * @param \Psr\Http\Message\RequestInterface $request
+     * @param string $uri
      *
-     * @return \Psr\Http\Message\RequestInterface
+     * @return UriInterface
+     *
+     * @throws \InvalidArgumentException If the given URI cannot be parsed.
      */
-    abstract protected function authentication(RequestInterface $request);
-    
-    /**
-     * Формат обмена данными
-     *
-     * @return    string
-     */
-    public function getContentType()
+    public function createUri(string $uri = ''): UriInterface
     {
-        return $this->contentType;
+        return $this->uriFactory->createUri($uri);
     }
-    
+
     /**
      * Send request. The request will be modified in a special way before sending.
      *
-     * @param \Psr\Http\Message\RequestInterface $request
+     * @param RequestInterface $request
      *
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return ResponseInterface
+     * @throws Exception
+     * @throws ClientExceptionInterface
      */
-    public function send(RequestInterface $request)
+    public function sendRequest(RequestInterface $request)
     {
-        $request = $this->authentication($request);
         $defaultHeaders = [
-            'Accept'       => $this->getContentType(),
-            'Content-Type' => $this->getContentType()
+            'Accept'       => 'application/json; charset=utf-8',
+            'Content-Type' => 'application/json; charset=utf-8'
         ];
-        
+
         foreach ($defaultHeaders as $defaultHeader => $value)
         {
             if ( ! $request->hasHeader($defaultHeader))
@@ -144,49 +125,28 @@ abstract class AbstractClient
                 $request = $request->withHeader($defaultHeader, $value);
             }
         }
-        
-        $response = $this->client->sendRequest($request);
-        $response = $this->transformResponseToException($response, $request);
-        
+
+        try
+        {
+            $response = $this->getHttpClient()->sendRequest($request);
+        }
+        catch (Exception $exception) // if non client exceptions should be wrapped?
+        {
+            throw $exception;
+        }
+
         return $response;
     }
-    
+
     /**
-     * Устаналивает необходимость токена при запросе.
+     * Returns the internal HTTP-client that is used and configured. Usually implements the `Http\Client\HttpClient`
+     * interface too
      *
-     * @param $tokenRequired
-     *
-     * @return boolean  возвращает предыдущее состояние
+     * @return ClientInterface
      */
-    protected function setAccessTokenRequired($tokenRequired)
+    protected function getHttpClient(): ClientInterface
     {
-        $previous = $this->tokenRequired;
-        $this->tokenRequired = (bool) $tokenRequired;
-        
-        return $previous;
+        return $this->httpClient;
     }
-    
-    /**
-     * Transforms the response into exceptions
-     *
-     * @param ResponseInterface $response
-     * @param RequestInterface  $request
-     *
-     * @return ResponseInterface Returns the response object if the operation status is successful
-     */
-    protected function transformResponseToException(ResponseInterface $response, RequestInterface $request)
-    {
-        if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500)
-        {
-            throw new \RuntimeException($response->getReasonPhrase(), $response->getStatusCode());
-        }
-        
-        if ($response->getStatusCode() >= 500 && $response->getStatusCode() < 600)
-        {
-            throw new ServiceException($response->getReasonPhrase(), $response->getStatusCode());
-        }
-        
-        return $response;
-    }
-    
+
 }

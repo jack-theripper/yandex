@@ -12,109 +12,127 @@
  */
 namespace Arhitector\Yandex\Disk;
 
-use Arhitector\Yandex\Client\Container\ContainerTrait;
+use Arhitector\Yandex\DiskClient;
+use Arhitector\Yandex\Entity;
+use Exception;
 use League\Event\EmitterTrait;
+use RuntimeException;
 
 /**
- * Базовый касс, описывающий ресурс.
+ * The base class that defines the resource.
  *
  * @package Arhitector\Yandex\Disk
+ * @mixin Entity
  */
-abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAggregate
+abstract class AbstractResource /*implements \ArrayAccess*/
 {
-	use ContainerTrait, FilterTrait, EmitterTrait {
-		toArray as protected _toArray;
-		has as hasProperty;
-	}
+    use FilterTrait, EmitterTrait;
 
-	/**
-	 * @var string  путь к ресурсу
-	 */
-	protected $path;
+    /**
+     * @var DiskClient The client that spawned the resource.
+     */
+    protected $client;
 
-	/**
-	 * @var \Psr\Http\Message\UriInterface
-	 */
-	protected $uri;
+    /**
+     * @var string Identifier or path of the resource on the disk.
+     */
+    protected $resourcePath;
 
-	/**
-	 * @var \Arhitector\Yandex\DiskClient объект диска, породивший ресурс.
-	 */
-	protected $client;
+    /**
+     * @var Entity A model that represents information about a resource.
+     */
+    protected $entity;
 
-	/**
-	 * @var array   допустимые фильтры.
-	 */
-	protected $parametersAllowed = ['limit', 'offset', 'preview_crop', 'preview_size', 'sort'];
+    /**
+     * @var string[]
+     */
+    protected $parametersAllowed = ['limit', 'offset', 'preview_crop', 'preview_size', 'sort'];
 
+    /**
+     * Returns identifier or path of the resource on the disk.
+     *
+     * @return string
+     */
+    public function getResourcePath(): string
+    {
+        return $this->resourcePath;
+    }
 
-	/**
-	 * Есть такой файл/папка на диске или свойство
-	 *
-	 * @param   mixed   $index
-	 *
-	 * @return bool
-	 */
-	public function has($index = null)
-	{
-		try
-		{
-			if ($this->toArray())
-			{
-				if ($index === null)
-				{
-					return true;
-				}
+    /**
+     * Checks whether the resource is a file.
+     *
+     * @return bool
+     */
+    public function isFile(): bool
+    {
+        return $this->get('type', false) === 'file';
+    }
 
-				return $this->hasProperty($index);
-			}
-		}
-		catch (\Exception $exc)
-		{
+    /**
+     * Checks whether the resource is a directory.
+     *
+     * @return bool
+     */
+    public function isDir(): bool
+    {
+        return $this->get('type', false) === 'dir';
+    }
 
-		}
+    /**
+     * Checks whether this resource is a public access or not
+     *
+     * @return bool
+     */
+    public function isPublish(): bool
+    {
+        return $this->has('public_key');
+    }
 
-		return false;
-	}
+    /**
+     * Does exist this resource on the disk.
+     *
+     * @return bool
+     */
+    public function isExists(): bool
+    {
+        try
+        {
+            return (bool) ($this->getEntity() || $this->getRawContents());
+        }
+        catch (Exception $exc) {}
 
-	/**
-	 * Проверяет, является ли ресурс файлом
-	 *
-	 * @return bool
-	 */
-	public function isFile()
-	{
-		return $this->get('type', false) === 'file';
-	}
+        return false;
+    }
 
-	/**
-	 * Проверяет, является ли ресурс папкой
-	 *
-	 * @return bool
-	 */
-	public function isDir()
-	{
-		return $this->get('type', false) === 'dir';
-	}
+    /**
+     * Proxy wrapper over entity model.
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     *
+     * @throws RuntimeException
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this->getEntity(), $name))
+        {
+            return call_user_func_array([$this->getEntity(), $name], $arguments);
+        }
 
-	/**
-	 * Проверяет, этот ресурс с открытым доступом или нет
-	 *
-	 * @return boolean
-	 */
-	public function isPublish()
-	{
-		return $this->has('public_key');
-	}
+        throw new RuntimeException(sprintf('Call to undefined method %s::%s()', __CLASS__, $name));
+    }
 
-	/**
-	 * Получить путь к ресурсу
-	 *
-	 * @return    string
-	 */
-	public function getPath()
-	{
-		return $this->path;
-	}
+    /**
+     * Getting and returns the current entity. If needed it will be refresh from api.
+     *
+     * @return Entity
+     */
+    abstract public function getEntity();
+
+    /**
+     * @return array Send a request to the API and return all the received data how it is.
+     */
+    abstract protected function getRawContents(): array;
 
 }
