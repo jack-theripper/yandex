@@ -1,27 +1,21 @@
 <?php
-
 /**
- * Часть библиотеки для работы с сервисами Яндекса
+ * This file is part of the arhitector/yandex-disk library.
  *
- * @package    Arhitector\Yandex
- * @version    2.0
- * @author     Arhitector
- * @license    MIT License
- * @copyright  2016 Arhitector
- * @link       https://github.com/jack-theripper
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
-
 namespace Arhitector\Yandex\Client;
 
+use Arhitector\Yandex\Client\Plugin\BaseUriPlugin;
 use Arhitector\Yandex\Client\Plugin\ResponseErrorPlugin;
 use Arhitector\Yandex\Exception;
-use Arhitector\Yandex\Exception\ClientException;
-use Http\Client\Common\Plugin\BaseUriPlugin;
 use Http\Client\Common\Plugin\RedirectPlugin;
 use Http\Client\Common\PluginClient;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
