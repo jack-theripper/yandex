@@ -5,7 +5,6 @@ namespace Arhitector\Yandex;
 use Psr\Http\Client\RequestExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -13,19 +12,19 @@ use Throwable;
  *
  * @package Arhitector\Yandex
  */
-class Exception extends RuntimeException implements RequestExceptionInterface
+class Exception extends \Exception implements RequestExceptionInterface
 {
-    
+
     /**
      * @var RequestInterface
      */
     protected $request;
-    
+
     /**
      * @var ResponseInterface
      */
     protected $response;
-    
+
     /**
      * Construct the exception.
      *
@@ -37,11 +36,11 @@ class Exception extends RuntimeException implements RequestExceptionInterface
     public function __construct(string $message = '', RequestInterface $request, ResponseInterface $response, Throwable $previous = null)
     {
         parent::__construct($message, $response->getStatusCode(), $previous);
-        
+
         $this->request = $request;
         $this->response = $response;
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -49,7 +48,7 @@ class Exception extends RuntimeException implements RequestExceptionInterface
     {
         return $this->request;
     }
-    
+
     /**
      * Returns the response object which was throwable exception.
      *
@@ -59,5 +58,5 @@ class Exception extends RuntimeException implements RequestExceptionInterface
     {
         return $this->response;
     }
-    
+
 }

@@ -109,7 +109,7 @@ abstract class AbstractClient implements RequestFactoryInterface, UriFactoryInte
      *
      * @return ResponseInterface
      * @throws Exception
-     * @throws ClientExceptionInterface
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function sendRequest(RequestInterface $request)
     {
@@ -128,6 +128,7 @@ abstract class AbstractClient implements RequestFactoryInterface, UriFactoryInte
 
         try
         {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $response = $this->getHttpClient()->sendRequest($request);
         }
         catch (Exception $exception) // if non client exceptions should be wrapped?
