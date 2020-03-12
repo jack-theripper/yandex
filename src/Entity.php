@@ -1,16 +1,24 @@
 <?php
-
-
+/**
+ * This file is part of the arhitector/yandex-disk library.
+ *
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Arhitector\Yandex;
 
+use ArrayAccess;
 use Closure;
+use OutOfBoundsException;
 
 /**
  * The basic entity.
  *
  * @package Arhitector\Yandex
  */
-class Entity
+class Entity implements ArrayAccess
 {
 
     /**
@@ -135,6 +143,41 @@ class Entity
         }
 
         return $elements;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetExists($offset): bool
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws OutOfBoundsException
+     */
+    public function offsetGet($offset)
+    {
+        return $this->get($offset, function() use ($offset) {
+            throw new OutOfBoundsException(sprintf('The value with the key "%s" does not exist.', $offset));
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetUnset($offset)
+    {
+        return null;
     }
 
 }
