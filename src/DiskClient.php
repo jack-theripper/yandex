@@ -112,7 +112,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      */
     public function getAccessToken(): string
     {
-        return $this->accessToken;
+        return (string) $this->accessToken;
     }
 
     /**
