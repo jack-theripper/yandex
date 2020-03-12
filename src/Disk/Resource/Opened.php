@@ -1,30 +1,26 @@
 <?php
-
 /**
- * Часть библиотеки для работы с сервисами Яндекса
+ * This file is part of the arhitector/yandex-disk library.
  *
- * @package    Arhitector\Yandex\Disk\Resource
- * @version    2.0
- * @author     Arhitector
- * @license    MIT License
- * @copyright  2016 Arhitector
- * @link       https://github.com/jack-theripper
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Disk\FilterTrait;
-use Arhitector\Yandex\Entity;
-use Arhitector\Yandex\Entity\PublicResource;
-use Arhitector\Yandex\Exception\NotFoundException;
-use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use Arhitector\Yandex\Disk\Operation;
+use Arhitector\Yandex\DiskClient;
+use Arhitector\Yandex\Entity;
+use Arhitector\Yandex\Entity\PublicResource;
+use Arhitector\Yandex\Exception;
+use Http\Discovery\Psr17FactoryDiscovery;
 use InvalidArgumentException;
+use OutOfBoundsException;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
 
 /**
  * It is a public resource.
@@ -86,7 +82,6 @@ class Opened extends AbstractResource
      */
     public function getEntity(): PublicResource
     {
-        var_dump(__METHOD__);
         if ( ! $this->entity || $this->isModified())
         {
             $this->entity = new PublicResource($this->getRawContents());
@@ -95,245 +90,188 @@ class Opened extends AbstractResource
         return $this->entity;
     }
 
-	/**
-	 * Returns a direct link to the file.
-	 *
-	 * @return string
-	 */
+    /**
+     * Returns a direct link to the file.
+     *
+     * @return string
+     * @throws Exception
+     */
 	public function getLink(): string
 	{
-
-//		if ( ! $this->has())
-//		{
-//			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
-//		}
+	    if ( ! $this->isExists()) // The requested resource could not be found
+        {
+            return null;
+        }
 
         $parameters = [
             'public_key' => $this->getPublicKey(),
-            'path'       => (string) $this->getResourcePath()
+            'path'       => $this->getResourcePath()
         ];
 
-        $uri = $this->client->createUri('/public/resources/download')
-            ->withQuery(http_build_query($parameters));
+        $request = $this->client->createRequest('GET', $this->client->createUri('/public/resources/download')
+            ->withQuery(http_build_query($parameters)));
 
-        $request = $this->client->createRequest('GET', $uri);
+        try
+        {
+            $response = $this->client->sendRequest($request);
 
-		$response = $this->client->sendRequest($request);
+            if ($response->getStatusCode() == 200 && ($data = json_decode($response->getBody(), true)))
+            {
+                return $data['href'] ?? null;
+            }
 
-		if ($response->getStatusCode() == 200)
-		{
-			$response = json_decode($response->getBody(), true);
-
-			var_dump($response);
-
-			if (isset($response['href']))
-			{
-				return $response['href'];
-			}
-		}
-
-		throw new \UnexpectedValueException('Не удалось запросить разрешение на скачивание, повторите заново');
+            return null;
+        }
+        catch (Exception $exception)
+        {
+            throw $exception;
+        }
 	}
 
-	/**
-	 * Скачивание публичного файла или папки
-	 *
-	 * @param resource|StreamInterface|string $destination Путь, по которому будет сохранён файл
-	 *                                                     StreamInterface будет записан в поток
-	 *                                                     resource открытый на запись
-	 * @param boolean                         $overwrite   флаг перезаписи
-	 * @param boolean                         $check_hash  провести проверку целостности скачанного файла
-	 *                                                     на основе хэша MD5
-	 *
-	 * @return bool
-	 */
-	public function download($destination, $overwrite = false, $check_hash = false)
+    /**
+     * Downloads a file or folder as zip. Returns an object with data.
+     * The handle is not closed, you have to do it manually if you need to further work with this resource.
+     *
+     * @param string|resource|StreamInterface $destination Where to save data
+     * @param bool $overwrite If `$destination` as filepath
+     *
+     * @return StreamInterface
+     * @throws Exception
+     */
+	public function download($destination, bool $overwrite = true): StreamInterface
 	{
-		$destination_type = gettype($destination);
+	    $streamFactory = Psr17FactoryDiscovery::findStreamFactory();
 
-		if (is_resource($destination))
-		{
-			$destination = new Stream($destination);
-		}
+        if (is_string($destination)) // to filesystem
+        {
+            if (file_exists($destination) && ! $overwrite)
+            {
+                throw new AlreadyExistsException('The file or folder already exists: "'.$destination.'"');
+            }
 
-		if ($destination instanceof StreamInterface)
-		{
-			if ( ! $destination->isWritable())
-			{
-				throw new \OutOfBoundsException('Дескриптор файла должен быть открыт с правами на запись.');
-			}
-		}
-		else if ($destination_type == 'string')
-		{
-			if (is_file($destination) && ! $overwrite)
-			{
-				throw new AlreadyExistsException('По указанному пути "'.$destination.'" уже существует ресурс.');
-			}
+            if ( ! is_writable(dirname($destination)))
+            {
+                throw new OutOfBoundsException('Forbidden to write to the directory where the file should be located');
+            }
 
-			if ( ! is_writable(dirname($destination)))
-			{
-				throw new \OutOfBoundsException('Запрещена запись в директорию, в которой должен быть расположен файл.');
-			}
+            $destination = $streamFactory->createStreamFromFile($destination, 'w+b');
+        }
+        else if (is_resource($destination)) // to file handler
+        {
+            $destination = $streamFactory->createStreamFromResource($destination);
+        }
+        else if ($destination instanceof StreamInterface) // It will be the same object. As psr-7 stream
+        {
+            if ( ! $destination->isWritable())
+            {
+                throw new OutOfBoundsException('The file descriptor must be opened with write permissions.');
+            }
+        }
+        else
+        {
+            throw new \InvalidArgumentException('The download path is illegitimate');
+        }
 
-			$destination = new Stream($destination, 'w+b');
-		}
-		else
-		{
-			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
-		}
+        $response = $this->client->sendRequest($this->client->createRequest('GET', $this->getLink()));
+        $stream = $response->getBody();
 
-		$response = $this->parent->sendRequest(new Request($this->getLink(), 'GET'));
+        while ( ! $stream->eof()) // Write the received data
+        {
+            $destination->write($stream->read(16384));
+        }
 
-		if ($response->getStatusCode() == 200)
-		{
-			$stream = $response->getBody();
+        $stream->close();
+        $this->emit('downloaded', $this, $destination, $this->client);
 
-			if ($check_hash)
-			{
-				$ctx = hash_init('md5');
-
-				while ( ! $stream->eof())
-				{
-					$read_data = $stream->read(1048576);
-					$destination->write($read_data);
-
-					hash_update($ctx, $read_data);
-				}
-			}
-			else
-			{
-				while ( ! $stream->eof())
-				{
-					$destination->write($stream->read(16384));
-				}
-			}
-
-			$stream->close();
-			$this->emit('downloaded', $this, $destination, $this->parent);
-			$this->parent->emit('downloaded', $this, $destination, $this->parent);
-
-			if ($destination_type == 'object')
-			{
-				return $destination;
-			}
-			else if ($check_hash && $destination_type == 'string' && $this->isFile())
-			{
-				if (hash_final($ctx, false) !== $this->get('md5', null))
-				{
-					throw new \RangeException('Ресурс скачан, но контрольные суммы различаются.');
-				}
-			}
-
-			return $destination->getSize();
-		}
-
-		return false;
+        return $destination;
 	}
 
-	/**
-	 * Этот файл или такой же находится на моём диске
-	 * Метод требует Access Token
-	 *
-	 * @return    boolean
-	 */
-	public function hasEqual()
+    /**
+     * Save a public resource to the Download folder. If `$toFolderPath` Folder does not exist an exception is thrown.
+     *
+     * @param string|Closed $filename     [optional] The name under which the resource will be saved in the folder
+     * @param string        $nestedPath   Path to the copied resource in the public folder.
+     * @param string        $toFolderPath Path to the folder where the resource will be saved. By default, "Downloads"
+     *
+     * @return Operation|Closed
+     * @throws Exception
+     * @throws \Exception
+     */
+	public function save($filename = null, string $nestedPath = null, string $toFolderPath = null)
 	{
-		if ($this->isExists() && ($path = $this->get('name')))
-		{
-			try
-			{
-				return $this->parent->getResource(((string) $this->get('path')).'/'.$path)
-				                    ->get('md5', false) === $this->get('md5');
-			}
-			catch (\Exception $exc)
-			{
+        $parameters = [
+            'public_key' => $this->getPublicKey()
+        ];
 
-			}
-		}
+        if ($filename instanceof Closed) // The name from private resource
+        {
+            $filename = substr(strrchr($filename->getResourcePath(), '/'), 1);
+        }
 
-		return false;
-	}
+        if ($filename != null && is_string($filename)) // The name as string
+        {
+            if (trim($filename) == '')
+            {
+                throw new InvalidArgumentException('The name under which the resource will be saved cannot be empty.');
+            }
 
-	/**
-	 * Сохранение публичного файла в «Загрузки» или отдельный файл из публичной папки
-	 *
-	 * @param    string $name Имя, под которым файл следует сохранить в папку «Загрузки»
-	 * @param    string $path Путь внутри публичной папки.
-	 *
-	 * @return    mixed
-	 */
-	public function save($name = null, $path = null)
-	{
-		$parameters = [];
+            $parameters['name'] = $filename;
+        }
 
-		/**
-		 * @var mixed   $name Имя, под которым файл следует сохранить в папку «Загрузки»
-		 */
-		if (is_string($name))
-		{
-			$parameters['name'] = $name;
-		}
-		else if ($name instanceof Closed)
-		{
-			$parameters['name'] = substr(strrchr($name->getPath(), '/'), 1);
-		}
+        if (is_string($nestedPath) && trim($nestedPath) != '') // Path in the public folder
+        {
+            $parameters['path'] = $nestedPath;
+        }
 
-		/**
-		 * @var string  $path (необязательный)
-		 * Путь внутри публичной папки. Следует указать, если в значении параметра public_key передан
-		 * ключ публичной папки, в которой находится нужный файл.
-		 * Путь в значении параметра следует кодировать в URL-формате.
-		 */
-		if (is_string($path))
-		{
-			$parameters['path'] = $path;
-		}
-		else if ($this->getResourcePath() !== null)
-		{
-			$parameters['path'] = $this->getResourcePath();
-		}
+        if (is_string($toFolderPath) && trim($toFolderPath) != '') // Where the resource will be saved
+        {
+            $parameters['save_path'] = $toFolderPath;
+        }
 
-		/**
-		 * Если к моменту ответа запрос удалось обработать без ошибок, API отвечает кодом 201 Created и возвращает
-		 * ссылку на сохраненный файл в теле ответа (в объекте Link).
-		 * Если операция сохранения была запущена, но еще не завершилась, Яндекс.Диск отвечает кодом 202 Accepted.
-		 */
-		$response = $this->parent->sendRequest((new Request($this->uri->withPath($this->uri->getPath()
-			.'public/resources/save-to-disk')
-		                                                       ->withQuery(http_build_query([
-					'public_key' => $this->getPublicKey()
-				] + $parameters, null, '&')), 'POST')));
+        $request = $this->client->createRequest('POST', $this->client->createUri('/public/resources/save-to-disk')
+            ->withQuery(http_build_query($parameters)));
 
-		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
-		{
-			$response = json_decode($response->getBody(), true);
+        try
+        {
+            $response = $this->client->sendRequest($request);
 
-			if (isset($response['operation']))
-			{
-				$response['operation'] = $this->parent->getOperation($response['operation']);
-				$this->emit('operation', $response['operation'], $this, $this->parent);
-				$this->parent->emit('operation', $response['operation'], $this, $this->parent);
+            // 202 The operation is performed asynchronously
+            // https://cloud-api.yandex.net/v1/disk/operations/<identifier>
+            if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
+            {
+                $response = json_decode($response->getBody(), true);
 
-				return $response['operation'];
-			}
+                if (isset($response['operation']))
+                {
+                    $response['operation'] = $this->client->getOperation($response['operation']);
+                    $this->emit('operation', $response['operation'], $this, $this->client);
+                    $this->client->emit('operation', $response['operation'], $this, $this->client);
 
-			if (isset($response['href']))
-			{
-				parse_str((new Uri($response['href']))->getQuery(), $path);
+                    return $response['operation'];
+                }
 
-				if (isset($path['path']))
-				{
-					return $this->parent->getResource($path['path']);
-				}
-			}
-		}
+                if (isset($response['href']))
+                {
+                    parse_str(($this->client->createUri($response['href']))->getQuery(), $result);
 
-		return false;
+                    if (isset($result['path']))
+                    {
+                        return $this->client->getResource($result['path']);
+                    }
+                }
+            }
+        }
+        catch (Exception $exception)
+        {
+            throw $exception;
+        }
+
+        throw new \Exception('Unrecognized error'); // @todo
 	}
 
 	/**
 	 * Устанавливает путь внутри публичной папки
-	 *
+	 * Удалить
 	 * @param string $path
 	 *
 	 * @return $this
@@ -377,7 +315,7 @@ class Opened extends AbstractResource
      */
     protected function getRawContents(): array
     {
-var_dump(__METHOD__);
+
         $request = $this->client->createRequest('GET',
             $this->client->createUri('/public/resources')
                 ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [

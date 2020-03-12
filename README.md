@@ -1217,17 +1217,6 @@ $publicResource->download($stream);
 
 var_dump($stream->getSize());
 ```
-
-### 1.3.9.4. Есть ли доступ к этому файлу от имени владельца.
-
-/**
-	 * Этот файл или такой же находится на моём диске
-	 * Метод требует Access Token
-	 *
-	 * @return    boolean
-	 */
-	 
-	 public function hasEqual()
 	 
 ### 1.3.9.5. Сохранение публичного файла в «Загрузки».
 
