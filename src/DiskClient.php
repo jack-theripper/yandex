@@ -1,29 +1,25 @@
 <?php
-
 /**
- * Часть библиотеки для работы с сервисами Яндекса
+ * This file is part of the arhitector/yandex-disk library.
  *
- * @package    Arhitector\Yandex
- * @version    2.0
- * @author     Arhitector
- * @license    MIT License
- * @copyright  2016 Arhitector
- * @link       https://github.com/jack-theripper
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
-
 namespace Arhitector\Yandex;
 
 use Arhitector\Yandex\Client\AbstractClient;
 use Arhitector\Yandex\Client\Container\ContainerTrait;
-use Arhitector\Yandex\Client\Exception\ForbiddenException;
-use Arhitector\Yandex\Client\Exception\UnauthorizedException;
 use Arhitector\Yandex\Client\Exception\UnsupportedException;
 use Arhitector\Yandex\Client\HttpClientTrait;
 use Arhitector\Yandex\Client\OAuth;
 use Arhitector\Yandex\Client\OAuthAuthentication;
 use Arhitector\Yandex\Disk\Operation;
 use Arhitector\Yandex\Disk\Resource\Opened;
-use Arhitector\Yandex\Entity\DiskTrait;
+use Arhitector\Yandex\Entity\Disk as DiskEntity;
+use Arhitector\Yandex\Entity\Link;
+use Arhitector\Yandex\Entity\PublicResource;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
 use Psr\Http\Client\ClientInterface;
@@ -37,7 +33,7 @@ use Zend\Diactoros\Uri;
  * The entry point for working with the disk.
  *
  * @package Arhitector\Yandex
- * @mixin DiskTrait
+ * @mixin DiskEntity
  */
 class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggregate, \Countable*/
 {
@@ -59,6 +55,11 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @var string[] A list identifiers of operations per session
      */
     protected $operations = [];
+
+    /**
+     * @var DiskEntity
+     */
+    protected $entity;
 
     /**
      * @var    string    для обращения к API требуется маркер доступа
@@ -113,6 +114,20 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     public function getAccessToken(): string
     {
         return (string) $this->accessToken;
+    }
+
+    /**
+     * @return DiskEntity
+     * @throws UnsupportedException
+     */
+    public function getEntity(): DiskEntity
+    {
+        if ( ! $this->entity)
+        {
+            $this->entity = new DiskEntity($this->toArray());
+        }
+
+        return $this->entity;
     }
 
     /**
@@ -233,11 +248,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
 
         return $this;
     }
-
-
-
-
-
 
     /**
      * Работа с ресурсами на диске
@@ -520,16 +530,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
         return $this->operations;
     }
 
-
-    	protected function authentication(RequestInterface $request)
-    	{
-    		if ($this->tokenRequired)
-    		{
-    			return $request->withHeader('Authorization', sprintf('OAuth %s', 'AgAAAAAWBdH4AANc6AXecIgRP0oyifkXo5SRW4o'));
-    		}
-
-    		return $request;
-    	}
     /**
      * Этот экземпляр используется в качестве обёртки
      *
