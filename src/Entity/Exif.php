@@ -12,27 +12,19 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Addresses of system folders in the user's Disk.
+ * Media file metadata (EXIF).
  *
  * @package Arhitector\Yandex\Entity
  */
-class SystemFolders extends Entity
+class Exif extends Entity
 {
 
     /**
-     * @return string Path to the downloads folder
+     * @return string Shooting date
      */
-    public function getDownloads(): string
+    public function getDateTime(): string
     {
-        return $this->get('downloads');
-    }
-
-    /**
-     * @return string Path to the applications folder
-     */
-    public function getApplications(): string
-    {
-        return $this->get('applications');
+        return $this->get('date_time');
     }
 
 }

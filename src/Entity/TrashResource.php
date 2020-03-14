@@ -12,11 +12,11 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Public file or folder.
+ * Contents of the trash.
  *
  * @package Arhitector\Yandex\Entity
  */
-class PublicResource extends Entity
+class TrashResource extends Entity
 {
 
     /**
@@ -24,14 +24,13 @@ class PublicResource extends Entity
      */
     protected $objectMap = [
         'share'       => ShareInfo::class,
-        'owner'       => UserPublicInformation::class,
-        '_embedded'   => PublicResourceList::class,
+        '_embedded'   => TrashResourceList::class,
         'exif'        => Exif::class,
         'comment_ids' => CommentIds::class
     ];
 
     /**
-     * @return string The verification status of antivirus
+     * @return string Статус проверки антивирусом
      */
     public function getAntivirusStatus(): string
     {
@@ -39,15 +38,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return int Public resource view count
-     */
-    public function getViewsCount(): int
-    {
-        return $this->get('views_count');
-    }
-
-    /**
-     * @return string Resource identifier
+     * @return string Идентификатор ресурса
      */
     public function getResourceId(): string
     {
@@ -55,17 +46,15 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return ShareInfo Information about the shared folder
+     * @return ShareInfo Информация об общей папке
      */
     public function getShare(): ShareInfo
     {
-        return $this->get('share', function () {
-            return new ShareInfo();
-        });
+        return $this->get('share');
     }
 
     /**
-     * @return string URL for downloading the file
+     * @return string URL для скачивания файла
      */
     public function getFile(): string
     {
@@ -73,17 +62,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return UserPublicInformation Owner of a published resource
-     */
-    public function getOwner(): UserPublicInformation
-    {
-        return $this->get('owner', function () {
-            return new UserPublicInformation();
-        });
-    }
-
-    /**
-     * @return int File size
+     * @return int Размер файла
      */
     public function getSize(): int
     {
@@ -91,7 +70,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Date when the photo or video file was created
+     * @return string Дата создания фото или видео файла
      */
     public function getPhotosliceTime(): string
     {
@@ -99,27 +78,39 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return PublicResourceList List of nested resources
+     * @return TrashResourceList Список вложенных ресурсов
      */
-    public function getEmbedded(): PublicResourceList
+    public function getEmbedded(): TrashResourceList
     {
-        return $this->get('_embedded', function () {
-            return new PublicResourceList();
-        });
+        return $this->get('_embedded');
     }
 
     /**
-     * @return Exif Media file metadata (EXIF)
+     * @return Exif Метаданные медиафайла (EXIF)
      */
     public function getExif(): Exif
     {
-        return $this->get('exif', function () {
-            return new Exif();
-        });
+        return $this->get('exif');
     }
 
     /**
-     * @return string Media file type that was recognized by the disk
+     * @return object Пользовательские атрибуты ресурса
+     */
+    public function getCustomProperties(): object
+    {
+        return $this->get('custom_properties');
+    }
+
+    /**
+     * @return string Путь откуда был удалён ресурс
+     */
+    public function getOriginPath(): string
+    {
+        return $this->get('origin_path');
+    }
+
+    /**
+     * @return string Определённый Диском тип файла
      */
     public function getMediaType(): string
     {
@@ -127,7 +118,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string SHA256-hash
+     * @return string SHA256-хэш
      */
     public function getSha256(): string
     {
@@ -135,7 +126,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string The type
+     * @return string Тип
      */
     public function getType(): string
     {
@@ -143,7 +134,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string MIME file type
+     * @return string MIME-тип файла
      */
     public function getMimeType(): string
     {
@@ -151,7 +142,23 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Public URL
+     * @return int Ревизия Диска в которой этот ресурс был изменён последний раз
+     */
+    public function getRevision(): int
+    {
+        return $this->get('revision');
+    }
+
+    /**
+     * @return string Дата добавления в корзину(для ресурсов в корзине)
+     */
+    public function getDeleted(): string
+    {
+        return $this->get('deleted');
+    }
+
+    /**
+     * @return string Публичный URL
      */
     public function getPublicUrl(): string
     {
@@ -159,7 +166,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Path of the published resource
+     * @return string Путь к ресурсу
      */
     public function getPath(): string
     {
@@ -167,7 +174,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string MD5-hash
+     * @return string MD5-хэш
      */
     public function getMd5(): string
     {
@@ -175,7 +182,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Published resource key
+     * @return string Ключ опубликованного ресурса
      */
     public function getPublicKey(): string
     {
@@ -183,7 +190,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Url of the preview file
+     * @return string URL превью файла
      */
     public function getPreview(): string
     {
@@ -191,7 +198,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string The name
+     * @return string Имя
      */
     public function getName(): string
     {
@@ -199,7 +206,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Date of created
+     * @return string Дата создания
      */
     public function getCreated(): string
     {
@@ -207,7 +214,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Date of modified
+     * @return string Дата изменения
      */
     public function getModified(): string
     {
@@ -215,13 +222,11 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return CommentIds Comment IDs
+     * @return CommentIds Идентификаторы комментариев
      */
     public function getCommentIds(): CommentIds
     {
-        return $this->get('comment_ids', function () {
-            return new CommentIds();
-        });
+        return $this->get('comment_ids');
     }
 
 }

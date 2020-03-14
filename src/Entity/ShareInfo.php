@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * This file is part of the arhitector/yandex-disk library.
+ *
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Arhitector\Yandex\Entity;
 
 use Arhitector\Yandex\Entity;
@@ -17,7 +24,7 @@ class ShareInfo extends Entity
      */
     public function isRoot(): bool
     {
-        return $this->get('is_root');
+        return $this->get('is_root', false);
     }
 
     /**
@@ -25,7 +32,7 @@ class ShareInfo extends Entity
      */
     public function isOwned(): bool
     {
-        return $this->get('is_owned');
+        return $this->get('is_owned', false);
     }
 
     /**

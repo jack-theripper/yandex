@@ -12,35 +12,27 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Link to download the resource.
+ * Comment identifiers.
  *
  * @package Arhitector\Yandex\Entity
  */
-class Link extends Entity
+class CommentIds extends Entity
 {
 
     /**
-     * @return string URL
+     * @return string The ID of the comments for private resources
      */
-    public function getHref(): string
+    public function getPrivateResource(): string
     {
-        return $this->get('href');
+        return $this->get('private_resource');
     }
 
     /**
-     * @return string HTTP method
+     * @return string The ID of the comments for public resources
      */
-    public function getMethod(): string
+    public function getPublicResource(): string
     {
-        return $this->get('method');
-    }
-
-    /**
-     * @return bool Flag for a templated URL
-     */
-    public function getTemplated(): bool
-    {
-        return $this->get('templated');
+        return $this->get('public_resource');
     }
 
 }

@@ -12,11 +12,11 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Public file or folder.
+ * The private resource
  *
  * @package Arhitector\Yandex\Entity
  */
-class PublicResource extends Entity
+class Resource extends Entity
 {
 
     /**
@@ -24,8 +24,7 @@ class PublicResource extends Entity
      */
     protected $objectMap = [
         'share'       => ShareInfo::class,
-        'owner'       => UserPublicInformation::class,
-        '_embedded'   => PublicResourceList::class,
+        '_embedded'   => ResourceList::class,
         'exif'        => Exif::class,
         'comment_ids' => CommentIds::class
     ];
@@ -39,15 +38,7 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return int Public resource view count
-     */
-    public function getViewsCount(): int
-    {
-        return $this->get('views_count');
-    }
-
-    /**
-     * @return string Resource identifier
+     * @return string Public resource view count
      */
     public function getResourceId(): string
     {
@@ -59,7 +50,7 @@ class PublicResource extends Entity
      */
     public function getShare(): ShareInfo
     {
-        return $this->get('share', function () {
+        return $this->get('share', function() {
             return new ShareInfo();
         });
     }
@@ -70,16 +61,6 @@ class PublicResource extends Entity
     public function getFile(): string
     {
         return $this->get('file');
-    }
-
-    /**
-     * @return UserPublicInformation Owner of a published resource
-     */
-    public function getOwner(): UserPublicInformation
-    {
-        return $this->get('owner', function () {
-            return new UserPublicInformation();
-        });
     }
 
     /**
@@ -99,12 +80,12 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return PublicResourceList List of nested resources
+     * @return ResourceList List of nested resources
      */
-    public function getEmbedded(): PublicResourceList
+    public function getEmbedded(): ResourceList
     {
         return $this->get('_embedded', function () {
-            return new PublicResourceList();
+            return new ResourceList();
         });
     }
 
@@ -119,6 +100,14 @@ class PublicResource extends Entity
     }
 
     /**
+     * @return object Custom attributes of resource
+     */
+    public function getCustomProperties(): object
+    {
+        return $this->get('custom_properties');
+    }
+
+    /**
      * @return string Media file type that was recognized by the disk
      */
     public function getMediaType(): string
@@ -127,11 +116,11 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string SHA256-hash
+     * @return string Url of the preview file
      */
-    public function getSha256(): string
+    public function getPreview(): string
     {
-        return $this->get('sha256');
+        return $this->get('preview');
     }
 
     /**
@@ -183,11 +172,11 @@ class PublicResource extends Entity
     }
 
     /**
-     * @return string Url of the preview file
+     * @return string SHA256-hash
      */
-    public function getPreview(): string
+    public function getSha256(): string
     {
-        return $this->get('preview');
+        return $this->get('sha256');
     }
 
     /**

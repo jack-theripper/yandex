@@ -12,27 +12,26 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Addresses of system folders in the user's Disk.
+ * List of nested resources.
  *
  * @package Arhitector\Yandex\Entity
  */
-class SystemFolders extends Entity
+class LastUploadedResourceList extends Entity
 {
 
     /**
-     * @return string Path to the downloads folder
+     * @var string[] The objects references map.
      */
-    public function getDownloads(): string
-    {
-        return $this->get('downloads');
-    }
+    protected $objectMap = [
+        'items' => Resource::class
+    ];
 
     /**
-     * @return string Path to the applications folder
+     * @return int Number of elements per page
      */
-    public function getApplications(): string
+    public function getLimit(): int
     {
-        return $this->get('applications');
+        return $this->get('limit');
     }
 
 }

@@ -12,12 +12,20 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Link to download the resource.
+ * Link to upload the file.
  *
  * @package Arhitector\Yandex\Entity
  */
-class Link extends Entity
+class ResourceUploadLink extends Entity
 {
+
+    /**
+     * @return string ID of the file upload operation
+     */
+    public function getOperationId(): string
+    {
+        return $this->get('operation_id');
+    }
 
     /**
      * @return string URL

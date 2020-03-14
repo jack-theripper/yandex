@@ -12,27 +12,19 @@ namespace Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity;
 
 /**
- * Addresses of system folders in the user's Disk.
+ * The status of the asynchronous operation.
  *
  * @package Arhitector\Yandex\Entity
  */
-class SystemFolders extends Entity
+class OperationStatus extends Entity
 {
 
     /**
-     * @return string Path to the downloads folder
+     * @return string The status of a operation
      */
-    public function getDownloads(): string
+    public function getStatus(): string
     {
-        return $this->get('downloads');
-    }
-
-    /**
-     * @return string Path to the applications folder
-     */
-    public function getApplications(): string
-    {
-        return $this->get('applications');
+        return $this->get('status');
     }
 
 }
