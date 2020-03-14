@@ -31,11 +31,6 @@ abstract class AbstractResource /*implements \ArrayAccess*/
     protected $client;
 
     /**
-     * @var string Identifier or path of the resource on the disk.
-     */
-    //protected $resourcePath;
-
-    /**
      * @var Entity A model that represents information about a resource.
      */
     protected $entity;
@@ -44,16 +39,6 @@ abstract class AbstractResource /*implements \ArrayAccess*/
      * @var string[]
      */
     protected $parametersAllowed = ['limit', 'offset', 'preview_crop', 'preview_size', 'sort'];
-
-    /**
-     * Returns identifier or path of the resource on the disk.
-     *
-     * @return string
-     */
-//    public function getResourcePath(): string
-//    {
-//        return (string) $this->resourcePath;
-//    }
 
     /**
      * Checks whether the resource is a file.
