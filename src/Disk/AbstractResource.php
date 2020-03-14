@@ -106,6 +106,20 @@ abstract class AbstractResource /*implements \ArrayAccess*/
     }
 
     /**
+     * Sets a entity object
+     *
+     * @param Entity $entity [optional] New entity object or `null` to clear current entity
+     *
+     * @return static
+     */
+    protected function setEntity(?Entity $entity): self
+    {
+        $this->entity = $entity;
+
+        return $this;
+    }
+
+    /**
      * Getting and returns the current entity. If needed it will be refresh from api.
      *
      * @return Entity
