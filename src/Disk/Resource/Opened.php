@@ -315,6 +315,7 @@ class Opened extends AbstractResource
 
             if ( ! empty($response))
             {
+                $this->isModified = false;
                 $this->entity = new PublicResource($response);
             }
         }
