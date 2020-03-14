@@ -127,19 +127,22 @@ class Entity implements ArrayAccess
     {
         foreach ($elements as $index => $element)
         {
-            if (isset($this->objectMap[$index]))
+            if ( ! isset($this->objectMap[$index]))
+            {
+                continue;
+            }
+
+            if (is_array($element) && count($element) > 0 && $element === array_values($element)) // sequential array
+            {
+                foreach ($element as $key => $value)
+                {
+                    $elements[$index][$key] = new $this->objectMap[$index]($value ?: []);
+                }
+            }
+            else
             {
                 $elements[$index] = new $this->objectMap[$index]($element ?: []);
             }
-
-//            if (is_array($data[$index]))
-//            {
-//                foreach ((array)$data[$index] as $k2 => $v) {
-//                    $data[$index][$k2] = new static::$objectMap[$index]($v);
-//                }
-           // } else {
-                //$elements[$index] = new $this->objectMap[$index]($element ?: []);
-          //  }
         }
 
         return $elements;
