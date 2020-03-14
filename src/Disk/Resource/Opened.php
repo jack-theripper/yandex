@@ -16,8 +16,10 @@ use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Entity;
 use Arhitector\Yandex\Entity\PublicResource;
 use Arhitector\Yandex\Exception;
+use EmptyIterator;
 use Http\Discovery\Psr17FactoryDiscovery;
 use InvalidArgumentException;
+use Iterator;
 use OutOfBoundsException;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
@@ -56,6 +58,28 @@ class Opened extends AbstractResource
 
         $this->client = $client;
         $this->publicKey = (string) $url_or_public_key;
+    }
+
+    /**
+     * Returns nested resources transformed to `Opened` objects
+     *
+     * @return Opened[]|Iterator
+     */
+    public function getItems(): Iterator
+    {
+        if ( ! $this->isDir())
+        {
+            return new EmptyIterator();
+        }
+
+        foreach ($this->getEmbedded()->getItems() as $entity)
+        {
+            yield (new self($this->getPublicKey(), $this->client))
+                ->setPublicPath($entity->getPath())
+                ->setEntity($entity->getType() == 'file' ? $entity : null);
+        }
+
+        return null;
     }
 
     /**
@@ -293,6 +317,20 @@ class Opened extends AbstractResource
 	    return $this->client->createUri('https://docviewer.yandex.ru/')
             ->withQuery(http_build_query($parameters));
 	}
+
+    /**
+     * Sets a new public path value
+     *
+     * @param string $publicPath
+     *
+     * @return self
+     */
+    protected function setPublicPath(string $publicPath): self
+    {
+        $this->publicPath = $publicPath;
+
+        return $this;
+    }
 
     /**
      * @return array Make a request to the API and return all the received data how it is.
