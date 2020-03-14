@@ -42,7 +42,7 @@ class Entity implements ArrayAccess
     }
 
     /**
-     * @return int Current revision of the Drive.
+     * @return int Current revision of the disk or the disk revision which this resource was last modified.
      */
     public function getRevision(): int
     {
