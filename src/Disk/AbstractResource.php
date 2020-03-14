@@ -1,14 +1,11 @@
 <?php
-
 /**
- * Часть библиотеки для работы с сервисами Яндекса
+ * This file is part of the arhitector/yandex-disk library.
  *
- * @package    Arhitector\Yandex\Disk
- * @version    2.0
- * @author     Arhitector
- * @license    MIT License
- * @copyright  2016 Arhitector
- * @link       https://github.com/jack-theripper
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 namespace Arhitector\Yandex\Disk;
 
@@ -36,7 +33,7 @@ abstract class AbstractResource /*implements \ArrayAccess*/
     /**
      * @var string Identifier or path of the resource on the disk.
      */
-    protected $resourcePath;
+    //protected $resourcePath;
 
     /**
      * @var Entity A model that represents information about a resource.
@@ -53,10 +50,10 @@ abstract class AbstractResource /*implements \ArrayAccess*/
      *
      * @return string
      */
-    public function getResourcePath(): string
-    {
-        return $this->resourcePath;
-    }
+//    public function getResourcePath(): string
+//    {
+//        return (string) $this->resourcePath;
+//    }
 
     /**
      * Checks whether the resource is a file.

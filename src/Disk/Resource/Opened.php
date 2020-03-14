@@ -9,7 +9,6 @@
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use Arhitector\Yandex\Disk\Operation;
@@ -21,6 +20,7 @@ use Http\Discovery\Psr17FactoryDiscovery;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * It is a public resource.
@@ -37,6 +37,11 @@ class Opened extends AbstractResource
     protected $publicKey;
 
     /**
+     * @var string Path to the resource in the public folder.
+     */
+    protected $publicPath;
+
+    /**
      * It is a public resource.
      *
      * @param mixed $url_or_public_key URL-address or published resource key.
@@ -44,25 +49,13 @@ class Opened extends AbstractResource
      */
     public function __construct($url_or_public_key, DiskClient $client)
     {
-        if (is_array($url_or_public_key))
-        {
-            if (empty($url_or_public_key['public_key']))
-            {
-                throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
-            }
-
-//            $this->setContents($url_or_public_key);
-            $url_or_public_key = $url_or_public_key['public_key'];
-//            $this->store['docviewer'] = $this->createDocViewerUrl();
-        }
-
         if ( ! is_scalar($url_or_public_key) || trim($url_or_public_key) == '')
         {
             throw new InvalidArgumentException('The "public_key" parameter must not be an empty string.');
         }
 
-        $this->publicKey = (string) $url_or_public_key;
         $this->client = $client;
+        $this->publicKey = (string) $url_or_public_key;
     }
 
     /**
@@ -73,6 +66,16 @@ class Opened extends AbstractResource
     public function getPublicKey(): string
     {
         return $this->publicKey;
+    }
+
+    /**
+     * Returns path to the resource in the public folder.
+     *
+     * @return string
+     */
+    public function getPublicPath(): string
+    {
+        return $this->publicPath ?? '/';
     }
 
     /**
@@ -105,7 +108,7 @@ class Opened extends AbstractResource
 
         $parameters = [
             'public_key' => $this->getPublicKey(),
-            'path'       => $this->getResourcePath()
+            'path'       => $this->getPublicPath() // should be the default "/" (slash)
         ];
 
         $request = $this->client->createRequest('GET', $this->client->createUri('/public/resources/download')
@@ -117,7 +120,7 @@ class Opened extends AbstractResource
 
             if ($response->getStatusCode() == 200 && ($data = json_decode($response->getBody(), true)))
             {
-                return $data['href'] ?? null;
+                return $data['href'] ?? '';
             }
 
             return null;
@@ -205,7 +208,8 @@ class Opened extends AbstractResource
 
         if ($filename instanceof Closed) // The name from private resource
         {
-            $filename = substr(strrchr($filename->getResourcePath(), '/'), 1);
+            // @todo
+            //$filename = substr(strrchr($filename->getResourcePath(), '/'), 1);
         }
 
         if ($filename != null && is_string($filename)) // The name as string
@@ -270,44 +274,24 @@ class Opened extends AbstractResource
 	}
 
 	/**
-	 * Устанавливает путь внутри публичной папки
-	 * Удалить
-	 * @param string $path
+	 * Returns a link to view the document
 	 *
-	 * @return $this
+	 * @return UriInterface
 	 */
-	public function setPath($path)
+	public function getDocviewer(): UriInterface
 	{
-		if ( ! is_scalar($path))
-		{
-			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
-		}
+	    if ( ! $this->isFile())
+        {
+            return null;
+        }
 
-		$this->resourcePath = (string) $path;
+        $parameters = [
+            'url'  => 'ya-disk-public://'.$this->getPublicKey(),
+            'name' => $this->getName()
+        ];
 
-		return $this;
-	}
-
-	/**
-	 * Получает ссылку для просмотра документа.
-	 *
-	 * @return bool|string
-	 * @throws \InvalidArgumentException
-	 */
-	protected function createDocViewerUrl()
-	{
-//		if ($this->isFile())
-//		{
-//			$docviewer = [
-//				'name' => $this->get('name'),
-//				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
-//			];
-//
-//			return (string) (new Uri('https://docviewer.yandex.ru/'))
-//				->withQuery(http_build_query($docviewer, null, '&'));
-//		}
-
-		return false;
+	    return $this->client->createUri('https://docviewer.yandex.ru/')
+            ->withQuery(http_build_query($parameters));
 	}
 
     /**
@@ -315,11 +299,11 @@ class Opened extends AbstractResource
      */
     protected function getRawContents(): array
     {
-
         $request = $this->client->createRequest('GET',
             $this->client->createUri('/public/resources')
                 ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-                    'public_key' => $this->getPublicKey()
+                    'public_key' => $this->getPublicKey(),
+                    'path' => $this->getPublicPath()
                 ]), null, '&'))
         );
 
@@ -329,33 +313,13 @@ class Opened extends AbstractResource
         {
             $response = json_decode($response->getBody(), true);
 
-            var_dump($response);
             if ( ! empty($response))
             {
-                $this->isModified = false;
-
-                if (isset($response['_embedded']))
-                {
-                    $response = array_merge($response, $response['_embedded']);
-                }
-
-                unset($response['_links'], $response['_embedded']);
-
-                if (isset($response['items']))
-                {
-                    $response['items'] = new Container\Collection(array_map(function($item) {
-                        return new self($item, $this->client);
-                    }, $response['items']));
-                }
-
-                $response['docviewer'] = $this->createDocViewerUrl();
-
                 $this->entity = new PublicResource($response);
             }
         }
 
         return $response;
     }
-
 
 }
