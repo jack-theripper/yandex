@@ -34,7 +34,7 @@ abstract class AbstractClient implements RequestFactoryInterface, UriFactoryInte
     /**
      * The base address of API. The default path component of the URI.
      */
-    const API_BASE_PATH = '';
+    const API_BASE_PATH = null;
 
     /**
      * @var ClientInterface The HTTP-client that is used.
@@ -61,7 +61,7 @@ abstract class AbstractClient implements RequestFactoryInterface, UriFactoryInte
         $this->requestFactory = Psr17FactoryDiscovery::findRequestFactory();
         $this->uriFactory = Psr17FactoryDiscovery::findUrlFactory();
         $this->httpClient = new PluginClient($httpClient ?? Psr18ClientDiscovery::find(), [
-            new BaseUriPlugin($this->createUri(static::API_BASE_PATH)), // Ensure the base path for api
+            new BaseUriPlugin($this->createUri(static::API_BASE_PATH ?: '')), // Ensure the base path for api
             new RedirectPlugin(), // Ensure the redirects if needed
             new ResponseErrorPlugin(), // Transform response to an error if possible
         ]);
