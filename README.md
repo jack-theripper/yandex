@@ -321,28 +321,9 @@ $collection->toArray();
 $resource->toArray();
 ```
 
-### 1.3.3. Метод toObject
+### 1.3.3. ~~Метод toObject~~
 
-Получает содержимое всего контейнера в виде объекта.
-
-> Примечание: метод не является рекурсивным, это означает, что вложенные ресурсы (например, файлы в папке) не будут преобразованы в объект, а результатом будет коллекция объектов.
-
-```php
-public stdClass Объект::toObject([array $allowed = null])
-```
-
-`$allowed` - получить только эти ключи.
-
-
-**Примеры**
-
-```php
-$disk->toObject();
-
-$collection->toObject();
-
-$resource->toObject(['name', 'type']);
-```
+Удалён
 
 ### 1.3.4. Метод getIterator
 
@@ -450,7 +431,7 @@ $resource->hasProperty('custom_properties'); // false
 $disk->toArray();
 ```
 
-Вернёт массив, примерно такого содержания. Метод `toObject` возвращает соответственно объект.
+Вернёт массив, примерно такого содержания.
 
 ```php
 array (size=5)
@@ -639,7 +620,6 @@ $resource->isExists(); // проверить, есть ли 'name'
 **Примеры**
 
 ```php
-$resource->toObject();
 
 $resource->get('items');
 

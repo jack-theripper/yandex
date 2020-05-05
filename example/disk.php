@@ -61,7 +61,7 @@ $disk->setAccessToken('');
 
 //$resource->download(__DIR__.'/image_downloaded.jpg'); // скачать файл с диска
 
-//var_dump($has, $resource->getProperties(), $resource->toObject());
+//var_dump($has, $resource->getProperties());
 //$resource = $disk->getPublishResource('https://yadi.sk/d/WSS6bK_ksQ5ck');
 //var_dump($resource->items->get(0)->getLink(), $resource->toArray());
 //var_dump($resource->download(__DIR__.'/down.zip', true));

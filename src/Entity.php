@@ -107,18 +107,6 @@ class Entity implements ArrayAccess
     }
 
     /**
-     * Returns all elements as object.
-     *
-     * @param string[] $allowed Returns only this elements.
-     *
-     * @return object
-     */
-    public function toObject(array $allowed = null)
-    {
-        return (object) $this->toArray($allowed);
-    }
-
-    /**
      * @param array $elements
      *
      * @return array
