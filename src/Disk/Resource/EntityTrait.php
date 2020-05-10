@@ -59,11 +59,16 @@ trait EntityTrait
     }
 
     /**
+     * Return an entity or create one.
+     *
      * @return Entity
      */
     protected function getOrCreateEntity(): Entity
     {
-        if ( ! $this->entity || $this->isModified())
+        // @todo
+        // The request should be modified? If so you need to update the Entity
+        // If the isModified method does not exist, the entity will never be updated
+        if ( ! $this->entity || (method_exists($this, 'isModified') && $this->isModified()))
         {
             $this->entity = $this->createEntity();
         }
