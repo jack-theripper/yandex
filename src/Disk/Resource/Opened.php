@@ -361,4 +361,19 @@ class Opened extends AbstractResource
         return $response;
     }
 
+    /**
+     * @inheritDoc
+     */
+    protected function updateAndCreateEntity(): Entity
+    {
+        // TODO: Implement updateAndCreateEntity() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function createEntity(): Entity
+    {
+        // TODO: Implement createEntity() method.
+    }
 }

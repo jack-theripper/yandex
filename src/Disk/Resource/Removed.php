@@ -1,117 +1,61 @@
 <?php
-
 /**
- * Часть библиотеки для работы с сервисами Яндекса
+ * This file is part of the arhitector/yandex-disk library.
  *
- * @package    Arhitector\Yandex\Disk\Resource
- * @version    2.0
- * @author     Arhitector
- * @license    MIT License
- * @copyright  2016 Arhitector
- * @link       https://github.com/jack-theripper
+ * (c) Dmitry Arhitector <dmitry.arhitector@yandex.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 namespace Arhitector\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Disk\AbstractResource;
-use Zend\Diactoros\Request;
+use Arhitector\Yandex\Entity;
+use Arhitector\Yandex\Entity\TrashResource;
+use InvalidArgumentException;
 
 /**
- * Ресурс в корзине.
- *
- * @property-read   string     $name
- * @property-read   string     $created
- * @property-read   string     $deleted
- * @property-read   array|null $custom_properties
- * @property-read   string     $origin_path
- * @property-read   string     $modified
- * @property-read   string     $media_type
- * @property-read   string     $resourcePath
- * @property-read   string     $md5
- * @property-read   string     $type
- * @property-read   string     $mime_type
- * @property-read   integer    $size
+ * It is a removed resource.
  *
  * @package Arhitector\Yandex\Disk\Resource
  */
 class Removed extends AbstractResource
 {
 
-	/**
-	 * Конструктор.
-	 *
-	 * @param string|array                   $path путь к ресурсу в корзине
-	 * @param \Arhitector\Yandex\DiskClient  $parent
-	 * @param \Psr\Http\Message\UriInterface $uri
-	 */
-	public function __construct($path, DiskClient $parent, \Psr\Http\Message\UriInterface $uri)
+    /**
+     * @var string Identifier or path of the resource on the disk.
+     */
+    protected $resourcePath;
+
+    /**
+     * It is a removed resource.
+     *
+     * @param string     $path
+     * @param DiskClient $client
+     */
+	public function __construct(string $path, DiskClient $client)
 	{
-		if (is_array($path))
-		{
-			if (empty($path['path']))
-			{
-				throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
-			}
-
-			$this->setContents($path);
-			$path = $path['path'];
-		}
-
-		if ( ! is_scalar($path))
-		{
-			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
-		}
+        if ( ! is_scalar($path) || trim($path) == '')
+        {
+            throw new InvalidArgumentException('The "path" parameter must not be an empty string.');
+        }
 
 		$this->resourcePath = (string) $path;
-		$this->client = $parent;
-		$this->uri = $uri;
+		$this->client = $client;
+
 		$this->setSort('created');
 	}
 
-	/**
-	 * Получает информацию о ресурсе
-	 *
-	 * @return    mixed
-	 */
-	public function toArray(array $allowed = null)
-	{
-		if ( ! $this->_toArray() || $this->isModified())
-		{
-			$response = $this->client->sendRequest((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
-					'path' => $this->getResourcePath()
-				]), null, '&')), 'GET')));
-
-			if ($response->getStatusCode() == 200)
-			{
-				$response = json_decode($response->getBody(), true);
-
-				if ( ! empty($response))
-				{
-					$this->isModified = false;
-
-					if (isset($response['_embedded']))
-					{
-						$response = array_merge($response, $response['_embedded']);
-					}
-
-					unset($response['_links'], $response['_embedded']);
-
-					if (isset($response['items']))
-					{
-						$response['items'] = new Container\Collection(array_map(function($item) {
-							return new self($item, $this->client, $this->uri);
-						}, $response['items']));
-					}
-
-					$this->setContents($response);
-				}
-			}
-		}
-
-		return $this->_toArray($allowed);
-	}
+    /**
+     * Returns identifier or path of the resource on the disk.
+     *
+     * @return string
+     */
+    public function getResourcePath(): string
+    {
+        return (string) $this->resourcePath;
+    }
 
 	/**
 	 *	Восстановление файла или папки из Корзины
@@ -175,20 +119,19 @@ class Removed extends AbstractResource
 	/**
 	 * Удаление файла или папки
 	 *
-	 * @return    mixed
+	 * @return mixed
 	 */
 	public function delete()
 	{
 		try
 		{
-			$response = $this->client->sendRequest(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                      ->withQuery(http_build_query([
-					'path' => $this->getResourcePath()
-				], null, '&')), 'DELETE'));
+		    $request = $this->client->createRequest('DELETE', $this->client->createUri('/trash/resources')
+                ->withQuery(http_build_query(['path' => $this->getResourcePath()])));
+			$response = $this->client->sendRequest($request);
 
 			if ($response->getStatusCode() == 202)
 			{
-				$this->setContents([]);
+				$this->setEntity(null); // clear entity
 				$response = json_decode($response->getBody(), true);
 
 				if ( ! empty($response['operation']))
@@ -210,5 +153,47 @@ class Removed extends AbstractResource
 			return false;
 		}
 	}
+
+    /**
+     * @inheritDoc
+     * @return Entity|TrashResource
+     */
+    public function getEntity(): TrashResource
+    {
+        if ( ! $this->entity || $this->isModified())
+        {
+            $this->entity = new TrashResource($this->getRawContents());
+        }
+
+        return $this->entity;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getRawContents(): array
+    {
+        $request = $this->client->createRequest('GET',
+            $this->client->createUri('/trash/resources')
+                ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+                    'path' => $this->getResourcePath()
+                ]), null, '&'))
+        );
+
+        $response = $this->client->sendRequest($request);
+
+        if ($response->getStatusCode() == 200)
+        {
+            $response = json_decode($response->getBody(), true);
+
+            if ( ! empty($response))
+            {
+                $this->isModified = false;
+                $this->entity = new TrashResource($response);
+            }
+        }
+
+        return $response;
+    }
 
 }

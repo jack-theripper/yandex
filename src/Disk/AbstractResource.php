@@ -9,6 +9,7 @@
  */
 namespace Arhitector\Yandex\Disk;
 
+use Arhitector\Yandex\Disk\Resource\EntityTrait;
 use Arhitector\Yandex\DiskClient;
 use Arhitector\Yandex\Entity;
 use Exception;
@@ -23,17 +24,12 @@ use RuntimeException;
  */
 abstract class AbstractResource /*implements \ArrayAccess*/
 {
-    use FilterTrait, EmitterTrait;
+    use FilterTrait, EmitterTrait, EntityTrait;
 
     /**
      * @var DiskClient The client that spawned the resource.
      */
     protected $client;
-
-    /**
-     * @var Entity A model that represents information about a resource.
-     */
-    protected $entity;
 
     /**
      * @var string[]
@@ -85,46 +81,6 @@ abstract class AbstractResource /*implements \ArrayAccess*/
 
         return false;
     }
-
-    /**
-     * Proxy wrapper over entity model.
-     *
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     *
-     * @throws RuntimeException
-     */
-    public function __call($name, $arguments)
-    {
-        if (method_exists($this->getEntity(), $name))
-        {
-            return call_user_func_array([$this->getEntity(), $name], $arguments);
-        }
-
-        throw new RuntimeException(sprintf('Call to undefined method %s::%s()', __CLASS__, $name));
-    }
-
-    /**
-     * Sets a entity object
-     *
-     * @param Entity $entity [optional] New entity object or `null` to clear current entity
-     *
-     * @return static
-     */
-    protected function setEntity(?Entity $entity): self
-    {
-        $this->entity = $entity;
-
-        return $this;
-    }
-
-    /**
-     * Getting and returns the current entity. If needed it will be refresh from api.
-     *
-     * @return Entity
-     */
-    abstract public function getEntity();
 
     /**
      * @return array Send a request to the API and return all the received data how it is.

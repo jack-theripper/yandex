@@ -16,6 +16,7 @@ use Arhitector\Yandex\Client\HttpClientTrait;
 use Arhitector\Yandex\Client\OAuth;
 use Arhitector\Yandex\Client\OAuthAuthentication;
 use Arhitector\Yandex\Disk\Operation;
+use Arhitector\Yandex\Disk\Resource\EntityTrait;
 use Arhitector\Yandex\Disk\Resource\Opened;
 use Arhitector\Yandex\Entity\Disk as DiskEntity;
 use Arhitector\Yandex\Entity\Link;
@@ -39,8 +40,8 @@ use Zend\Diactoros\Uri;
  */
 class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggregate, \Countable*/
 {
-    use ContainerTrait, EmitterTrait {
-        toArray as protected _toArray;
+    use /*ContainerTrait,*/ EmitterTrait, EntityTrait {
+//        toArray as protected _toArray;
     }
 
     /**
@@ -117,51 +118,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     public function getAccessToken(): string
     {
         return (string) $this->accessToken;
-    }
-
-    /**
-     * @return DiskEntity
-     * @throws UnsupportedException
-     */
-    public function getEntity(): DiskEntity
-    {
-        if ( ! $this->entity)
-        {
-            $this->entity = new DiskEntity($this->toArray());
-        }
-
-        return $this->entity;
-    }
-
-    /**
-     * Retrieve information about the disc
-     *
-     * @param array $allowed
-     *
-     * @return array
-     */
-    public function toArray(array $allowed = null)
-    {
-        if ( true || ! $this->_toArray())
-        {
-            $response = $this->sendRequest($this->createRequest('GET', '/'));
-
-            if ($response->getStatusCode() == 200)
-            {
-                $response = json_decode($response->getBody(), true);
-
-                if ( ! is_array($response))
-                {
-                    throw new UnsupportedException('Получен не поддерживаемый формат ответа от API Диска.');
-                }
-
-                $this->setContents($response += [
-                    'free_space' => $response['total_space'] - $response['used_space']
-                ]);
-            }
-        }
-
-        return $this->_toArray($allowed);
     }
 
     /**
@@ -439,8 +395,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
         }))->setSort('created')->setLimit($limit, $offset);
     }
 
-
-
     /**
      * Последние загруженные файлы
      *
@@ -545,6 +499,49 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
         $this->tokenRequired = (bool) $tokenRequired;
 
         return $previous;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEntity(): Entity
+    {
+        return $this->getOrCreateEntity();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function createEntity(): DiskEntity
+    {
+        $this->isModified = false;
+
+        $response = $this->sendRequest($this->createRequest('GET', '/'));
+        $data = [];
+
+        if ($response->getStatusCode() == 200)
+        {
+            $response = json_decode($response->getBody(), true);
+
+            if ( ! is_array($response))
+            {
+                throw new UnsupportedException('Получен не поддерживаемый формат ответа от API Диска.');
+            }
+
+            $data = $response += [
+                'free_space' => $response['total_space'] - $response['used_space']
+            ];
+        }
+
+        return new DiskEntity($data);
+    }
+
+    /**
+     *	@return  bool
+     */
+    protected function isModified()
+    {
+        return false;
     }
 
 }
