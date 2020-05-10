@@ -22,6 +22,7 @@ use Arhitector\Yandex\Entity\Disk as DiskEntity;
 use Arhitector\Yandex\Entity\Link;
 use Arhitector\Yandex\Entity\PublicResource;
 use Arhitector\Yandex\Entity\PublicResourceList;
+use Arhitector\Yandex\Exception\ServerException;
 use InvalidArgumentException;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
@@ -40,9 +41,7 @@ use Zend\Diactoros\Uri;
  */
 class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggregate, \Countable*/
 {
-    use /*ContainerTrait,*/ EmitterTrait, EntityTrait {
-//        toArray as protected _toArray;
-    }
+    use EmitterTrait, EntityTrait;
 
     /**
      * The base address of API. The default path component of the URI.
@@ -503,6 +502,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
 
     /**
      * @inheritDoc
+     * @return DiskEntity
      */
     public function getEntity(): Entity
     {
@@ -511,37 +511,26 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     protected function createEntity(): DiskEntity
     {
-        $this->isModified = false;
-
-        $response = $this->sendRequest($this->createRequest('GET', '/'));
-        $data = [];
+        $request = $this->createRequest('GET', '/');
+        $response = $this->sendRequest($request);
 
         if ($response->getStatusCode() == 200)
         {
             $response = json_decode($response->getBody(), true);
 
-            if ( ! is_array($response))
+            if ( ! empty($response))
             {
-                throw new UnsupportedException('Получен не поддерживаемый формат ответа от API Диска.');
+                return new DiskEntity($response += [
+                    'free_space' => $response['total_space'] - $response['used_space'] // just calculate the free space
+                ]);
             }
-
-            $data = $response += [
-                'free_space' => $response['total_space'] - $response['used_space']
-            ];
         }
 
-        return new DiskEntity($data);
-    }
-
-    /**
-     *	@return  bool
-     */
-    protected function isModified()
-    {
-        return false;
+        throw new Exception(sprintf('An unsupported response was received with status code %d".', $response->getStatusCode()), $request, $response);
     }
 
 }
