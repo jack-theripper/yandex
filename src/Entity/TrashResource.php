@@ -64,7 +64,7 @@ class TrashResource extends Entity
     /**
      * @return int Размер файла
      */
-    public function getSize(): int
+    public function getSize()
     {
         return $this->get('size');
     }

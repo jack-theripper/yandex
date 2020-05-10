@@ -38,7 +38,7 @@ class Disk extends Entity
     /**
      * @return int Maximum supported file size
      */
-    public function getMaxFileSize(): int
+    public function getMaxFileSize()
     {
         return $this->get('max_file_size');
     }
@@ -46,7 +46,7 @@ class Disk extends Entity
     /**
      * @return int Total disk size (bytes)
      */
-    public function getTotalSpace(): int
+    public function getTotalSpace()
     {
         return $this->get('total_space');
     }
@@ -54,7 +54,7 @@ class Disk extends Entity
     /**
      * @return int Total size of files in the trash (bytes). Included in `used_space`
      */
-    public function getTrashSize(): int
+    public function getTrashSize()
     {
         return $this->get('trash_size');
     }
@@ -70,7 +70,7 @@ class Disk extends Entity
     /**
      * @return int Disk used size (bytes)
      */
-    public function getUsedSpace(): int
+    public function getUsedSpace()
     {
         return $this->get('used_space');
     }

@@ -66,7 +66,7 @@ class Resource extends Entity
     /**
      * @return int File size
      */
-    public function getSize(): int
+    public function getSize()
     {
         return $this->get('size');
     }
