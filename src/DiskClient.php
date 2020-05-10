@@ -62,7 +62,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     protected $entity;
 
     /**
-     * @var    string    для обращения к API требуется маркер доступа
+     * @var string To access the API you need to set the token
      */
     protected $tokenRequired = true;
 
@@ -93,12 +93,13 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @param string $accessToken A new access token.
      *
      * @return DiskClient
+     * @throws InvalidArgumentException
      */
     public function setAccessToken(string $accessToken): DiskClient
     {
         if ( ! is_string($accessToken) || trim($accessToken) == '')
         {
-            throw new \InvalidArgumentException('The OAuth token must not be an empty string.');
+            throw new InvalidArgumentException('The OAuth token must not be an empty string.');
         }
 
         $this->accessToken = $accessToken;
@@ -165,6 +166,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * Clean the trash.
      *
      * @return bool|Operation
+     * @throws Exception
      */
     public function cleanTrash()
     {
@@ -263,19 +265,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * $disk->getResource('any_file.ext') -> upload( __DIR__.'/file_to_upload');
      * $disk->getResource('any_file.ext') // Mackey\Yandex\Disk\Resource\Closed
      *      ->toArray(); // если ресурса еще нет, то исключение NotFoundException
-     *
-     * array (size=11)
-     * 'public_key' => string 'wICbu9SPnY3uT4tFA6P99YXJwuAr2TU7oGYu1fTq68Y=' (length=44)
-     * 'name' => string 'Gameface - Gangsigns_trapsound.ru.mp3' (length=37)
-     * 'created' => string '2014-10-08T22:13:49+00:00' (length=25)
-     * 'public_url' => string 'https://yadi.sk/d/g0N4hNtXcrq22' (length=31)
-     * 'modified' => string '2014-10-08T22:13:49+00:00' (length=25)
-     * 'media_type' => string 'audio' (length=5)
-     * 'path' => string 'disk:/applications_swagga/1/Gameface - Gangsigns_trapsound.ru.mp3' (length=65)
-     * 'md5' => string '8c2559f3ce1ece12e749f9e5dfbda59f' (length=32)
-     * 'type' => string 'file' (length=4)
-     * 'mime_type' => string 'audio/mpeg' (length=10)
-     * 'size' => int 8099883
      */
     public function getResource($path, $limit = 20, $offset = 0)
     {
@@ -331,9 +320,9 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     }
 
     /**
-     * Работа с опубликованными ресурсами
+     * Working with published resources
      *
-     * @param mixed $public_key Публичный ключ к опубликованному ресурсу.
+     * @param string $public_key Public key or URL address
      * @param int $limit
      * @param int $offset
      *
@@ -351,7 +340,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     }
 
     /**
-     * Получение списка опубликованных файлов и папок
+     * Returns a list of published resources
      *
      * @param int $limit
      * @param int $offset
@@ -490,13 +479,13 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      *
      * @param string $identifier идентификатор операции или NULL
      *
-     * @return  \Arhitector\Yandex\Disk\Operation
+     * @return Operation
      *
      * @example
      *
      * $disk->getOperation('identifier operation')
      */
-    public function getOperation($identifier)
+    public function getOperation($identifier): Operation
     {
         return new Disk\Operation($identifier, $this);
     }
