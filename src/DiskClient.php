@@ -90,6 +90,16 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     }
 
     /**
+     * Returns the current access token or `null` if not set.
+     *
+     * @return string
+     */
+    public function getAccessToken(): string
+    {
+        return (string) $this->accessToken;
+    }
+
+    /**
      * Sets the access token. All characters including spaces are taken into account.
      *
      * @param string $accessToken A new access token.
@@ -110,13 +120,12 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     }
 
     /**
-     * Returns the current access token or `null` if not set.
-     *
-     * @return string
+     * @inheritDoc
+     * @return DiskEntity
      */
-    public function getAccessToken(): string
+    public function getEntity(): Entity
     {
-        return (string) $this->accessToken;
+        return $this->getOrCreateEntity();
     }
 
     /**
@@ -128,9 +137,8 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
     public function cleanTrash()
     {
         $response = $this->sendRequest($this->createRequest('DELETE', '/trash/resources'));
-        $statusCode = $response->getStatusCode();
 
-        if ($statusCode == 204)
+        if ($response->getStatusCode() == 204)
         {
             return true;
         }
@@ -498,15 +506,6 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
         $this->tokenRequired = (bool) $tokenRequired;
 
         return $previous;
-    }
-
-    /**
-     * @inheritDoc
-     * @return DiskEntity
-     */
-    public function getEntity(): Entity
-    {
-        return $this->getOrCreateEntity();
     }
 
     /**
