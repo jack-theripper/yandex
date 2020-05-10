@@ -20,6 +20,8 @@ use Arhitector\Yandex\Disk\Resource\Opened;
 use Arhitector\Yandex\Entity\Disk as DiskEntity;
 use Arhitector\Yandex\Entity\Link;
 use Arhitector\Yandex\Entity\PublicResource;
+use Arhitector\Yandex\Entity\PublicResourceList;
+use InvalidArgumentException;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
 use Psr\Http\Client\ClientInterface;
@@ -287,7 +289,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @param int $limit
      * @param int $offset
      *
-     * @return \Arhitector\Yandex\Disk\Resource\Collection
+     * @return \Arhitector\Yandex\Disk\Resource\ResourceList
      *
      * @example
      *
@@ -300,7 +302,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      */
     public function getResources($limit = 20, $offset = 0)
     {
-        return (new Disk\Resource\Collection(function ($parameters) {
+        return (new Disk\Resource\ResourceList(function ($parameters) {
             $response = $this->sendRequest((new Request($this->createUri('resources/files')->withQuery(http_build_query($parameters, null, '&')), 'GET')));
 
             if ($response->getStatusCode() == 200)
@@ -345,11 +347,11 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @param int $limit
      * @param int $offset
      *
-     * @return \Arhitector\Yandex\Disk\Resource\Collection
+     * @return \Arhitector\Yandex\Disk\Resource\ResourceList|PublicResourceList
      */
     public function getPublicResources($limit = 20, $offset = 0)
     {
-        return (new Disk\Resource\Collection(function ($parameters) {
+        return (new Disk\Resource\ResourceList(function ($parameters) {
             $previous = $this->setAccessTokenRequired(false);
             $response = $this->sendRequest((new Request($this->requestUri->withPath($this->getCurrentUri()
                     ->getPath().'resources/public')->withQuery(http_build_query($parameters, null, '&')), 'GET')));
@@ -406,11 +408,11 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @param int $limit
      * @param int $offset
      *
-     * @return \Arhitector\Yandex\Disk\Resource\Collection
+     * @return \Arhitector\Yandex\Disk\Resource\ResourceList
      */
     public function getTrashResources($limit = 20, $offset = 0)
     {
-        return (new Disk\Resource\Collection(function ($parameters) {
+        return (new Disk\Resource\ResourceList(function ($parameters) {
             if ( ! empty($parameters['sort']) && ! in_array($parameters['sort'],
                     ['deleted', 'created', '-deleted', '-created']))
             {
@@ -445,7 +447,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      * @param integer $limit
      * @param integer $offset
      *
-     * @return   \Arhitector\Yandex\Disk\Resource\Collection
+     * @return   \Arhitector\Yandex\Disk\Resource\ResourceList
      *
      * @example
      *
@@ -453,7 +455,7 @@ class DiskClient extends AbstractClient /*implements \ArrayAccess, \IteratorAggr
      */
     public function uploaded($limit = 20, $offset = 0)
     {
-        return (new Disk\Resource\Collection(function ($parameters) {
+        return (new Disk\Resource\ResourceList(function ($parameters) {
             $response = $this->sendRequest((new Request($this->getCurrentUri()->withPath($this->getCurrentUri()
                     ->getPath().'resources/last-uploaded')->withQuery(http_build_query($parameters, null, '&')),
                 'GET')));
