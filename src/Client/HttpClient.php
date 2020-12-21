@@ -101,7 +101,7 @@ class HttpClient implements HttpClientInterface, HttpAsyncClientInterface
 	}
 
 	/**
-	 * Sends a PSR-7 request.
+	 * Sends a PSR-7 request and returns a PSR-7 response.
 	 *
 	 * @param RequestInterface $request
 	 *
@@ -110,10 +110,8 @@ class HttpClient implements HttpClientInterface, HttpAsyncClientInterface
 	 * @throws \RuntimeException         If creating the body stream fails.
 	 * @throws \UnexpectedValueException if unsupported HTTP version requested
 	 * @throws RequestException
-	 *
-	 * @since 1.0
 	 */
-	public function sendRequest(RequestInterface $request)
+	public function sendRequest(RequestInterface $request): ResponseInterface
 	{
 		$responseBuilder = $this->createResponseBuilder();
 		$options = $this->createCurlOptions($request, $responseBuilder);
@@ -218,7 +216,7 @@ class HttpClient implements HttpClientInterface, HttpAsyncClientInterface
 		$options[CURLOPT_WRITEFUNCTION] = function ($ch, $data) use ($responseBuilder) {
 			return $responseBuilder->getResponse()->getBody()->write($data);
 		};
-		
+
 		$options[CURLOPT_HTTPHEADER] = $this->createHeaders($request, $options);
 
 		if ($request->getUri()->getUserInfo())
