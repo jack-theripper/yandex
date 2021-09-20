@@ -1,13 +1,13 @@
 {
-	"name": "diat/yandex",
+	"name": "arhitector/yandex",
 	"description": "PHP SDK для работы с некоторыми сервисами яндекса (Яндекс.Диск, Yandex.Disk)",
 	"keywords": ["yandex", "disk", "диск", "яндекс", "php", "curl", "api", "client", "sdk",
 		"yandex disk", "яндекс диск", "rest", "restful", "яндекс"
 	],
 	"license": "MIT",
 	"authors": [{
-		"name": "Atageldi Didarov",
-		"email": "didarov.atageldi@gmail.com"
+		"name": "Dmitry Arhitector",
+		"email": "dmitry.arhitector@yandex.ru"
 	}],
 	"require": {
 		"php": ">=7.3",
