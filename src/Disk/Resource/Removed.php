@@ -10,12 +10,13 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Ресурс в корзине.
@@ -47,10 +48,8 @@ class Removed extends AbstractResource
 	 */
 	public function __construct($path, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
-		if (is_array($path))
-		{
-			if (empty($path['path']))
-			{
+		if (is_array($path)) {
+			if (empty($path['path'])) {
 				throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 			}
 
@@ -58,8 +57,7 @@ class Removed extends AbstractResource
 			$path = $path['path'];
 		}
 
-		if ( ! is_scalar($path))
-		{
+		if (!is_scalar($path)) {
 			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 		}
 
@@ -76,35 +74,30 @@ class Removed extends AbstractResource
 	 */
 	public function toArray(array $allowed = null)
 	{
-		if ( ! $this->_toArray() || $this->isModified())
-		{
-			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+		if (!$this->_toArray() || $this->isModified()) {
+			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
+				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'path' => $this->getPath()
 				]), null, '&')), 'GET')));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if ( ! empty($response))
-				{
+				if (!empty($response)) {
 					$this->isModified = false;
 
-					if (isset($response['_embedded']))
-					{
+					if (isset($response['_embedded'])) {
 						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
 
-					if (isset($response['items']))
-					{
-						$response['items'] = new Container\Collection(array_map(function($item) {
+					if (isset($response['items'])) {
+						$response['items'] = new Container\Collection(array_map(function ($item) {
 							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
-					
+
 					$this->setContents($response);
 				}
 			}
@@ -123,23 +116,20 @@ class Removed extends AbstractResource
 	 */
 	public function restore($name = null, $overwrite = false)
 	{
-		if (is_bool($name))
-		{
+		if (is_bool($name)) {
 			$overwrite = $name;
 			$name = null;
 		}
 
-		if ($name instanceof Closed)
-		{
+		if ($name instanceof Closed) {
 			$name = $name->getPath();
 		}
 
-		if ( ! empty($name) && ! is_string($name))
-		{
+		if (!empty($name) && !is_string($name)) {
 			throw new \InvalidArgumentException('Новое имя для восстанавливаемого ресурса должо быть строкой');
 		}
 
-		$request = new Request($this->uri->withPath($this->uri->getPath().'trash/resources/restore')
+		$request = new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources/restore')
 			->withQuery(http_build_query([
 				'path'      => $this->getPath(),
 				'name'      => (string) $name,
@@ -148,16 +138,13 @@ class Removed extends AbstractResource
 
 		$response = $this->client->send($request);
 
-		if ($response->getStatusCode() == 201 || $response->getStatusCode() == 202)
-		{
+		if ($response->getStatusCode() == 201 || $response->getStatusCode() == 202) {
 			$this->setContents([]);
 
-			if ($response->getStatusCode() == 202)
-			{
+			if ($response->getStatusCode() == 202) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['operation']))
-				{
+				if (isset($response['operation'])) {
 					$response['operation'] = $this->client->getOperation($response['operation']);
 					$this->emit('operation', $response['operation'], $this, $this->client);
 					$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -179,20 +166,17 @@ class Removed extends AbstractResource
 	 */
 	public function delete()
 	{
-		try
-		{
-			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
-			                                                      ->withQuery(http_build_query([
+		try {
+			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
+				->withQuery(http_build_query([
 					'path' => $this->getPath()
 				], null, '&')), 'DELETE'));
 
-			if ($response->getStatusCode() == 202)
-			{
+			if ($response->getStatusCode() == 202) {
 				$this->setContents([]);
 				$response = json_decode($response->getBody(), true);
 
-				if ( ! empty($response['operation']))
-				{
+				if (!empty($response['operation'])) {
 					$response['operation'] = $this->client->getOperation($response['operation']);
 					$this->emit('operation', $response['operation'], $this, $this->client);
 					$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -204,11 +188,8 @@ class Removed extends AbstractResource
 			}
 
 			return $response->getStatusCode() == 204;
-		}
-		catch (\Exception $exc)
-		{
+		} catch (\Exception $exc) {
 			return false;
 		}
 	}
-
 }

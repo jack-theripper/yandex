@@ -10,6 +10,7 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
@@ -18,9 +19,9 @@ use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Публичный ресурс.
@@ -46,7 +47,7 @@ class Opened extends AbstractResource
 	 * @var    string    ресурс
 	 */
 	protected $publicKey;
-	
+
 	/**
 	 * Конструктор.
 	 *
@@ -56,10 +57,8 @@ class Opened extends AbstractResource
 	 */
 	public function __construct($public_key, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
-		if (is_array($public_key))
-		{
-			if (empty($public_key['public_key']))
-			{
+		if (is_array($public_key)) {
+			if (empty($public_key['public_key'])) {
 				throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
 			}
 
@@ -68,8 +67,7 @@ class Opened extends AbstractResource
 			$this->store['docviewer'] = $this->createDocViewerUrl();
 		}
 
-		if ( ! is_scalar($public_key))
-		{
+		if (!is_scalar($public_key)) {
 			throw new \InvalidArgumentException('Параметр "public_key" должен быть строкового типа.');
 		}
 
@@ -95,31 +93,26 @@ class Opened extends AbstractResource
 	 */
 	public function toArray(array $allowed = null)
 	{
-		if ( ! $this->_toArray() || $this->isModified())
-		{
-			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath().'public/resources')
-			                                                       ->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
+		if (!$this->_toArray() || $this->isModified()) {
+			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath() . 'public/resources')
+				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'public_key' => $this->getPublicKey()
 				]), null, '&')), 'GET')));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if ( ! empty($response))
-				{
+				if (!empty($response)) {
 					$this->isModified = false;
 
-					if (isset($response['_embedded']))
-					{
+					if (isset($response['_embedded'])) {
 						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
 
-					if (isset($response['items']))
-					{
-						$response['items'] = new Container\Collection(array_map(function($item) {
+					if (isset($response['items'])) {
+						$response['items'] = new Container\Collection(array_map(function ($item) {
 							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
@@ -143,23 +136,20 @@ class Opened extends AbstractResource
 	 */
 	public function getLink()
 	{
-		if ( ! $this->has())
-		{
+		if (!$this->has()) {
 			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
 		}
 
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'public/resources/download')
-		                                                      ->withQuery(http_build_query([
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'public/resources/download')
+			->withQuery(http_build_query([
 				'public_key' => $this->getPublicKey(),
 				'path'       => (string) $this->getPath()
 			], null, '&')), 'GET'));
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['href']))
-			{
+			if (isset($response['href'])) {
 				return $response['href'];
 			}
 		}
@@ -183,59 +173,44 @@ class Opened extends AbstractResource
 	{
 		$destination_type = gettype($destination);
 
-		if (is_resource($destination))
-		{
+		if (is_resource($destination)) {
 			$destination = new Stream($destination);
 		}
 
-		if ($destination instanceof StreamInterface)
-		{
-			if ( ! $destination->isWritable())
-			{
+		if ($destination instanceof StreamInterface) {
+			if (!$destination->isWritable()) {
 				throw new \OutOfBoundsException('Дескриптор файла должен быть открыт с правами на запись.');
 			}
-		}
-		else if ($destination_type == 'string')
-		{
-			if (is_file($destination) && ! $overwrite)
-			{
-				throw new AlreadyExistsException('По указанному пути "'.$destination.'" уже существует ресурс.');
+		} else if ($destination_type == 'string') {
+			if (is_file($destination) && !$overwrite) {
+				throw new AlreadyExistsException('По указанному пути "' . $destination . '" уже существует ресурс.');
 			}
 
-			if ( ! is_writable(dirname($destination)))
-			{
+			if (!is_writable(dirname($destination))) {
 				throw new \OutOfBoundsException('Запрещена запись в директорию, в которой должен быть расположен файл.');
 			}
 
 			$destination = new Stream($destination, 'w+b');
-		}
-		else
-		{
+		} else {
 			throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 		}
 
 		$response = $this->client->send(new Request($this->getLink(), 'GET'));
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$stream = $response->getBody();
 
-			if ($check_hash)
-			{
+			if ($check_hash) {
 				$ctx = hash_init('md5');
 
-				while ( ! $stream->eof())
-				{
+				while (!$stream->eof()) {
 					$read_data = $stream->read(1048576);
 					$destination->write($read_data);
 
 					hash_update($ctx, $read_data);
 				}
-			}
-			else
-			{
-				while ( ! $stream->eof())
-				{
+			} else {
+				while (!$stream->eof()) {
 					$destination->write($stream->read(16384));
 				}
 			}
@@ -244,14 +219,10 @@ class Opened extends AbstractResource
 			$this->emit('downloaded', $this, $destination, $this->client);
 			$this->client->emit('downloaded', $this, $destination, $this->client);
 
-			if ($destination_type == 'object')
-			{
+			if ($destination_type == 'object') {
 				return $destination;
-			}
-			else if ($check_hash && $destination_type == 'string' && $this->isFile())
-			{
-				if (hash_final($ctx, false) !== $this->get('md5', null))
-				{
+			} else if ($check_hash && $destination_type == 'string' && $this->isFile()) {
+				if (hash_final($ctx, false) !== $this->get('md5', null)) {
 					throw new \RangeException('Ресурс скачан, но контрольные суммы различаются.');
 				}
 			}
@@ -270,16 +241,11 @@ class Opened extends AbstractResource
 	 */
 	public function hasEqual()
 	{
-		if ($this->has() && ($path = $this->get('name')))
-		{
-			try
-			{
-				return $this->client->getResource(((string) $this->get('path')).'/'.$path)
-				                    ->get('md5', false) === $this->get('md5');
-			}
-			catch (\Exception $exc)
-			{
-
+		if ($this->has() && ($path = $this->get('name'))) {
+			try {
+				return $this->client->getResource(((string) $this->get('path')) . '/' . $path)
+					->get('md5', false) === $this->get('md5');
+			} catch (\Exception $exc) {
 			}
 		}
 
@@ -301,12 +267,9 @@ class Opened extends AbstractResource
 		/**
 		 * @var mixed   $name Имя, под которым файл следует сохранить в папку «Загрузки»
 		 */
-		if (is_string($name))
-		{
+		if (is_string($name)) {
 			$parameters['name'] = $name;
-		}
-		else if ($name instanceof Closed)
-		{
+		} else if ($name instanceof Closed) {
 			$parameters['name'] = substr(strrchr($name->getPath(), '/'), 1);
 		}
 
@@ -316,12 +279,9 @@ class Opened extends AbstractResource
 		 * ключ публичной папки, в которой находится нужный файл.
 		 * Путь в значении параметра следует кодировать в URL-формате.
 		 */
-		if (is_string($path))
-		{
+		if (is_string($path)) {
 			$parameters['path'] = $path;
-		}
-		else if ($this->getPath() !== null)
-		{
+		} else if ($this->getPath() !== null) {
 			$parameters['path'] = $this->getPath();
 		}
 
@@ -331,17 +291,15 @@ class Opened extends AbstractResource
 		 * Если операция сохранения была запущена, но еще не завершилась, Яндекс.Диск отвечает кодом 202 Accepted.
 		 */
 		$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath()
-			.'public/resources/save-to-disk')
-		                                                       ->withQuery(http_build_query([
-					'public_key' => $this->getPublicKey()
-				] + $parameters, null, '&')), 'POST')));
+			. 'public/resources/save-to-disk')
+			->withQuery(http_build_query([
+				'public_key' => $this->getPublicKey()
+			] + $parameters, null, '&')), 'POST')));
 
-		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
-		{
+		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201) {
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['operation']))
-			{
+			if (isset($response['operation'])) {
 				$response['operation'] = $this->client->getOperation($response['operation']);
 				$this->emit('operation', $response['operation'], $this, $this->client);
 				$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -349,12 +307,10 @@ class Opened extends AbstractResource
 				return $response['operation'];
 			}
 
-			if (isset($response['href']))
-			{
+			if (isset($response['href'])) {
 				parse_str((new Uri($response['href']))->getQuery(), $path);
 
-				if (isset($path['path']))
-				{
+				if (isset($path['path'])) {
 					return $this->client->getResource($path['path']);
 				}
 			}
@@ -372,8 +328,7 @@ class Opened extends AbstractResource
 	 */
 	public function setPath($path)
 	{
-		if ( ! is_scalar($path))
-		{
+		if (!is_scalar($path)) {
 			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 		}
 
@@ -381,7 +336,7 @@ class Opened extends AbstractResource
 
 		return $this;
 	}
-	
+
 	/**
 	 * Получает ссылку для просмотра документа.
 	 *
@@ -390,18 +345,16 @@ class Opened extends AbstractResource
 	 */
 	protected function createDocViewerUrl()
 	{
-		if ($this->isFile())
-		{
+		if ($this->isFile()) {
 			$docviewer = [
 				'name' => $this->get('name'),
 				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
 			];
-			
+
 			return (string) (new Uri('https://docviewer.yandex.ru/'))
 				->withQuery(http_build_query($docviewer, null, '&'));
 		}
 
 		return false;
 	}
-
 }

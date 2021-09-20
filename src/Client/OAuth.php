@@ -10,13 +10,14 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Client;
 
 use Arhitector\Yandex\AbstractClient;
 use Arhitector\Yandex\Client\Exception\UnauthorizedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Клиент для Access Token
@@ -51,8 +52,7 @@ class OAuth extends AbstractClient
 	{
 		parent::__construct();
 
-		if ($token !== null)
-		{
+		if ($token !== null) {
 			$this->setAccessToken($token);
 		}
 	}
@@ -67,8 +67,7 @@ class OAuth extends AbstractClient
 	 */
 	public function setClientOauth($client_id)
 	{
-		if ( ! is_string($client_id))
-		{
+		if (!is_string($client_id)) {
 			throw new \InvalidArgumentException('ID приложения https://oauth.yandex.ru должен быть строкового типа.');
 		}
 
@@ -97,8 +96,7 @@ class OAuth extends AbstractClient
 	 */
 	public function setClientOauthSecret($client_secret)
 	{
-		if ( ! is_string($client_secret))
-		{
+		if (!is_string($client_secret)) {
 			throw new \InvalidArgumentException('Пароль приложения https://oauth.yandex.ru должен быть строкового типа.');
 		}
 
@@ -127,8 +125,7 @@ class OAuth extends AbstractClient
 	 */
 	public function setAccessToken($token)
 	{
-		if ( ! is_string($token))
-		{
+		if (!is_string($token)) {
 			throw new \InvalidArgumentException('OAuth-токен должен быть строкового типа.');
 		}
 
@@ -176,48 +173,40 @@ class OAuth extends AbstractClient
 	 */
 	public function refreshAccessToken($username, $password, $onlyToken = false)
 	{
-		if ( ! is_scalar($username) || ! is_scalar($password))
-		{
+		if (!is_scalar($username) || !is_scalar($password)) {
 			throw new \InvalidArgumentException('Параметры "имя пользователя" и "пароль" должны быть простого типа.');
 		}
 
 		$previous = $this->setAccessTokenRequired(false);
-		$request = new Request(rtrim(self::API_BASEPATH, ' /').'/token', 'POST');
+		$request = new Request(rtrim(self::API_BASEPATH, ' /') . '/token', 'POST');
 		$request->getBody()
-		        ->write(http_build_query([
-			        'grant_type'    => 'password',
-			        'client_id'     => $this->getClientOauth(),
-			        'client_secret' => $this->getClientOauthSecret(),
-			        'username'      => (string) $username,
-			        'password'      => (string) $password
-		        ]));
+			->write(http_build_query([
+				'grant_type'    => 'password',
+				'client_id'     => $this->getClientOauth(),
+				'client_secret' => $this->getClientOauthSecret(),
+				'username'      => (string) $username,
+				'password'      => (string) $password
+			]));
 
-		try
-		{
+		try {
 			$response = json_decode($this->send($request)->wait()->getBody());
 
-			if ($onlyToken)
-			{
+			if ($onlyToken) {
 				return (string) $response->access_token;
 			}
 
 			$response->created_at = time();
 
 			return $response;
-		}
-		catch (\Exception $exc)
-		{
+		} catch (\Exception $exc) {
 			$response = json_decode($exc->getMessage());
 
-			if (isset($response->error_description))
-			{
+			if (isset($response->error_description)) {
 				throw new UnauthorizedException($response->error_description);
 			}
 
 			throw $exc;
-		}
-		finally
-		{
+		} finally {
 			$this->setAccessTokenRequired($previous);
 		}
 	}
@@ -231,14 +220,13 @@ class OAuth extends AbstractClient
 	 */
 	protected function authentication(RequestInterface $request)
 	{
-		if ($this->tokenRequired)
-		{
+		if ($this->tokenRequired) {
 			return $request->withHeader('Authorization', sprintf('OAuth %s', $this->getAccessToken()));
 		}
 
 		return $request;
 	}
-	
+
 	/**
 	 * Трансформирует ответ в исключения.
 	 * Ответ API, где использует OAuth, отличается от других сервисов.
@@ -250,25 +238,21 @@ class OAuth extends AbstractClient
 	 */
 	protected function transformResponseToException(RequestInterface $request, ResponseInterface $response)
 	{
-		if (isset($this->exceptions[$response->getStatusCode()]))
-		{
+		if (isset($this->exceptions[$response->getStatusCode()])) {
 			$exception = $this->exceptions[$response->getStatusCode()];
 
-			if ($response->hasHeader('Content-Type')
+			if (
+				$response->hasHeader('Content-Type')
 				&& stripos($response->getHeaderLine('Content-Type'), 'json') !== false
-			)
-			{
+			) {
 				$responseBody = json_decode($response->getBody(), true);
 
-				if ( ! isset($responseBody['message']))
-				{
+				if (!isset($responseBody['message'])) {
 					$responseBody['message'] = (string) $response->getBody();
 				}
 
-				if (is_array($exception))
-				{
-					if ( ! isset($responseBody['error'], $exception[$responseBody['error']]))
-					{
+				if (is_array($exception)) {
+					if (!isset($responseBody['error'], $exception[$responseBody['error']])) {
 						return parent::transformResponseToException($request, $response);
 					}
 
@@ -281,5 +265,4 @@ class OAuth extends AbstractClient
 
 		return parent::transformResponseToException($request, $response);
 	}
-	
 }

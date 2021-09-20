@@ -10,6 +10,7 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex;
 
 use Arhitector\Yandex\Client\Container\ContainerTrait;
@@ -18,9 +19,9 @@ use Arhitector\Yandex\Client\OAuth;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
 use Psr\Http\Message\RequestInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Клиент для Яндекс.Диска
@@ -140,8 +141,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	{
 		$this->setEmitter(new Emitter);
 
-		if ($token instanceof AbstractClient)
-		{
+		if ($token instanceof AbstractClient) {
 			$token = $token->getAccessToken();
 		}
 
@@ -167,16 +167,13 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function toArray(array $allowed = null)
 	{
-		if ( ! $this->_toArray())
-		{
+		if (!$this->_toArray()) {
 			$response = $this->send(new Request($this->uri, 'GET'));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if ( ! is_array($response))
-				{
+				if (!is_array($response)) {
 					throw new UnsupportedException('Получен не поддерживаемый формат ответа от API Диска.');
 				}
 
@@ -219,14 +216,12 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getResource($path, $limit = 20, $offset = 0)
 	{
-		if ( ! is_string($path))
-		{
+		if (!is_string($path)) {
 			throw new \InvalidArgumentException('Ресурс, должен быть строкового типа - путь к файлу/папке.');
 		}
 
-		if (stripos($path, 'app:/') !== 0 && stripos($path, 'disk:/') !== 0)
-		{
-			$path = 'disk:/'.ltrim($path, ' /');
+		if (stripos($path, 'app:/') !== 0 && stripos($path, 'disk:/') !== 0) {
+			$path = 'disk:/' . ltrim($path, ' /');
 		}
 
 		return (new Disk\Resource\Closed($path, $this, $this->uri))
@@ -252,17 +247,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function($parameters) {
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath().'resources/files')
+		return (new Disk\Resource\Collection(function ($parameters) {
+			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/files')
 				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['items']))
-				{
-					return array_map(function($item) {
+				if (isset($response['items'])) {
+					return array_map(function ($item) {
 						return new Disk\Resource\Closed($item, $this, $this->uri);
 					}, $response['items']);
 				}
@@ -299,8 +292,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getPublishResource($public_key, $limit = 20, $offset = 0)
 	{
-		if ( ! is_string($public_key))
-		{
+		if (!is_string($public_key)) {
 			throw new \InvalidArgumentException('Публичный ключ ресурса должен быть строкового типа.');
 		}
 
@@ -318,19 +310,17 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getPublishResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function($parameters) {
+		return (new Disk\Resource\Collection(function ($parameters) {
 			$previous = $this->setAccessTokenRequired(false);
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath().'resources/public')
+			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/public')
 				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
 			$this->setAccessTokenRequired($previous);
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['items']))
-				{
-					return array_map(function($item) {
+				if (isset($response['items'])) {
+					return array_map(function ($item) {
 						return new Disk\Resource\Opened($item, $this, $this->uri);
 					}, $response['items']);
 				}
@@ -356,17 +346,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getTrashResource($path, $limit = 20, $offset = 0)
 	{
-		if ( ! is_string($path))
-		{
+		if (!is_string($path)) {
 			throw new \InvalidArgumentException('Ресурс, должен быть строкового типа - путь к файлу/папке, либо NULL');
 		}
 
-		if (stripos($path, 'trash:/') === 0)
-		{
+		if (stripos($path, 'trash:/') === 0) {
 			$path = substr($path, 7);
 		}
 
-		return (new Disk\Resource\Removed('trash:/'.ltrim($path, ' /'), $this, $this->uri))
+		return (new Disk\Resource\Removed('trash:/' . ltrim($path, ' /'), $this, $this->uri))
 			->setLimit($limit, $offset);
 	}
 
@@ -380,24 +368,22 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getTrashResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function($parameters) {
-			if ( ! empty($parameters['sort'])
-				&& ! in_array($parameters['sort'], ['deleted', 'created', '-deleted', '-created'])
-			)
-			{
+		return (new Disk\Resource\Collection(function ($parameters) {
+			if (
+				!empty($parameters['sort'])
+				&& !in_array($parameters['sort'], ['deleted', 'created', '-deleted', '-created'])
+			) {
 				throw new \UnexpectedValueException('Допустимые значения сортировки - deleted, created и со знаком "минус".');
 			}
 
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath().'trash/resources')
+			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
 				->withQuery(http_build_query($parameters + ['path' => 'trash:/'], null, '&')), 'GET')));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['_embedded']['items']))
-				{
-					return array_map(function($item) {
+				if (isset($response['_embedded']['items'])) {
+					return array_map(function ($item) {
 						return new Disk\Resource\Removed($item, $this, $this->uri);
 					}, $response['_embedded']['items']);
 				}
@@ -416,14 +402,12 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function cleanTrash()
 	{
-		$response = $this->send(new Request($this->uri->withPath($this->uri->getPath().'trash/resources'), 'DELETE'));
+		$response = $this->send(new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources'), 'DELETE'));
 
-		if ($response->getStatusCode() == 204)
-		{
+		if ($response->getStatusCode() == 204) {
 			$response = json_decode($response->getBody(), true);
 
-			if ( ! empty($response['operation']))
-			{
+			if (!empty($response['operation'])) {
 				return $response['operation'];
 			}
 
@@ -447,17 +431,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function uploaded($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function($parameters) {
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath().'resources/last-uploaded')
+		return (new Disk\Resource\Collection(function ($parameters) {
+			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/last-uploaded')
 				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['items']))
-				{
-					return array_map(function($item) {
+				if (isset($response['items'])) {
+					return array_map(function ($item) {
 						return new Disk\Resource\Closed($item, $this, $this->uri);
 					}, $response['items']);
 				}
@@ -524,14 +506,11 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	{
 		$response = parent::send($request);
 
-		if ($response->getStatusCode() == 202)
-		{
-			if (($responseBody = json_decode($response->getBody(), true)) && isset($responseBody['href']))
-			{
+		if ($response->getStatusCode() == 202) {
+			if (($responseBody = json_decode($response->getBody(), true)) && isset($responseBody['href'])) {
 				$operation = new Uri($responseBody['href']);
 
-				if ( ! $operation->getQuery())
-				{
+				if (!$operation->getQuery()) {
 					$responseBody['operation'] = substr(strrchr($operation->getPath(), '/'), 1);
 					$stream = new Stream('php://temp', 'w');
 					$stream->write(json_encode($responseBody));
@@ -569,5 +548,4 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		return $this;
 	}
-
 }
