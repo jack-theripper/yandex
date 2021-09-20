@@ -10,6 +10,7 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Disk\Resource;
 
 use Arhitector\Yandex\Client\Container;
@@ -20,9 +21,9 @@ use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use League\Event\Event;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Закрытый ресурс.
@@ -53,10 +54,8 @@ class Closed extends AbstractResource
 	 */
 	public function __construct($resource, Disk $parent, \Psr\Http\Message\UriInterface $uri)
 	{
-		if (is_array($resource))
-		{
-			if (empty($resource['path']))
-			{
+		if (is_array($resource)) {
+			if (empty($resource['path'])) {
 				throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 			}
 
@@ -65,8 +64,7 @@ class Closed extends AbstractResource
 			$resource = $resource['path'];
 		}
 
-		if ( ! is_scalar($resource))
-		{
+		if (!is_scalar($resource)) {
 			throw new \InvalidArgumentException('Параметр "path" должен быть строкового типа.');
 		}
 
@@ -86,32 +84,26 @@ class Closed extends AbstractResource
 	 */
 	public function toArray(array $allowed = null)
 	{
-		if ( ! $this->_toArray() || $this->isModified())
-		{
-			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
+		if (!$this->_toArray() || $this->isModified()) {
+			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'path' => $this->getPath()
 				]), null, '&')), 'GET'));
 
-			if ($response->getStatusCode() == 200)
-			{
+			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
 
-				if ( ! empty($response))
-				{
+				if (!empty($response)) {
 					$this->isModified = false;
 
-					if (isset($response['_embedded']))
-					{
+					if (isset($response['_embedded'])) {
 						$response = array_merge($response, $response['_embedded']);
 					}
 
 					unset($response['_links'], $response['_embedded']);
 
-					if (isset($response['items']))
-					{
-						$response['items'] = new Container\Collection(array_map(function ($item)
-						{
+					if (isset($response['items'])) {
+						$response['items'] = new Container\Collection(array_map(function ($item) {
 							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
@@ -137,13 +129,11 @@ class Closed extends AbstractResource
 	{
 		$properties = $this->get('custom_properties', []);
 
-		if (isset($properties[$index]))
-		{
+		if (isset($properties[$index])) {
 			return $properties[$index];
 		}
 
-		if ($default instanceof \Closure)
-		{
+		if ($default instanceof \Closure) {
 			return $default($this);
 		}
 
@@ -171,18 +161,15 @@ class Closed extends AbstractResource
 	 */
 	public function set($meta, $value = null)
 	{
-		if ( ! is_array($meta))
-		{
-			if ( ! is_scalar($meta))
-			{
+		if (!is_array($meta)) {
+			if (!is_scalar($meta)) {
 				throw new \InvalidArgumentException('Индекс метаинформации должен быть простого типа.');
 			}
 
 			$meta = [(string) $meta => $value];
 		}
 
-		if (empty($meta))
-		{
+		if (empty($meta)) {
 			throw new \OutOfBoundsException('Не было передано ни одного значения для добавления метаинформации.');
 		}
 
@@ -191,7 +178,7 @@ class Closed extends AbstractResource
 			throw new \LengthException('Максимальный допустимый размер объекта метаинформации составляет 1024 байт.');
 		}*/
 
-		$request = (new Request($this->uri->withPath($this->uri->getPath().'resources')
+		$request = (new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PATCH'));
 
 		$request->getBody()
@@ -199,8 +186,7 @@ class Closed extends AbstractResource
 
 		$response = $this->client->send($request);
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$this->setContents(json_decode($response->getBody(), true));
 			$this->store['docviewer'] = $this->createDocViewerUrl();
 		}
@@ -263,25 +249,22 @@ class Closed extends AbstractResource
 	 */
 	public function delete($permanently = false)
 	{
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 			->withQuery(http_build_query([
 				'path'        => $this->getPath(),
 				'permanently' => (bool) $permanently
 			])), 'DELETE'));
 
-		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 204)
-		{
+		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 204) {
 			$this->setContents([]);
 
 			$this->emit('delete', $this, $this->client);
 			$this->client->emit('delete', $this, $this->client);
 
-			if ($response->getStatusCode() == 202)
-			{
+			if ($response->getStatusCode() == 202) {
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['operation']))
-				{
+				if (isset($response['operation'])) {
 					$response['operation'] = $this->client->getOperation($response['operation']);
 					$this->emit('operation', $response['operation'], $this, $this->client);
 					$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -290,8 +273,7 @@ class Closed extends AbstractResource
 				}
 			}
 
-			try
-			{
+			try {
 				/*$resource = $this->client->getTrashResource('/', 0);
 				$resource = $this->client->getTrashResources(1, $resource->get('total', 0) - 1)->getFirst();
 
@@ -299,10 +281,7 @@ class Closed extends AbstractResource
 				{
 					return $resource;
 				}*/
-			}
-			catch (\Exception $exc)
-			{
-
+			} catch (\Exception $exc) {
 			}
 
 			return true;
@@ -328,25 +307,22 @@ class Closed extends AbstractResource
 	 */
 	public function move($destination, $overwrite = false)
 	{
-		if ($destination instanceof Closed)
-		{
+		if ($destination instanceof Closed) {
 			$destination = $destination->getPath();
 		}
 
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/move')
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/move')
 			->withQuery(http_build_query([
 				'from'      => $this->getPath(),
 				'path'      => $destination,
 				'overwrite' => (bool) $overwrite
 			], null, '&')), 'POST'));
 
-		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201)
-		{
+		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201) {
 			$this->path = $destination;
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['operation']))
-			{
+			if (isset($response['operation'])) {
 				$response['operation'] = $this->client->getOperation($response['operation']);
 				$this->emit('operation', $response['operation'], $this, $this->client);
 				$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -368,16 +344,13 @@ class Closed extends AbstractResource
 	 */
 	public function create()
 	{
-		try
-		{
-			$this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources')
+		try {
+			$this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 				->withQuery(http_build_query([
 					'path' => $this->getPath()
 				], null, '&')), 'PUT'));
 			$this->setContents([]);
-		}
-		catch (\Exception $exc)
-		{
+		} catch (\Exception $exc) {
 			throw $exc;
 		}
 
@@ -395,22 +368,19 @@ class Closed extends AbstractResource
 	{
 		$request = 'resources/unpublish';
 
-		if ($publish)
-		{
+		if ($publish) {
 			$request = 'resources/publish';
 		}
 
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().$request)
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . $request)
 			->withQuery(http_build_query([
 				'path' => $this->getPath()
 			], null, '&')), 'PUT'));
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$this->setContents([]);
 
-			if ($publish && $this->has('public_key'))
-			{
+			if ($publish && $this->has('public_key')) {
 				return $this->client->getPublishResource($this->get('public_key'));
 			}
 		}
@@ -437,62 +407,47 @@ class Closed extends AbstractResource
 	{
 		$destination_type = gettype($destination);
 
-		if ( ! $this->has())
-		{
+		if (!$this->has()) {
 			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
 		}
 
-		if (is_resource($destination))
-		{
+		if (is_resource($destination)) {
 			$destination = new Stream($destination);
 		}
 
-		if ($destination instanceof StreamInterface)
-		{
-			if ( ! $destination->isWritable())
-			{
+		if ($destination instanceof StreamInterface) {
+			if (!$destination->isWritable()) {
 				throw new \OutOfBoundsException('Дескриптор файла должен быть открыт с правами на запись.');
 			}
-		}
-		else
-		{
-			if ($destination_type == 'string')
-			{
-				if (is_file($destination) && ! $overwrite)
-				{
-					throw new AlreadyExistsException('По указанному пути "'.$destination.'" уже существует ресурс.');
+		} else {
+			if ($destination_type == 'string') {
+				if (is_file($destination) && !$overwrite) {
+					throw new AlreadyExistsException('По указанному пути "' . $destination . '" уже существует ресурс.');
 				}
 
-				if ( ! is_writable(dirname($destination)))
-				{
+				if (!is_writable(dirname($destination))) {
 					throw new \OutOfBoundsException('Запрещена запись в директорию, в которой должен быть расположен файл.');
 				}
 
 				$destination = new Stream($destination, 'w+b');
-			}
-			else
-			{
+			} else {
 				throw new \InvalidArgumentException('Такой тип параметра $destination не поддерживается.');
 			}
 		}
 
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/download')
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/download')
 			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'GET'));
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['href']))
-			{
+			if (isset($response['href'])) {
 				$response = $this->client->send(new Request($response['href'], 'GET'));
 
-				if ($response->getStatusCode() == 200)
-				{
+				if ($response->getStatusCode() == 200) {
 					$stream = $response->getBody();
 
-					while ( ! $stream->eof())
-					{
+					while (!$stream->eof()) {
 						$destination->write($stream->read(16384));
 					}
 
@@ -500,8 +455,7 @@ class Closed extends AbstractResource
 					$this->emit('downloaded', $this, $destination, $this->client);
 					$this->client->emit('downloaded', $this, $destination, $this->client);
 
-					if ($destination_type == 'object')
-					{
+					if ($destination_type == 'object') {
 						return $destination;
 					}
 
@@ -525,24 +479,21 @@ class Closed extends AbstractResource
 	 */
 	public function copy($destination, $overwrite = false)
 	{
-		if ($destination instanceof Closed)
-		{
+		if ($destination instanceof Closed) {
 			$destination = $destination->getPath();
 		}
 
-		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/copy')
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/copy')
 			->withQuery(http_build_query([
 				'from'      => $this->getPath(),
 				'path'      => $destination,
 				'overwrite' => (bool) $overwrite
 			], null, '&')), 'POST'));
 
-		if ($response->getStatusCode() == 201)
-		{
+		if ($response->getStatusCode() == 201) {
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['operation']))
-			{
+			if (isset($response['operation'])) {
 				$response['operation'] = $this->client->getOperation($response['operation']);
 				$this->emit('operation', $response['operation'], $this, $this->client);
 				$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -571,32 +522,29 @@ class Closed extends AbstractResource
 	 */
 	public function upload($file_path, $overwrite = false, $disable_redirects = false)
 	{
-		if (is_string($file_path))
-		{
+		if (is_string($file_path)) {
 			$scheme = substr($file_path, 0, 7);
 
-			if ($scheme == 'http://' or $scheme == 'https:/')
-			{
-				try
-				{
-					$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/upload')
+			if ($scheme == 'http://' or $scheme == 'https:/') {
+				try {
+					$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/upload')
 						->withQuery(http_build_query([
 							'url'  => $file_path,
 							'path' => $this->getPath(),
 							'disable_redirects' => (int) $disable_redirects
 						], null, '&')), 'POST'));
-				}
-				catch (AlreadyExistsException $exc)
-				{
+				} catch (AlreadyExistsException $exc) {
 					// параметр $overwrite не работает т.к. диск не поддерживает {AlreadyExistsException:409}->rename->delete
-					throw new AlreadyExistsException($exc->getMessage().' Перезапись для удалённой загрузки не доступна.',
-						$exc->getCode(), $exc);
+					throw new AlreadyExistsException(
+						$exc->getMessage() . ' Перезапись для удалённой загрузки не доступна.',
+						$exc->getCode(),
+						$exc
+					);
 				}
 
 				$response = json_decode($response->getBody(), true);
 
-				if (isset($response['operation']))
-				{
+				if (isset($response['operation'])) {
 					$response['operation'] = $this->client->getOperation($response['operation']);
 					$this->emit('operation', $response['operation'], $this, $this->client);
 					$this->client->emit('operation', $response['operation'], $this, $this->client);
@@ -609,41 +557,33 @@ class Closed extends AbstractResource
 
 			$file_path = realpath($file_path);
 
-			if ( ! is_file($file_path))
-			{
-				throw new \OutOfBoundsException('Локальный файл по такому пути: "'.$file_path.'" отсутствует.');
+			if (!is_file($file_path)) {
+				throw new \OutOfBoundsException('Локальный файл по такому пути: "' . $file_path . '" отсутствует.');
 			}
-		}
-		else
-		{
-			if ( ! is_resource($file_path))
-			{
+		} else {
+			if (!is_resource($file_path)) {
 				throw new \InvalidArgumentException('Параметр "путь к файлу" должен быть строкового типа или открытый файловый дескриптор на чтение.');
 			}
 		}
 
-		$access_upload = json_decode($this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/upload')
+		$access_upload = json_decode($this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/upload')
 			->withQuery(http_build_query([
 				'path'      => $this->getPath(),
-				'overwrite' => (int) ((boolean) $overwrite),
+				'overwrite' => (int) ((bool) $overwrite),
 			], null, '&')), 'GET'))
 			->getBody(), true);
 
-		if ( ! isset($access_upload['href']))
-		{
+		if (!isset($access_upload['href'])) {
 			// $this->client->setRetries = 1
 			throw new \RuntimeException('Не возможно загрузить локальный файл - не получено разрешение.');
 		}
-		
-		if ($this->getEmitter()->hasListeners('progress'))
-		{
+
+		if ($this->getEmitter()->hasListeners('progress')) {
 			$stream = new Progress($file_path, 'rb');
 			$stream->addListener('progress', function (Event $event, $percent) {
 				$this->emit('progress', $percent);
 			});
-		}
-		else
-		{
+		} else {
 			$stream = new Stream($file_path, 'rb');
 		}
 
@@ -654,38 +594,35 @@ class Closed extends AbstractResource
 		return $response->getStatusCode() == 201;
 	}
 
-    /**
-     * Получает прямую ссылку
-     *
-     * @return    string
-     * @throws    mixed
-     *
-     * @TODO    Не работает для файлов вложенных в публичную папку.
-     */
-    public function getLink()
-    {
-        if ( ! $this->has())
-        {
-            throw new NotFoundException('Не удалось найти запрошенный ресурс.');
-        }
+	/**
+	 * Получает прямую ссылку
+	 *
+	 * @return    string
+	 * @throws    mixed
+	 *
+	 * @TODO    Не работает для файлов вложенных в публичную папку.
+	 */
+	public function getLink()
+	{
+		if (!$this->has()) {
+			throw new NotFoundException('Не удалось найти запрошенный ресурс.');
+		}
 
-        $response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath().'resources/download')
-                                                              ->withQuery(http_build_query([
-                                                                  'path'       => (string) $this->getPath()
-                                                              ], null, '&')), 'GET'));
+		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/download')
+			->withQuery(http_build_query([
+				'path'       => (string) $this->getPath()
+			], null, '&')), 'GET'));
 
-        if ($response->getStatusCode() == 200)
-        {
-            $response = json_decode($response->getBody(), true);
+		if ($response->getStatusCode() == 200) {
+			$response = json_decode($response->getBody(), true);
 
-            if (isset($response['href']))
-            {
-                return $response['href'];
-            }
-        }
+			if (isset($response['href'])) {
+				return $response['href'];
+			}
+		}
 
-        throw new \UnexpectedValueException('Не удалось запросить разрешение на скачивание, повторите заново');
-    }
+		throw new \UnexpectedValueException('Не удалось запросить разрешение на скачивание, повторите заново');
+	}
 
 	/**
 	 * Получает ссылку для просмотра документа. Достпно владельцу аккаунта.
@@ -694,15 +631,13 @@ class Closed extends AbstractResource
 	 */
 	protected function createDocViewerUrl()
 	{
-		if ($this->isFile())
-		{
+		if ($this->isFile()) {
 			$docviewer = [
 				'url'  => $this->get('path'),
 				'name' => $this->get('name')
 			];
 
-			if (strpos($docviewer['url'], 'disk:/') === 0)
-			{
+			if (strpos($docviewer['url'], 'disk:/') === 0) {
 				$docviewer['url'] = substr($docviewer['url'], 6);
 			}
 
@@ -714,5 +649,4 @@ class Closed extends AbstractResource
 
 		return false;
 	}
-
 }

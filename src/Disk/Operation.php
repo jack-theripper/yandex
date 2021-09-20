@@ -10,11 +10,12 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex\Disk;
 
 use Arhitector\Yandex\Disk;
 use Psr\Http\Message\UriInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Получение информации об асинхронной операции.
@@ -62,8 +63,7 @@ class Operation
 	 */
 	public function __construct($identifier, Disk $disk, UriInterface $uri)
 	{
-		if ( ! is_string($identifier))
-		{
+		if (!is_string($identifier)) {
 			throw new \InvalidArgumentException('Ожидается строковый идентификатор асинхронной операции.');
 		}
 
@@ -79,15 +79,13 @@ class Operation
 	 */
 	public function getStatus()
 	{
-		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath().'operations/'
-			.$this->getIdentifier()), 'GET'));
+		$response = $this->parent->send(new Request($this->uri->withPath($this->uri->getPath() . 'operations/'
+			. $this->getIdentifier()), 'GET'));
 
-		if ($response->getStatusCode() == 200)
-		{
+		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
 
-			if (isset($response['status']))
-			{
+			if (isset($response['status'])) {
 				return $response['status'];
 			}
 		}
@@ -134,5 +132,4 @@ class Operation
 	{
 		return $this->getStatus() == self::PENDING;
 	}
-	
 }
