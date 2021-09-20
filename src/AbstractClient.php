@@ -10,6 +10,7 @@
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
+
 namespace Arhitector\Yandex;
 
 use Arhitector\Yandex\Client\Exception\ServiceException;
@@ -20,7 +21,7 @@ use Http\Client\Common\PluginClient;
 use Http\Message\MessageFactory\DiactorosMessageFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Uri;
 
 /**
  * Базовый клиент, реализует способы аунтифиации
@@ -133,10 +134,8 @@ abstract class AbstractClient
 			'Content-Type' => $this->getContentType()
 		];
 
-		foreach ($defaultHeaders as $defaultHeader => $value)
-		{
-			if ( ! $request->hasHeader($defaultHeader))
-			{
+		foreach ($defaultHeaders as $defaultHeader => $value) {
+			if (!$request->hasHeader($defaultHeader)) {
 				$request = $request->withHeader($defaultHeader, $value);
 			}
 		}
@@ -173,17 +172,14 @@ abstract class AbstractClient
 	 */
 	protected function transformResponseToException(RequestInterface $request, ResponseInterface $response)
 	{
-		if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500)
-		{
+		if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
 			throw new \RuntimeException($response->getReasonPhrase(), $response->getStatusCode());
 		}
 
-		if ($response->getStatusCode() >= 500 && $response->getStatusCode() < 600)
-		{
+		if ($response->getStatusCode() >= 500 && $response->getStatusCode() < 600) {
 			throw new ServiceException($response->getReasonPhrase(), $response->getStatusCode());
 		}
 
 		return $response;
 	}
-
 }
