@@ -20,7 +20,7 @@ use Http\Client\Common\PluginClient;
 use Http\Message\MessageFactory\DiactorosMessageFactory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Uri;
 
 /**
  * Базовый клиент, реализует способы аунтифиации

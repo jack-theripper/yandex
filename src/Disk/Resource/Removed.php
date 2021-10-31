@@ -15,7 +15,7 @@ namespace Arhitector\Yandex\Disk\Resource;
 use Arhitector\Yandex\Client\Container;
 use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Ресурс в корзине.
@@ -104,7 +104,7 @@ class Removed extends AbstractResource
 							return new self($item, $this->client, $this->uri);
 						}, $response['items']));
 					}
-					
+
 					$this->setContents($response);
 				}
 			}

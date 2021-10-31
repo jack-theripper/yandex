@@ -20,9 +20,9 @@ use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use League\Event\Event;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Закрытый ресурс.
@@ -634,7 +634,7 @@ class Closed extends AbstractResource
 			// $this->client->setRetries = 1
 			throw new \RuntimeException('Не возможно загрузить локальный файл - не получено разрешение.');
 		}
-		
+
 		if ($this->getEmitter()->hasListeners('progress'))
 		{
 			$stream = new Progress($file_path, 'rb');

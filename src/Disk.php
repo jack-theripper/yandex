@@ -18,9 +18,9 @@ use Arhitector\Yandex\Client\OAuth;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
 use Psr\Http\Message\RequestInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Клиент для Яндекс.Диска

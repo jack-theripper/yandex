@@ -1,42 +1,33 @@
 {
-  "name": "arhitector/yandex",
-  "description": "PHP SDK для работы с некоторыми сервисами яндекса (Яндекс.Диск, Yandex.Disk)",
-  "keywords": ["yandex", "disk", "диск", "яндекс", "php", "curl", "api", "client", "sdk",
-    "yandex disk", "яндекс диск", "rest", "restful", "яндекс"],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Dmitry Arhitector",
-      "email": "dmitry.arhitector@yandex.ru"
-    }
-  ],
-  "require": {
-    "php": ">=5.5",
-    "zendframework/zend-diactoros": "^2.1",
-    "league/event": "^2.2",
-    "php-http/curl-client": "1.4.*",
-    "php-http/message": "^1.2",
-    "php-http/client-common": "^1.1"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "~5.6.2"
-  },
-  "autoload": {
-    "psr-4": {
-      "Arhitector\\Yandex\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Arhitector\\Yandex\\Tests\\": "tests/"
-    }
-  },
-  "scripts": {
-    "test": "vendor/bin/phpunit"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.0-dev"
-    }
-  }
+	"name": "arhitector/yandex",
+	"description": "PHP SDK для работы с некоторыми сервисами яндекса (Яндекс.Диск, Yandex.Disk)",
+	"keywords": [
+		"yandex", "disk", "диск", "яндекс", "php", "curl", "api", "client", "sdk",
+		"yandex disk", "яндекс диск", "rest", "restful", "яндекс"
+	],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Dmitry Arhitector",
+			"email": "dmitry.arhitector@yandex.ru"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"league/event": "^2.2",
+		"php-http/curl-client": "1.4.*",
+		"php-http/message": "^1.2",
+		"php-http/client-common": "^1.1",
+		"laminas/laminas-diactoros": "^2.8"
+	},
+	"autoload": {
+		"psr-4": {
+			"Arhitector\\Yandex\\": "src/"
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "2.0-dev"
+		}
+	}
 }

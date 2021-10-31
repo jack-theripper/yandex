@@ -14,7 +14,7 @@ namespace Arhitector\Yandex\Disk;
 
 use Arhitector\Yandex\Disk;
 use Psr\Http\Message\UriInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Получение информации об асинхронной операции.
@@ -74,7 +74,7 @@ class Operation
 
 	/**
 	 * Текстовый статус операции.
-	 * 
+	 *
 	 * @return  string|null NULL если не удалось получить статус.
 	 */
 	public function getStatus()
@@ -134,5 +134,5 @@ class Operation
 	{
 		return $this->getStatus() == self::PENDING;
 	}
-	
+
 }

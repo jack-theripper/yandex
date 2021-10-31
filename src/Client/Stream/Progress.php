@@ -14,7 +14,7 @@ namespace Arhitector\Yandex\Client\Stream;
 
 use League\Event\EmitterTrait;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Stream;
+use Laminas\Diactoros\Stream;
 
 /**
  * Class Progress stream.
@@ -24,17 +24,17 @@ use Zend\Diactoros\Stream;
 class Progress extends Stream implements StreamInterface
 {
 	use EmitterTrait;
-	
+
 	/**
 	 * @var int Размер передаваемого тела.
 	 */
 	protected $totalSize = 0;
-	
+
 	/**
 	 * @var int Количество байт прочитанных из потока.
 	 */
 	protected $readSize = 0;
-	
+
 	/**
 	 * Progress constructor.
 	 *
@@ -44,10 +44,10 @@ class Progress extends Stream implements StreamInterface
 	public function __construct($stream, $mode)
 	{
 		parent::__construct($stream, $mode);
-		
+
 		$this->totalSize = $this->getSize();
 	}
-	
+
 	/**
 	 * Read data from the stream.
 	 *
@@ -64,10 +64,10 @@ class Progress extends Stream implements StreamInterface
 		$this->readSize += $length;
 		$percent = round(100 / $this->totalSize * $this->readSize, 2);
 		$this->emit('progress', min(100.0, $percent));
-		
+
 		return parent::read($length);
 	}
-	
+
 	/**
 	 * Returns the remaining contents in a string
 	 *
@@ -79,10 +79,10 @@ class Progress extends Stream implements StreamInterface
 	{
 		$this->readSize = $this->totalSize;
 		$this->emit('progress', 100.0);
-		
+
 		return parent::getContents();
 	}
-	
+
 	/**
 	 * Seek to a position in the stream.
 	 *
@@ -101,11 +101,11 @@ class Progress extends Stream implements StreamInterface
 		if (parent::seek($offset, $whence))
 		{
 			$this->readSize = $offset;
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 }

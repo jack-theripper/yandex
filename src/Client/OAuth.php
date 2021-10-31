@@ -16,7 +16,7 @@ use Arhitector\Yandex\AbstractClient;
 use Arhitector\Yandex\Client\Exception\UnauthorizedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Request;
+use Laminas\Diactoros\Request;
 
 /**
  * Клиент для Access Token
@@ -238,7 +238,7 @@ class OAuth extends AbstractClient
 
 		return $request;
 	}
-	
+
 	/**
 	 * Трансформирует ответ в исключения.
 	 * Ответ API, где использует OAuth, отличается от других сервисов.
@@ -281,5 +281,5 @@ class OAuth extends AbstractClient
 
 		return parent::transformResponseToException($request, $response);
 	}
-	
+
 }

@@ -18,9 +18,9 @@ use Arhitector\Yandex\Disk;
 use Arhitector\Yandex\Disk\AbstractResource;
 use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
 use Psr\Http\Message\StreamInterface;
-use Zend\Diactoros\Request;
-use Zend\Diactoros\Stream;
-use Zend\Diactoros\Uri;
+use Laminas\Diactoros\Request;
+use Laminas\Diactoros\Stream;
+use Laminas\Diactoros\Uri;
 
 /**
  * Публичный ресурс.
@@ -46,7 +46,7 @@ class Opened extends AbstractResource
 	 * @var    string    ресурс
 	 */
 	protected $publicKey;
-	
+
 	/**
 	 * Конструктор.
 	 *
@@ -381,7 +381,7 @@ class Opened extends AbstractResource
 
 		return $this;
 	}
-	
+
 	/**
 	 * Получает ссылку для просмотра документа.
 	 *
@@ -396,7 +396,7 @@ class Opened extends AbstractResource
 				'name' => $this->get('name'),
 				'url'  => sprintf('ya-disk-public://%s', $this->get('public_key'))
 			];
-			
+
 			return (string) (new Uri('https://docviewer.yandex.ru/'))
 				->withQuery(http_build_query($docviewer, null, '&'));
 		}
