@@ -558,7 +558,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Этот экземпляр используется в качестве обёртки
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public function isWrapper()
 	{
