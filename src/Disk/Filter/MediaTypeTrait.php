@@ -13,129 +13,128 @@
 namespace Arhitector\Yandex\Disk\Filter;
 
 /**
- * Медиа тип.
+ * Фильтрация по медиа типам.
  *
  * @package Arhitector\Yandex\Disk\Filter
  */
 trait MediaTypeTrait
 {
+	/**
+	 * Аyдио-файлы.
+	 */
+	public const TYPE_AUDIO = 'audio';
+	/**
+	 * Файлы резервных и временных копий.
+	 */
+	public const TYPE_BACKUP = 'backup';
+	/**
+	 * Электронные книги.
+	 */
+	public const TYPE_BOOK = 'book';
+	/**
+	 * Сжатые и архивированные файлы.
+	 */
+	public const TYPE_ZIP = 'compressed';
+	/**
+	 * Файлы с базами данных.
+	 */
+	public const TYPE_DATA = 'data';
+	/**
+	 * Файлы с кодом (C++, Java, XML и т. п.), а также служебные файлы IDE.
+	 */
+	public const TYPE_SRC = 'development';
+	/**
+	 * Образы носителей информации и сопутствующие файлы (например, ISO и CUE).
+	 */
+	public const TYPE_DISKIMAGE = 'diskimage';
+	/**
+	 * Документы офисных форматов (Word, OpenOffice и т. п.).
+	 */
+	public const TYPE_DOC = 'document';
+	/**
+	 * Зашифрованные файлы.
+	 */
+	public const TYPE_ENCODED = 'encoded';
+	/**
+	 * Исполняемые файлы.
+	 */
+	public const TYPE_EXE = 'executable';
+	/**
+	 * Файлы с флэш-видео или анимацией.
+	 */
+	public const TYPE_FLASH = 'flash';
+	/**
+	 * Файлы шрифтов.
+	 */
+	public const TYPE_FONT = 'font';
+	/**
+	 * Изображения.
+	 */
+	public const TYPE_IMG = 'image';
+	/**
+	 * файлы настроек для различных программ.
+	 */
+	public const TYPE_SETTINGS = 'settings';
+	/**
+	 * Файлы офисных таблиц (Excel, Numbers, Lotus).
+	 */
+	public const TYPE_TABLE = 'spreadsheet';
+	/**
+	 * Текстовые файлы.
+	 */
+	public const TYPE_TEXT = 'text';
+	/**
+	 * Неизвестный тип.
+	 */
+	public const TYPE_UNKNOWN = 'unknown';
+	/**
+	 * Видео-файлы.
+	 */
+	public const TYPE_VIDEO = 'video';
+	/**
+	 * Различные файлы, используемые браузерами и сайтами (CSS, сертификаты, файлы закладок).
+	 */
+	public const TYPE_WEB = 'web';
 
 	/**
-	 * @var array   доступные типы
+	 * @var string[] все доступные медиа типы
 	 */
 	protected $mediaTypes = [
-
-		/**
-		 * аудио-файлы
-		 */
-		'audio',
-
-		/**
-		 * файлы резервных и временных копий
-		 */
-		'backup',
-
-		/**
-		 * электронные книги
-		 */
-		'book',
-
-		/**
-		 * сжатые и архивированные файлы
-		 */
-		'compressed',
-
-		/**
-		 * файлы с базами данных
-		 */
-		'data',
-
-		/**
-		 * файлы с кодом (C++, Java, XML и т. п.), а также служебные файлы IDE
-		 */
-		'development',
-
-		/**
-		 * образы носителей информации в различных форматах и сопутствующие файлы (например, CUE)
-		 */
-		'diskimage',
-
-		/**
-		 * документы офисных форматов (Word, OpenOffice и т. п.)
-		 */
-		'document',
-
-		/**
-		 * зашифрованные файлы
-		 */
-		'encoded',
-
-		/**
-		 * исполняемые файлы
-		 */
-		'executable',
-
-		/**
-		 * файлы с флэш-видео или анимацией
-		 */
-		'flash',
-
-		/**
-		 * файлы шрифтов.
-		 */
-		'font',
-
-		/**
-		 * изображения
-		 */
-		'image',
-
-		/**
-		 * файлы настроек для различных программ
-		 */
-		'settings',
-
-		/**
-		 * файлы офисных таблиц (Numbers, Lotus)
-		 */
-		'spreadsheet',
-
-		/**
-		 * текстовые файлы
-		 */
-		'text',
-
-		/**
-		 * неизвестный тип
-		 */
-		'unknown',
-
-		/**
-		 * видео-файлы
-		 */
-		'video',
-
-		/**
-		 * различные файлы, используемые браузерами и сайтами (CSS, сертификаты, файлы закладок)
-		 */
-		'web'
+		self::TYPE_AUDIO,
+		self::TYPE_BACKUP,
+		self::TYPE_BOOK,
+		self::TYPE_ZIP,
+		self::TYPE_DATA,
+		self::TYPE_SRC,
+		self::TYPE_DISKIMAGE,
+		self::TYPE_DOC,
+		self::TYPE_ENCODED,
+		self::TYPE_EXE,
+		self::TYPE_FLASH,
+		self::TYPE_FONT,
+		self::TYPE_IMG,
+		self::TYPE_SETTINGS,
+		self::TYPE_TABLE,
+		self::TYPE_TEXT,
+		self::TYPE_UNKNOWN,
+		self::TYPE_VIDEO,
+		self::TYPE_WEB,
 	];
 
 	/**
-	 * Тип файлов, которые нужно включить в список
+	 * Тип файлов, которые нужно включить в список.
 	 *
-	 * @param    string $media_type
-	 *
-	 * @return    $this
-	 * @throws    \UnexpectedValueException
+	 * @param string $media_type медиа тип (`TYPE_*` константы) или несколько типов перечисленных через запятую
+	 * @return $this
+	 * @throws \UnexpectedValueException
 	 */
 	public function setMediaType($media_type)
 	{
-		$media_type = (string) $media_type;
-
-		if ( ! in_array($media_type, $this->getMediaTypes()))
-		{
-			throw new \UnexpectedValueException('Тип файла, значения - "'.implode('", "', $this->getMediaTypes()).'".');
+		$media_types = explode(',', $media_type);
+		if (array_diff($this->getMediaTypes(), $media_types)) {
+			throw new \UnexpectedValueException(
+				'Неверный тип файла, допустимые значения: "'.implode('", "', $this->getMediaTypes()).'".'
+			);
 		}
 
 		$this->isModified = true;
@@ -147,22 +146,17 @@ trait MediaTypeTrait
 	/**
 	 * Получает установленное значение.
 	 *
-	 * @return  string
+	 * @return string|null
 	 */
 	public function getMediaType()
 	{
-		if (isset($this->parameters['media_type']))
-		{
-			return $this->parameters['media_type'];
-		}
-
-		return null;
+		return $this->parameters['media_type'] ?? null;
 	}
 
 	/**
-	 * Все возможные типы файлов
+	 * Все возможные типы файлов.
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getMediaTypes()
 	{
