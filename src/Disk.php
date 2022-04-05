@@ -398,7 +398,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 				new Request(
 					$this->uri
 						->withPath($this->uri->getPath() . 'trash/resources')
-						->withQuery(http_build_query(['path' => 'trash:/'] + $parameters, null, '&')),
+						->withQuery(http_build_query($parameters + ['path' => 'trash:/'], null, '&')),
 					'GET'
 				)
 			);
