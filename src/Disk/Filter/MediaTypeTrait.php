@@ -124,7 +124,7 @@ trait MediaTypeTrait
 	/**
 	 * Тип файлов, которые нужно включить в список.
 	 *
-	 * @param string $media_type медиа тип (`TYPE_*` константы) или несколько типов перечисленных через запятую
+	 * @param string $media_type медиа тип (`MEDIA_TYPE_*` константы) или несколько типов перечисленных через запятую
 	 * @return $this
 	 * @throws \UnexpectedValueException
 	 */
