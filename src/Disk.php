@@ -274,7 +274,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			return [];
 		};
 
-		return (new {$this->collectionClass}($callback))->setLimit($limit, $offset);
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
@@ -346,7 +346,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			return [];
 		};
 
-		return (new {$this->collectionClass}($callback))->setLimit($limit, $offset);
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
@@ -416,7 +416,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			return [];
 		};
 	
-		return (new {$this->collectionClass}($callback))->setSort('created')->setLimit($limit, $offset);
+		return (new $this->collectionClass($callback))->setSort('created')->setLimit($limit, $offset);
 	}
 
 	/**
@@ -478,7 +478,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			return [];
 		};
 
-		return (new {$this->collectionClass}($callback))->setLimit($limit, $offset);
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
