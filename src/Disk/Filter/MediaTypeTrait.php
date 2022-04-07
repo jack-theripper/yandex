@@ -13,6 +13,83 @@
 namespace Arhitector\Yandex\Disk\Filter;
 
 /**
+ * Аyдио-файлы.
+ */
+const MEDIA_TYPE_AUDIO = 'audio';
+/**
+ * Файлы резервных и временных копий.
+ */
+const MEDIA_TYPE_BACKUP = 'backup';
+/**
+ * Электронные книги.
+ */
+const MEDIA_TYPE_BOOK = 'book';
+/**
+ * Сжатые и архивированные файлы.
+ */
+const MEDIA_TYPE_ZIP = 'compressed';
+/**
+ * Файлы с базами данных.
+ */
+const MEDIA_TYPE_DATA = 'data';
+/**
+ * Файлы с кодом (C++, Java, XML и т. п.), а также служебные файлы IDE.
+ */
+const MEDIA_TYPE_SRC = 'development';
+/**
+ * Образы носителей информации и сопутствующие файлы (например, ISO и CUE).
+ */
+const MEDIA_TYPE_DISKIMAGE = 'diskimage';
+/**
+ * Документы офисных форматов (Word, OpenOffice и т. п.).
+ */
+const MEDIA_TYPE_DOC = 'document';
+/**
+ * Зашифрованные файлы.
+ */
+const MEDIA_TYPE_ENCODED = 'encoded';
+/**
+ * Исполняемые файлы.
+ */
+const MEDIA_TYPE_EXE = 'executable';
+/**
+ * Файлы с флэш-видео или анимацией.
+ */
+const MEDIA_TYPE_FLASH = 'flash';
+/**
+ * Файлы шрифтов.
+ */
+const MEDIA_TYPE_FONT = 'font';
+/**
+ * Изображения.
+ */
+const MEDIA_TYPE_IMG = 'image';
+/**
+ * файлы настроек для различных программ.
+ */
+const MEDIA_TYPE_SETTINGS = 'settings';
+/**
+ * Файлы офисных таблиц (Excel, Numbers, Lotus).
+ */
+const MEDIA_TYPE_TABLE = 'spreadsheet';
+/**
+ * Текстовые файлы.
+ */
+const MEDIA_TYPE_TEXT = 'text';
+/**
+ * Неизвестный тип.
+ */
+const MEDIA_TYPE_UNKNOWN = 'unknown';
+/**
+ * Видео-файлы.
+ */
+const MEDIA_TYPE_VIDEO = 'video';
+/**
+ * Различные файлы, используемые браузерами и сайтами (CSS, сертификаты, файлы закладок).
+ */
+const MEDIA_TYPE_WEB = 'web';
+
+/**
  * Фильтрация по медиа типам.
  *
  * @package Arhitector\Yandex\Disk\Filter
@@ -20,105 +97,28 @@ namespace Arhitector\Yandex\Disk\Filter;
 trait MediaTypeTrait
 {
 	/**
-	 * Аyдио-файлы.
-	 */
-	public const TYPE_AUDIO = 'audio';
-	/**
-	 * Файлы резервных и временных копий.
-	 */
-	public const TYPE_BACKUP = 'backup';
-	/**
-	 * Электронные книги.
-	 */
-	public const TYPE_BOOK = 'book';
-	/**
-	 * Сжатые и архивированные файлы.
-	 */
-	public const TYPE_ZIP = 'compressed';
-	/**
-	 * Файлы с базами данных.
-	 */
-	public const TYPE_DATA = 'data';
-	/**
-	 * Файлы с кодом (C++, Java, XML и т. п.), а также служебные файлы IDE.
-	 */
-	public const TYPE_SRC = 'development';
-	/**
-	 * Образы носителей информации и сопутствующие файлы (например, ISO и CUE).
-	 */
-	public const TYPE_DISKIMAGE = 'diskimage';
-	/**
-	 * Документы офисных форматов (Word, OpenOffice и т. п.).
-	 */
-	public const TYPE_DOC = 'document';
-	/**
-	 * Зашифрованные файлы.
-	 */
-	public const TYPE_ENCODED = 'encoded';
-	/**
-	 * Исполняемые файлы.
-	 */
-	public const TYPE_EXE = 'executable';
-	/**
-	 * Файлы с флэш-видео или анимацией.
-	 */
-	public const TYPE_FLASH = 'flash';
-	/**
-	 * Файлы шрифтов.
-	 */
-	public const TYPE_FONT = 'font';
-	/**
-	 * Изображения.
-	 */
-	public const TYPE_IMG = 'image';
-	/**
-	 * файлы настроек для различных программ.
-	 */
-	public const TYPE_SETTINGS = 'settings';
-	/**
-	 * Файлы офисных таблиц (Excel, Numbers, Lotus).
-	 */
-	public const TYPE_TABLE = 'spreadsheet';
-	/**
-	 * Текстовые файлы.
-	 */
-	public const TYPE_TEXT = 'text';
-	/**
-	 * Неизвестный тип.
-	 */
-	public const TYPE_UNKNOWN = 'unknown';
-	/**
-	 * Видео-файлы.
-	 */
-	public const TYPE_VIDEO = 'video';
-	/**
-	 * Различные файлы, используемые браузерами и сайтами (CSS, сертификаты, файлы закладок).
-	 */
-	public const TYPE_WEB = 'web';
-
-	/**
 	 * @var string[] все доступные медиа типы
 	 */
 	protected $mediaTypes = [
-		self::TYPE_AUDIO,
-		self::TYPE_BACKUP,
-		self::TYPE_BOOK,
-		self::TYPE_ZIP,
-		self::TYPE_DATA,
-		self::TYPE_SRC,
-		self::TYPE_DISKIMAGE,
-		self::TYPE_DOC,
-		self::TYPE_ENCODED,
-		self::TYPE_EXE,
-		self::TYPE_FLASH,
-		self::TYPE_FONT,
-		self::TYPE_IMG,
-		self::TYPE_SETTINGS,
-		self::TYPE_TABLE,
-		self::TYPE_TEXT,
-		self::TYPE_UNKNOWN,
-		self::TYPE_VIDEO,
-		self::TYPE_WEB,
+		MEDIA_TYPE_AUDIO,
+		MEDIA_TYPE_BACKUP,
+		MEDIA_TYPE_BOOK,
+		MEDIA_TYPE_ZIP,
+		MEDIA_TYPE_DATA,
+		MEDIA_TYPE_SRC,
+		MEDIA_TYPE_DISKIMAGE,
+		MEDIA_TYPE_DOC,
+		MEDIA_TYPE_ENCODED,
+		MEDIA_TYPE_EXE,
+		MEDIA_TYPE_FLASH,
+		MEDIA_TYPE_FONT,
+		MEDIA_TYPE_IMG,
+		MEDIA_TYPE_SETTINGS,
+		MEDIA_TYPE_TABLE,
+		MEDIA_TYPE_TEXT,
+		MEDIA_TYPE_UNKNOWN,
+		MEDIA_TYPE_VIDEO,
+		MEDIA_TYPE_WEB,
 	];
 
 	/**
