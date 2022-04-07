@@ -131,7 +131,7 @@ trait MediaTypeTrait
 	public function setMediaType($media_type)
 	{
 		$media_types = explode(',', $media_type);
-		if (array_diff($this->getMediaTypes(), $media_types)) {
+		if (array_diff($media_types, $this->getMediaTypes())) {
 			throw new \UnexpectedValueException(
 				'Неверный тип файла, допустимые значения: "'.implode('", "', $this->getMediaTypes()).'".'
 			);
