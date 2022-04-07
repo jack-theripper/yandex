@@ -123,6 +123,10 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	protected $operations = [];
 
+	/**
+	 * @var string имя класса коллекции ресурсов
+	 */
+	protected $collectionClass = Disk\Resource\Collection::class;
 
 	/**
 	 * Конструктор
@@ -247,9 +251,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function ($parameters) {
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/files')
-				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
+		$callback = function ($parameters) {
+			$response = $this->send(
+				new Request(
+					$this->uri
+						->withPath($this->uri->getPath() . 'resources/files')
+						->withQuery(http_build_query($parameters, null, '&')),
+					'GET'
+				)
+			);
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -262,8 +272,9 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			}
 
 			return [];
-		}))
-			->setLimit($limit, $offset);
+		};
+
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
@@ -310,10 +321,16 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getPublishResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function ($parameters) {
+		$callback = function ($parameters) {
 			$previous = $this->setAccessTokenRequired(false);
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/public')
-				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
+			$response = $this->send(
+				new Request(
+					$this->uri
+						->withPath($this->uri->getPath() . 'resources/public')
+						->withQuery(http_build_query($parameters, null, '&')),
+					'GET'
+				)
+			);
 			$this->setAccessTokenRequired($previous);
 
 			if ($response->getStatusCode() == 200) {
@@ -327,8 +344,9 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			}
 
 			return [];
-		}))
-			->setLimit($limit, $offset);
+		};
+
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
@@ -368,16 +386,22 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function getTrashResources($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function ($parameters) {
+		$callback = function ($parameters) {
 			if (
 				!empty($parameters['sort'])
-				&& !in_array($parameters['sort'], ['deleted', 'created', '-deleted', '-created'])
+				&& !in_array($parameters['sort'], ['deleted', 'created', '-deleted', '-created'], true)
 			) {
 				throw new \UnexpectedValueException('Допустимые значения сортировки - deleted, created и со знаком "минус".');
 			}
 
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
-				->withQuery(http_build_query($parameters + ['path' => 'trash:/'], null, '&')), 'GET')));
+			$response = $this->send(
+				new Request(
+					$this->uri
+						->withPath($this->uri->getPath() . 'trash/resources')
+						->withQuery(http_build_query($parameters + ['path' => 'trash:/'], null, '&')),
+					'GET'
+				)
+			);
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -390,9 +414,9 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			}
 
 			return [];
-		}))
-			->setSort('created')
-			->setLimit($limit, $offset);
+		};
+	
+		return (new $this->collectionClass($callback))->setSort('created')->setLimit($limit, $offset);
 	}
 
 	/**
@@ -420,8 +444,8 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Последние загруженные файлы
 	 *
-	 * @param    integer $limit
-	 * @param    integer $offset
+	 * @param    int $limit
+	 * @param    int $offset
 	 *
 	 * @return   \Arhitector\Yandex\Disk\Resource\Collection
 	 *
@@ -431,9 +455,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function uploaded($limit = 20, $offset = 0)
 	{
-		return (new Disk\Resource\Collection(function ($parameters) {
-			$response = $this->send((new Request($this->uri->withPath($this->uri->getPath() . 'resources/last-uploaded')
-				->withQuery(http_build_query($parameters, null, '&')), 'GET')));
+		$callback = function ($parameters) {
+			$response = $this->send(
+				new Request(
+					$this->uri
+						->withPath($this->uri->getPath() . 'resources/last-uploaded')
+						->withQuery(http_build_query($parameters, null, '&')),
+					'GET'
+				)
+			);
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -446,8 +476,9 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			}
 
 			return [];
-		}))
-			->setLimit($limit, $offset);
+		};
+
+		return (new $this->collectionClass($callback))->setLimit($limit, $offset);
 	}
 
 	/**
