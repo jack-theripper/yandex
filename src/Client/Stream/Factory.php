@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Client\Stream
+ * @package    Globosphere\Yandex\Client\Stream
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,7 +11,7 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Client\Stream;
+namespace Globosphere\Yandex\Client\Stream;
 
 use Http\Message\StreamFactory;
 use Psr\Http\Message\StreamInterface;
@@ -20,7 +20,7 @@ use Laminas\Diactoros\Stream;
 /**
  * Интерфейс для более эффективного управления потоками, нежели то, что предлагает http-php
  *
- * @package Arhitector\Yandex\Client\Stream
+ * @package Globosphere\Yandex\Client\Stream
  */
 class Factory implements StreamFactory
 {

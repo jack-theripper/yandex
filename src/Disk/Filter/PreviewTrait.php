@@ -3,20 +3,20 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk\Filter
+ * @package    Globosphere\Yandex\Disk\Filter
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Disk\Filter;
+namespace Globosphere\Yandex\Disk\Filter;
 
 /**
  * Фильтр для превью.
  * Использует возможности Яндес.Диска.
  *
- * @package Arhitector\Yandex\Disk\Filter
+ * @package Globosphere\Yandex\Disk\Filter
  */
 trait PreviewTrait
 {

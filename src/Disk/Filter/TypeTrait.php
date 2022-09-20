@@ -3,19 +3,19 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Globosphere\Yandex\Disk
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Disk\Filter;
+namespace Globosphere\Yandex\Disk\Filter;
 
 /**
  * Тип - файл/папка.
  * 
- * @package Arhitector\Yandex\Disk\Filter
+ * @package Globosphere\Yandex\Disk\Filter
  */
 trait TypeTrait
 {

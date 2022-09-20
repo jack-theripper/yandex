@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Globosphere\Yandex\Disk
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,16 +11,16 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Disk;
+namespace Globosphere\Yandex\Disk;
 
-use Arhitector\Yandex\Disk;
+use Globosphere\Yandex\Disk;
 use Psr\Http\Message\UriInterface;
 use Laminas\Diactoros\Request;
 
 /**
  * Получение информации об асинхронной операции.
  *
- * @package Arhitector\Yandex\Disk
+ * @package Globosphere\Yandex\Disk
  */
 class Operation
 {
@@ -46,7 +46,7 @@ class Operation
 	protected $uri;
 
 	/**
-	 * @var \Arhitector\Yandex\Disk объект диска, породивший ресурс.
+	 * @var \Globosphere\Yandex\Disk объект диска, породивший ресурс.
 	 */
 	protected $parent;
 

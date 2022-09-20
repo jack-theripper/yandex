@@ -3,22 +3,22 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Client
+ * @package    Globosphere\Yandex\Client
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Client;
+namespace Globosphere\Yandex\Client;
 
-use Arhitector\Yandex\AbstractClient;
+use Globosphere\Yandex\AbstractClient;
 use Psr\Http\Message\RequestInterface;
 
 /**
  * Ключ API
  *
- * @package Arhitector\Yandex\Client
+ * @package Globosphere\Yandex\Client
  */
 class SimpleKey extends AbstractClient
 {

@@ -10,7 +10,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 $token = 'Access Token';
 
-$disk = new Arhitector\Yandex\Disk($token);
+$disk = new Globosphere\Yandex\Disk($token);
 
 // Внимание! В запрос будет передан Access Token
 $request = new Request('https://cloud-api.yandex.net/v1/disk/resources?path=O2cXW1AEVWI222.jpg', 'GET');

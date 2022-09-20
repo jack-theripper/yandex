@@ -3,23 +3,23 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Globosphere\Yandex\Disk
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Disk\Resource;
+namespace Globosphere\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container\Collection as CollectionContainer;
-use Arhitector\Yandex\Disk\Filter\MediaTypeTrait;
-use Arhitector\Yandex\Disk\FilterTrait;
+use Globosphere\Yandex\Client\Container\Collection as CollectionContainer;
+use Globosphere\Yandex\Disk\Filter\MediaTypeTrait;
+use Globosphere\Yandex\Disk\FilterTrait;
 
 /**
  * Коллекция ресурсов.
  *
- * @package Arhitector\Yandex\Disk\Resource
+ * @package Globosphere\Yandex\Disk\Resource
  */
 class Collection extends CollectionContainer
 {

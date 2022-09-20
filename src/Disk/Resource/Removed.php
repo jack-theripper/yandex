@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk\Resource
+ * @package    Globosphere\Yandex\Disk\Resource
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,11 +11,11 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Disk\Resource;
+namespace Globosphere\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Disk;
-use Arhitector\Yandex\Disk\AbstractResource;
+use Globosphere\Yandex\Client\Container;
+use Globosphere\Yandex\Disk;
+use Globosphere\Yandex\Disk\AbstractResource;
 use Laminas\Diactoros\Request;
 
 /**
@@ -34,7 +34,7 @@ use Laminas\Diactoros\Request;
  * @property-read   string     $mime_type
  * @property-read   integer    $size
  *
- * @package Arhitector\Yandex\Disk\Resource
+ * @package Globosphere\Yandex\Disk\Resource
  */
 class Removed extends AbstractResource
 {
@@ -43,7 +43,7 @@ class Removed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $path путь к ресурсу в корзине
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Globosphere\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
 	public function __construct($path, Disk $parent, \Psr\Http\Message\UriInterface $uri)

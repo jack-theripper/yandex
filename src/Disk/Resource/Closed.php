@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk\Resource
+ * @package    Globosphere\Yandex\Disk\Resource
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,14 +11,14 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Disk\Resource;
+namespace Globosphere\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Client\Exception\NotFoundException;
-use Arhitector\Yandex\Client\Stream\Progress;
-use Arhitector\Yandex\Disk;
-use Arhitector\Yandex\Disk\AbstractResource;
-use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use Globosphere\Yandex\Client\Container;
+use Globosphere\Yandex\Client\Exception\NotFoundException;
+use Globosphere\Yandex\Client\Stream\Progress;
+use Globosphere\Yandex\Disk;
+use Globosphere\Yandex\Disk\AbstractResource;
+use Globosphere\Yandex\Disk\Exception\AlreadyExistsException;
 use League\Event\Event;
 use Psr\Http\Message\StreamInterface;
 use Laminas\Diactoros\Request;
@@ -40,7 +40,7 @@ use Laminas\Diactoros\Uri;
  * @property-read   integer    $size
  * @property-read   string     $docviewer
  *
- * @package Arhitector\Yandex\Disk\Resource
+ * @package Globosphere\Yandex\Disk\Resource
  */
 class Closed extends AbstractResource
 {
@@ -49,7 +49,7 @@ class Closed extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $resource путь к существующему либо новому ресурсу
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Globosphere\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
 	public function __construct($resource, Disk $parent, \Psr\Http\Message\UriInterface $uri)
@@ -245,7 +245,7 @@ class Closed extends AbstractResource
 	 *
 	 * @param   boolean $permanently TRUE Признак безвозвратного удаления
 	 *
-	 * @return  bool|\Arhitector\Yandex\Disk\Operation|\Arhitector\Yandex\Disk\Resource\Removed
+	 * @return  bool|\Globosphere\Yandex\Disk\Operation|\Globosphere\Yandex\Disk\Resource\Removed
 	 */
 	public function delete($permanently = false)
 	{
@@ -298,12 +298,12 @@ class Closed extends AbstractResource
 	 * возвращается подходящий код ответа, а тело ответа содержит описание ошибки).
 	 * Приложения должны самостоятельно следить за статусами запрошенных операций.
 	 *
-	 * @param   string|\Arhitector\Yandex\Disk\Resource\Closed $destination новый путь.
+	 * @param   string|\Globosphere\Yandex\Disk\Resource\Closed $destination новый путь.
 	 * @param   boolean                                        $overwrite   признак перезаписи файлов. Учитывается,
 	 *                                                                      если ресурс перемещается в папку, в которой
 	 *                                                                      уже есть ресурс с таким именем.
 	 *
-	 * @return bool|\Arhitector\Yandex\Disk\Operation
+	 * @return bool|\Globosphere\Yandex\Disk\Operation
 	 */
 	public function move($destination, $overwrite = false)
 	{
@@ -339,7 +339,7 @@ class Closed extends AbstractResource
 	/**
 	 *    Создание папки, если ресурса с таким же именем нет
 	 *
-	 * @return    \Arhitector\Yandex\Disk\Resource\Closed
+	 * @return    \Globosphere\Yandex\Disk\Resource\Closed
 	 * @throws    mixed
 	 */
 	public function create()
@@ -362,7 +362,7 @@ class Closed extends AbstractResource
 	 *
 	 * @param   boolean $publish TRUE открыть доступ, FALSE закрыть доступ
 	 *
-	 * @return  \Arhitector\Yandex\Disk\Resource\Closed|\Arhitector\Yandex\Disk\Resource\Opened
+	 * @return  \Globosphere\Yandex\Disk\Resource\Closed|\Globosphere\Yandex\Disk\Resource\Opened
 	 */
 	public function setPublish($publish = true)
 	{
@@ -514,7 +514,7 @@ class Closed extends AbstractResource
 	 * @param   bool   $overwrite         если ресурс существует на Яндекс.Диске TRUE перезапишет ресурс.
 	 * @param   bool   $disable_redirects помогает запретить редиректы по адресу, TRUE запретит пере адресацию.
 	 *
-	 * @return  bool|\Arhitector\Yandex\Disk\Operation
+	 * @return  bool|\Globosphere\Yandex\Disk\Operation
 	 *
 	 * @throws    mixed
 	 *

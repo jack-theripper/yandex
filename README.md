@@ -88,11 +88,11 @@ SDK различает общий доступ и доступ приложен�
 ```php
 
 // передать OAuth-токен зарегистрированного приложения.
-$disk = new Arhitector\Yandex\Disk('OAuth-токен');
+$disk = new Globosphere\Yandex\Disk('OAuth-токен');
 
 /**
  * Получить Объектно Ориентированное представление закрытого ресурса.
- * @var  Arhitector\Yandex\Disk\Resource\Closed $resource
+ * @var  Globosphere\Yandex\Disk\Resource\Closed $resource
  */
 $resource = $disk->getResource('новый файл.txt');
 
@@ -118,7 +118,7 @@ try
   {
     /**
      * Получить закрытый ресурс
-     * @var  Arhitector\Yandex\Disk\Resource\Closed $resource
+     * @var  Globosphere\Yandex\Disk\Resource\Closed $resource
      */
     $resource = $disk->getResource('новый файл.txt');
 
@@ -127,7 +127,7 @@ try
     // Вывести информацию. Когда ресурс не найден будет вызвано исключение NotFoundException
     $resource->toArray();
   }
-  catch (Arhitector\Yandex\Client\Exception\NotFoundException $exc)
+  catch (Globosphere\Yandex\Client\Exception\NotFoundException $exc)
   {
     // Ресурс на Диске отсутствует, загрузить под именем 'новый файл.txt'
     $resource->upload(__DIR__.'/файл в локальной папке.txt');
@@ -136,7 +136,7 @@ try
   // Теперь удалю, совсем.
   $file->delete(true);
 }
-catch (Arhitector\Yandex\Client\Exception\UnauthorizedException $exc)
+catch (Globosphere\Yandex\Client\Exception\UnauthorizedException $exc)
 {
 	// Записать в лог, авторизоваться не удалось
 	log($exc->getMessage());
@@ -149,26 +149,26 @@ catch (Exception $exc)
 
 ## 1.2. Как подключиться к Яндекс.Диску
 
-Обращение к Яндекс.Диску осуществляется через **Arhitector\Yandex\Disk**. После получения OAuth-токена, его (OAuth-токен) можно использовать следующим образом:
+Обращение к Яндекс.Диску осуществляется через **Globosphere\Yandex\Disk**. После получения OAuth-токена, его (OAuth-токен) можно использовать следующим образом:
 
 - Вариант 1. Инициализировать клиент.
 
 Один и тот же OAuth-токен может быть использован для доступа к разным сервисам.
 
 ```php
-$client = new Arhitector\Yandex\Client\OAuth('OAuth-токен');
+$client = new Globosphere\Yandex\Client\OAuth('OAuth-токен');
 ```
 
 Инициализировать клиент Яндекс.Диска и передать `$client`.
 
 ```php
-$disk = new Arhitector\Yandex\Disk($client);
+$disk = new Globosphere\Yandex\Disk($client);
 ```
 
 - Вариант 2. Инициализировать клиент Яндекс.Диска с передачей OAuth-токена в конструктор.
 
 ```php
-$disk = new Arhitector\Yandex\Disk('OAuth-токен');
+$disk = new Globosphere\Yandex\Disk('OAuth-токен');
 ```
 
 - Вариант 3. Инициализировать клиент Яндекс.Диска без передачи OAuth-токена.
@@ -189,12 +189,12 @@ $disk->setAccessToken('OAuth-токен');
 
 ```php
 /**
- * @var Arhitector\Yandex\Client\OAuth  $client
- * @var Arhitector\Yandex\Disk          $disk
+ * @var Globosphere\Yandex\Client\OAuth  $client
+ * @var Globosphere\Yandex\Disk          $disk
  */
 ```
 
-> Примечание: Arhitector\Yandex\Client\OAuth не является реализацией протокола OAuth 2.0.
+> Примечание: Globosphere\Yandex\Client\OAuth не является реализацией протокола OAuth 2.0.
 
 ### 1.2.1. Установить OAuth-токен
 
@@ -244,11 +244,11 @@ $client->getAccessToken(); // string '0c4181a7c2cf4521964a72ff57a34a07'
 
 SDK различает три типа ресурсов: **публичный**, **закрытый**, и тот который **помещён в корзину**. Каждый из типов представлен своим объектом. Для любого типа ресурса доступна фильтрация (методы **setMediaType**, **setType** и т.д.) у каждого из типов свой набор возможных значений.
 
-- Публичный ресурс, `Arhitector\Yandex\Disk\Resource\Opened`
+- Публичный ресурс, `Globosphere\Yandex\Disk\Resource\Opened`
 
-- Ресурс доступный владельцу, `Arhitector\Yandex\Disk\Resource\Closed`
+- Ресурс доступный владельцу, `Globosphere\Yandex\Disk\Resource\Closed`
 
-- Ресурс в корзине, `Arhitector\Yandex\Disk\Resource\Removed`
+- Ресурс в корзине, `Globosphere\Yandex\Disk\Resource\Removed`
 
 ### Введение
 
@@ -527,7 +527,7 @@ public Resource\Closed Disk::getResource(string $path [, int $limit = 20 [, int 
 
 ```php
 /**
- * @var Arhitector\Yandex\Disk\Resource\Closed  $resource
+ * @var Globosphere\Yandex\Disk\Resource\Closed  $resource
  */
 $resource = $disk->getResource('/путь от корня диска/до файла/или папки/название.txt');
 
@@ -538,7 +538,7 @@ $resource = $disk->getResource('disk:/путь от корня диска/до �
 
 ```php
 /**
- * @var Arhitector\Yandex\Disk\Resource\Closed  $resource
+ * @var Globosphere\Yandex\Disk\Resource\Closed  $resource
  */
 $resource = $disk->getResource('app:/название.txt', 100, 10);
 ```
@@ -557,7 +557,7 @@ $resource->setOffset(200);
 
 #### Метод Disk::getResources, список всех файлов.
 
-Получает список всех файлов в папках, под папках и т.д. Список представлен объектом `Arhitector\Yandex\Disk\Resource\Collection`. 
+Получает список всех файлов в папках, под папках и т.д. Список представлен объектом `Globosphere\Yandex\Disk\Resource\Collection`. 
 
 ```php
 public Resource\Collection Disk::getResources([, int $limit = 20 [, int $offset = 0]])
@@ -578,10 +578,10 @@ $collection = $disk->getResources();
 $disk->getResources(100, 15);
 ```
 
-Список файлов в папках также представлен объектом `Arhitector\Yandex\Disk\Resource\Collection`
+Список файлов в папках также представлен объектом `Globosphere\Yandex\Disk\Resource\Collection`
 
 ```php
-$resource->items; // object 'Arhitector\Yandex\Disk\Resource\Collection'
+$resource->items; // object 'Globosphere\Yandex\Disk\Resource\Collection'
 ```
 
 ##### Метод getFirst
@@ -825,9 +825,9 @@ public mixed delete([bool $permanently = false])
 
 - `boolean` - результат выполнения.
 
-- `Arhitector\Yandex\Disk\Operation` - объект синхронной операции, если по мнению API Яндекс.Диска операция удаления длительная.
+- `Globosphere\Yandex\Disk\Operation` - объект синхронной операции, если по мнению API Яндекс.Диска операция удаления длительная.
 
-- ~~`Arhitector\Yandex\Disk\Resource\Removed` - объект ресурса в корзине (не поддерживается).~~
+- ~~`Globosphere\Yandex\Disk\Resource\Removed` - объект ресурса в корзине (не поддерживается).~~
 
 **Примеры**
 
@@ -852,7 +852,7 @@ public mixed Closed::move(mixed $destionation [, $overwrite = FALSE] )
 
 **Возвращаемые значения**
 
-`bool` или объект `Arhitector\Yandex\Disk\Operation`
+`bool` или объект `Globosphere\Yandex\Disk\Operation`
 
 **Примеры**
 
@@ -880,7 +880,7 @@ $resource->create();
 
 ### 1.3.8.10. Публикация ресурса\Закрытие доступа
 
-Открывает доступ к ресурсу из вне по публичной ссылке. Опубликованные ресурсы управляются своим объектом `Arhitector\Yandex\Disk\Resource\Opened`.
+Открывает доступ к ресурсу из вне по публичной ссылке. Опубликованные ресурсы управляются своим объектом `Globosphere\Yandex\Disk\Resource\Opened`.
 
 ```php
 public mixed Closed::setPublish([bool $publish = true])
@@ -890,10 +890,10 @@ public mixed Closed::setPublish([bool $publish = true])
 
 **Возвращаемые значения**
 
-`Arhitector\Yandex\Disk\Resource\Closed` возвращается когда доступ закрыт.
+`Globosphere\Yandex\Disk\Resource\Closed` возвращается когда доступ закрыт.
 
 
-`Arhitector\Yandex\Disk\Resource\Opened` возвращается если был открыт доступ к ресурсу.
+`Globosphere\Yandex\Disk\Resource\Opened` возвращается если был открыт доступ к ресурсу.
 
 У ресурса с открытым доступом существует дополнительная информация, такая как `public_key` или `public_url`. Также `docviewer` возвращает ссылку доступную всем из вне.
 
@@ -985,13 +985,13 @@ public bool Closed::copy(mixed $destination [,bool  $overwrite = false])
 Может принимать значения:
 
 - `string` - строка, путь от корня папки приложения или  корня Яндекс.Диска.
-- `Arhitector\Yandex\Disk\Resource\Closed` - инициализированный объект другого ресурса.
+- `Globosphere\Yandex\Disk\Resource\Closed` - инициализированный объект другого ресурса.
 
 `$overwrite` - признак перезаписи, если по указанному пути существует ресурс. Поведение по умолчанию `FALSE`.
 
 **Возвращаемые значения**
 
-`TRUE` или `FALSE`, а также `Arhitector\Yandex\Disk\Operation` в случае длительного копирования.
+`TRUE` или `FALSE`, а также `Globosphere\Yandex\Disk\Operation` в случае длительного копирования.
 
 **Примеры**
 
@@ -1041,7 +1041,7 @@ $fp = fopen(__DIR__.'/файл.txt', 'rb');
 $resource->upload($fp, true);
 ```
 
-Загрузка файлов, расположенных на удалённом сервере. Возвращает объект операции `Arhitector\Yandex\Disk\Operation`.
+Загрузка файлов, расположенных на удалённом сервере. Возвращает объект операции `Globosphere\Yandex\Disk\Operation`.
 
 ```php
 $operation = $resource->upload('http://домен.ру/файл.zip');
@@ -1052,7 +1052,7 @@ $operation = $resource->upload('https://домен.ру/файл.zip', null, tru
 
 ### 1.3.8.14. Методы фильтрации
 
-Объект `Arhitector\Yandex\Disk\Resource\Closed` поддерживает:
+Объект `Globosphere\Yandex\Disk\Resource\Closed` поддерживает:
 
 - setLimit
 - setOffset
@@ -1085,7 +1085,7 @@ public Resource\Closed Disk::getPublishResource(string $public_key [, int $limit
 
 ```php
 /**
- * @var Arhitector\Yandex\Disk\Resource\Opened  $publicResource
+ * @var Globosphere\Yandex\Disk\Resource\Opened  $publicResource
  */
 $publicResource = $disk->getResource('https://yadi.sk/d/g0N4hNtXcrq22');
 
@@ -1103,7 +1103,7 @@ $publicResource->setOffset(200);
 
 #### Метод Disk::getPublishResources, список всех опубликованных файлов.
 
-Получает список всех файлов на Яндекс.Диске с открытым доступом и т.д. Список представлен объектом `Arhitector\Yandex\Disk\Resource\Collection`.
+Получает список всех файлов на Яндекс.Диске с открытым доступом и т.д. Список представлен объектом `Globosphere\Yandex\Disk\Resource\Collection`.
 
 ```php
 public Resource\Collection Disk::getPublishResources([, int $limit = 20 [, int $offset = 0]])
@@ -1270,7 +1270,7 @@ var_dump($stream->getSize());
 	 * @param int       $limit
 	 * @param int       $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Removed
+	 * @return \Globosphere\Yandex\Disk\Resource\Removed
 	 * @example
 	 *
 	 * $disk->getTrashResource('file.ext') -> toArray() // файл в корзине
@@ -1284,7 +1284,7 @@ var_dump($stream->getSize());
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return \Globosphere\Yandex\Disk\Resource\Collection
 	 */
 	public function getTrashResources($limit = 20, $offset = 0)
 	
@@ -1315,7 +1315,7 @@ var_dump($stream->getSize());
 	/**
 	 * Очистить корзину.
 	 *
-	 * @return bool|\Arhitector\Yandex\Disk\Operation
+	 * @return bool|\Globosphere\Yandex\Disk\Operation
 	 */
 	public function cleanTrash()
 
@@ -1326,7 +1326,7 @@ var_dump($stream->getSize());
 	 * @param    integer $limit
 	 * @param    integer $offset
 	 *
-	 * @return   \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return   \Globosphere\Yandex\Disk\Resource\Collection
 	 *
 	 * @example
 	 *
@@ -1341,7 +1341,7 @@ var_dump($stream->getSize());
 	 *
 	 * @param   string $identifier идентификатор операции или NULL
 	 *
-	 * @return  \Arhitector\Yandex\Disk\Operation
+	 * @return  \Globosphere\Yandex\Disk\Operation
 	 *
 	 * @example
 	 *

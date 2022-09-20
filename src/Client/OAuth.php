@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Client
+ * @package    Globosphere\Yandex\Client
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,10 +11,10 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Client;
+namespace Globosphere\Yandex\Client;
 
-use Arhitector\Yandex\AbstractClient;
-use Arhitector\Yandex\Client\Exception\UnauthorizedException;
+use Globosphere\Yandex\AbstractClient;
+use Globosphere\Yandex\Client\Exception\UnauthorizedException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Request;
@@ -22,7 +22,7 @@ use Laminas\Diactoros\Request;
 /**
  * Клиент для Access Token
  *
- * @package Arhitector\Yandex\Client
+ * @package Globosphere\Yandex\Client
  */
 class OAuth extends AbstractClient
 {

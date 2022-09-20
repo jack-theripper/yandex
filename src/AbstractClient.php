@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex
+ * @package    Globosphere\Yandex
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,11 +11,11 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex;
+namespace Globosphere\Yandex;
 
-use Arhitector\Yandex\Client\Exception\ServiceException;
-use Arhitector\Yandex\Client\HttpClient;
-use Arhitector\Yandex\Client\Stream\Factory;
+use Globosphere\Yandex\Client\Exception\ServiceException;
+use Globosphere\Yandex\Client\HttpClient;
+use Globosphere\Yandex\Client\Stream\Factory;
 use Http\Client\Common\Plugin\RedirectPlugin;
 use Http\Client\Common\PluginClient;
 use Http\Message\MessageFactory\DiactorosMessageFactory;
@@ -26,7 +26,7 @@ use Laminas\Diactoros\Uri;
 /**
  * Базовый клиент, реализует способы аунтифиации
  *
- * @package Arhitector\Yandex
+ * @package Globosphere\Yandex
  */
 abstract class AbstractClient
 {
@@ -58,17 +58,17 @@ abstract class AbstractClient
 		/**
 		 * Не авторизован.
 		 */
-		401 => 'Arhitector\Yandex\Client\Exception\UnauthorizedException',
+		401 => 'Globosphere\Yandex\Client\Exception\UnauthorizedException',
 
 		/**
 		 * Доступ запрещён. Возможно, у приложения недостаточно прав для данного действия.
 		 */
-		403 => 'Arhitector\Yandex\Client\Exception\ForbiddenException',
+		403 => 'Globosphere\Yandex\Client\Exception\ForbiddenException',
 
 		/**
 		 * Не удалось найти запрошенный ресурс.
 		 */
-		404 => 'Arhitector\Yandex\Client\Exception\NotFoundException'
+		404 => 'Globosphere\Yandex\Client\Exception\NotFoundException'
 	];
 
 	/**
@@ -168,7 +168,7 @@ abstract class AbstractClient
 	 * @param \Psr\Http\Message\ResponseInterface $response
 	 *
 	 * @return \Psr\Http\Message\ResponseInterface если статус код не является ошибочным, то вернуть объект ответа
-	 * @throws \Arhitector\Yandex\Client\Exception\ServiceException
+	 * @throws \Globosphere\Yandex\Client\Exception\ServiceException
 	 */
 	protected function transformResponseToException(RequestInterface $request, ResponseInterface $response)
 	{

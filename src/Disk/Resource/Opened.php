@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk\Resource
+ * @package    Globosphere\Yandex\Disk\Resource
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,13 +11,13 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex\Disk\Resource;
+namespace Globosphere\Yandex\Disk\Resource;
 
-use Arhitector\Yandex\Client\Container;
-use Arhitector\Yandex\Client\Exception\NotFoundException;
-use Arhitector\Yandex\Disk;
-use Arhitector\Yandex\Disk\AbstractResource;
-use Arhitector\Yandex\Disk\Exception\AlreadyExistsException;
+use Globosphere\Yandex\Client\Container;
+use Globosphere\Yandex\Client\Exception\NotFoundException;
+use Globosphere\Yandex\Disk;
+use Globosphere\Yandex\Disk\AbstractResource;
+use Globosphere\Yandex\Disk\Exception\AlreadyExistsException;
 use Psr\Http\Message\StreamInterface;
 use Laminas\Diactoros\Request;
 use Laminas\Diactoros\Stream;
@@ -26,7 +26,7 @@ use Laminas\Diactoros\Uri;
 /**
  * Публичный ресурс.
  *
- * @package Arhitector\Yandex\Disk\Resource
+ * @package Globosphere\Yandex\Disk\Resource
  *
  * @property-read   string    $public_key публичный ключ
  * @property-read   string    $name       название файла
@@ -52,7 +52,7 @@ class Opened extends AbstractResource
 	 * Конструктор.
 	 *
 	 * @param string|array                   $public_key URL адрес или публичный ключ ресурса.
-	 * @param \Arhitector\Yandex\Disk        $parent
+	 * @param \Globosphere\Yandex\Disk        $parent
 	 * @param \Psr\Http\Message\UriInterface $uri
 	 */
 	public function __construct($public_key, Disk $parent, \Psr\Http\Message\UriInterface $uri)

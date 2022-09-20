@@ -3,22 +3,22 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Disk
+ * @package    Globosphere\Yandex\Disk
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Disk;
+namespace Globosphere\Yandex\Disk;
 
-use Arhitector\Yandex\Client\Container\ContainerTrait;
+use Globosphere\Yandex\Client\Container\ContainerTrait;
 use League\Event\EmitterTrait;
 
 /**
  * Базовый касс, описывающий ресурс.
  *
- * @package Arhitector\Yandex\Disk
+ * @package Globosphere\Yandex\Disk
  */
 abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAggregate
 {
@@ -38,7 +38,7 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 	protected $uri;
 
 	/**
-	 * @var \Arhitector\Yandex\Disk объект диска, породивший ресурс.
+	 * @var \Globosphere\Yandex\Disk объект диска, породивший ресурс.
 	 */
 	protected $client;
 

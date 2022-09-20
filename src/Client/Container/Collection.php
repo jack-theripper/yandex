@@ -3,19 +3,19 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex\Client
+ * @package    Globosphere\Yandex\Client
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
  * @copyright  2016 Arhitector
  * @link       https://github.com/jack-theripper
  */
-namespace Arhitector\Yandex\Client\Container;
+namespace Globosphere\Yandex\Client\Container;
 
 /**
  * Коллекция на основе контейнера.
  * 
- * @package Arhitector\Yandex\Client\Container
+ * @package Globosphere\Yandex\Client\Container
  */
 class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 {
@@ -47,7 +47,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Получает последний элемент в списке
 	 *
-	 * @return  \Arhitector\Yandex\Disk\AbstractResource
+	 * @return  \Globosphere\Yandex\Disk\AbstractResource
 	 */
 	public function getLast()
 	{

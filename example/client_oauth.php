@@ -8,6 +8,6 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$oauth = new Arhitector\Yandex\Client\OAuth();
+$oauth = new Globosphere\Yandex\Client\OAuth();
 
 var_dump($oauth);

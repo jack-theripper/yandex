@@ -3,7 +3,7 @@
 /**
  * Часть библиотеки для работы с сервисами Яндекса
  *
- * @package    Arhitector\Yandex
+ * @package    Globosphere\Yandex
  * @version    2.0
  * @author     Arhitector
  * @license    MIT License
@@ -11,11 +11,11 @@
  * @link       https://github.com/jack-theripper
  */
 
-namespace Arhitector\Yandex;
+namespace Globosphere\Yandex;
 
-use Arhitector\Yandex\Client\Container\ContainerTrait;
-use Arhitector\Yandex\Client\Exception\UnsupportedException;
-use Arhitector\Yandex\Client\OAuth;
+use Globosphere\Yandex\Client\Container\ContainerTrait;
+use Globosphere\Yandex\Client\Exception\UnsupportedException;
+use Globosphere\Yandex\Client\OAuth;
 use League\Event\Emitter;
 use League\Event\EmitterTrait;
 use Psr\Http\Message\RequestInterface;
@@ -26,7 +26,7 @@ use Laminas\Diactoros\Uri;
 /**
  * Клиент для Яндекс.Диска
  *
- * @package Arhitector\Yandex
+ * @package Globosphere\Yandex
  */
 class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 {
@@ -47,28 +47,28 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 		/**
 		 * Некорректные данные (Bad Request).
 		 */
-		400 => 'Arhitector\Yandex\Client\Exception\UnsupportedException',
+		400 => 'Globosphere\Yandex\Client\Exception\UnsupportedException',
 
 		/**
 		 * Не авторизован (Unauthorized).
 		 */
-		401 => 'Arhitector\Yandex\Client\Exception\UnauthorizedException',
+		401 => 'Globosphere\Yandex\Client\Exception\UnauthorizedException',
 
 		/**
 		 * Доступ запрещён (Forbidden).
 		 * Возможно, у приложения недостаточно прав для данного действия.
 		 */
-		403 => 'Arhitector\Yandex\Client\Exception\ForbiddenException',
+		403 => 'Globosphere\Yandex\Client\Exception\ForbiddenException',
 
 		/**
 		 * Не удалось найти запрошенный ресурс (Not Found).
 		 */
-		404 => 'Arhitector\Yandex\Client\Exception\NotFoundException',
+		404 => 'Globosphere\Yandex\Client\Exception\NotFoundException',
 
 		/**
 		 * Ресурс не может быть представлен в запрошенном формате (Not Acceptable).
 		 */
-		406 => 'Arhitector\Yandex\Disk\Exception\UnsupportedException',
+		406 => 'Globosphere\Yandex\Disk\Exception\UnsupportedException',
 
 		/**
 		 * Конфликт путей/имён.
@@ -78,44 +78,44 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 			/**
 			 * Указанного пути не существует.
 			 */
-			'DiskPathDoesntExistsError' => 'Arhitector\Yandex\Client\Exception\NotFoundException',
+			'DiskPathDoesntExistsError' => 'Globosphere\Yandex\Client\Exception\NotFoundException',
 
 			/**
 			 * Ресурс уже существует
 			 */
-			'DiskResourceAlreadyExistsError' => 'Arhitector\Yandex\Disk\Exception\AlreadyExistsException',
+			'DiskResourceAlreadyExistsError' => 'Globosphere\Yandex\Disk\Exception\AlreadyExistsException',
 
 			/**
 			 * Уже существует папка с таким именем.
 			 */
-			'DiskPathPointsToExistentDirectoryError' => 'Arhitector\Yandex\Disk\Exception\AlreadyExistsException'
+			'DiskPathPointsToExistentDirectoryError' => 'Globosphere\Yandex\Disk\Exception\AlreadyExistsException'
 		],
 
 		/**
 		 * Ресурс не может быть представлен в запрошенном формате (Unsupported Media Type).
 		 */
-		415 => 'Arhitector\Yandex\Client\Exception\UnsupportedException',
+		415 => 'Globosphere\Yandex\Client\Exception\UnsupportedException',
 
 		/**
 		 * Ресурс заблокирован (Locked).
 		 * Возможно, над ним выполняется другая операция.
 		 */
-		423 => 'Arhitector\Yandex\Client\Exception\ForbiddenException',
+		423 => 'Globosphere\Yandex\Client\Exception\ForbiddenException',
 
 		/**
 		 * Слишком много запросов(Too Many Requests).
 		 */
-		429 => 'Arhitector\Yandex\Client\Exception\ForbiddenException',
+		429 => 'Globosphere\Yandex\Client\Exception\ForbiddenException',
 
 		/**
 		 * Сервис временно недоступен(Service Unavailable).
 		 */
-		503 => 'Arhitector\Yandex\Client\Exception\ServiceException',
+		503 => 'Globosphere\Yandex\Client\Exception\ServiceException',
 
 		/**
 		 * Недостаточно свободного места (Insufficient Storage).
 		 */
-		507 => 'Arhitector\Yandex\Disk\Exception\OutOfSpaceException'
+		507 => 'Globosphere\Yandex\Disk\Exception\OutOfSpaceException'
 	];
 
 	/**
@@ -197,7 +197,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param    integer $limit
 	 * @param    integer $offset
 	 *
-	 * @return   \Arhitector\Yandex\Disk\Resource\Closed
+	 * @return   \Globosphere\Yandex\Disk\Resource\Closed
 	 *
 	 * @example
 	 *
@@ -238,15 +238,15 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return \Globosphere\Yandex\Disk\Resource\Collection
 	 *
 	 * @example
 	 *
-	 * $disk->getResources(100, 0) // Arhitector\Yandex\Disk\Resource\Collection
+	 * $disk->getResources(100, 0) // Globosphere\Yandex\Disk\Resource\Collection
 	 *      ->toArray();
 	 *
 	 * array (size=2)
-	 * 0 => object(Arhitector\Yandex\Disk\Resource\Closed)[30]
+	 * 0 => object(Globosphere\Yandex\Disk\Resource\Closed)[30]
 	 * .....
 	 */
 	public function getResources($limit = 20, $offset = 0)
@@ -282,7 +282,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @param	mixed $public_key Публичный ключ к опубликованному ресурсу.
 	 *
-	 * @return	\Arhitector\Yandex\Disk\Resource\Opened
+	 * @return	\Globosphere\Yandex\Disk\Resource\Opened
 	 *
 	 * @example
 	 *
@@ -317,7 +317,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return \Globosphere\Yandex\Disk\Resource\Collection
 	 */
 	public function getPublishResources($limit = 20, $offset = 0)
 	{
@@ -356,7 +356,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int       $limit
 	 * @param int       $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Removed
+	 * @return \Globosphere\Yandex\Disk\Resource\Removed
 	 * @example
 	 *
 	 * $disk->getTrashResource('file.ext') -> toArray() // файл в корзине
@@ -382,7 +382,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return \Globosphere\Yandex\Disk\Resource\Collection
 	 */
 	public function getTrashResources($limit = 20, $offset = 0)
 	{
@@ -422,7 +422,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Очистить корзину.
 	 *
-	 * @return bool|\Arhitector\Yandex\Disk\Operation
+	 * @return bool|\Globosphere\Yandex\Disk\Operation
 	 */
 	public function cleanTrash()
 	{
@@ -447,7 +447,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param    int $limit
 	 * @param    int $offset
 	 *
-	 * @return   \Arhitector\Yandex\Disk\Resource\Collection
+	 * @return   \Globosphere\Yandex\Disk\Resource\Collection
 	 *
 	 * @example
 	 *
@@ -486,7 +486,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @param   string $identifier идентификатор операции или NULL
 	 *
-	 * @return  \Arhitector\Yandex\Disk\Operation
+	 * @return  \Globosphere\Yandex\Disk\Operation
 	 *
 	 * @example
 	 *
@@ -571,7 +571,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @param $identifier
 	 *
-	 * @return \Arhitector\Yandex\Disk
+	 * @return \Globosphere\Yandex\Disk
 	 */
 	protected function addOperation($identifier)
 	{

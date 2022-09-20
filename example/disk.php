@@ -10,12 +10,12 @@ error_reporting(E_ALL);
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$disk = new Arhitector\Yandex\Disk();
+$disk = new Globosphere\Yandex\Disk();
 $disk->setAccessToken('');
 
 /**
  * Список всех файлов на диске, метод getResources([int limit = 20, [int offset = 0]].
- * Возвращает объект "Arhitector\Yandex\Disk\Resource\Collection"
+ * Возвращает объект "Globosphere\Yandex\Disk\Resource\Collection"
  */
 /*$resources = $disk->getResources()
 	->setLimit(10) // количество файлов, getResources может принять "limit" первым параметром.
@@ -26,8 +26,8 @@ $disk->setAccessToken('');
 	->setSort('name', true) // способ сортировки, второй параметр TRUE означает "в обратном порядке"
 	;*/
 
-//$first = $resources->getFirst(); // Arhitector\Yandex\Disk\Resource\Closed
-//$last = $resources->getLast(); // Arhitector\Yandex\Disk\Resource\Closed
+//$first = $resources->getFirst(); // Globosphere\Yandex\Disk\Resource\Closed
+//$last = $resources->getLast(); // Globosphere\Yandex\Disk\Resource\Closed
 
 //var_dump($first->toArray(), $last->toArray(), $resources->toArray());
 
