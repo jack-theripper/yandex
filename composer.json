@@ -1,4 +1,4 @@
-or{
+{
 	"name": "architector/yandex",
 	"description": "PHP SDK для работы с некоторыми сервисами яндекса (Яндекс.Диск, Yandex.Disk)",
 	"keywords": ["yandex", "disk", "диск", "яндекс", "php", "curl", "api", "client", "sdk",
