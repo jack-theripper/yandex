@@ -1,5 +1,5 @@
-{
-	"name": "globosphere/yandex",
+or{
+	"name": "architector/yandex",
 	"description": "PHP SDK для работы с некоторыми сервисами яндекса (Яндекс.Диск, Yandex.Disk)",
 	"keywords": ["yandex", "disk", "диск", "яндекс", "php", "curl", "api", "client", "sdk",
 		"yandex disk", "яндекс диск", "rest", "restful", "яндекс"
@@ -22,12 +22,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Globosphere\\Yandex\\": "src/"
+			"Architector\\Yandex\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Globosphere\\Yandex\\Tests\\": "tests/"
+			"Architector\\Yandex\\Tests\\": "tests/"
 		}
 	},
 	"scripts": {
