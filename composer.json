@@ -15,7 +15,7 @@
 		"league/event": "^2.2",
 		"php-http/curl-client": "1.4.*",
 		"php-http/message": "^1.2",
-		"php-http/client-common": "^1.1"
+		"php-http/client-common": ">=1.1"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9.4"
