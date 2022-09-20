@@ -22,12 +22,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Arhitector\\Yandex\\": "src/"
+			"Globosphere\\Yandex\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Arhitector\\Yandex\\Tests\\": "tests/"
+			"Globosphere\\Yandex\\Tests\\": "tests/"
 		}
 	},
 	"scripts": {
