@@ -588,8 +588,8 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->client->send((new Request($access_upload['href'], 'PUT', $stream)));
-		$this->emit('uploaded', $this, $this->client);
-		$this->client->emit('uploaded', $this, $this->client);
+		$this->emit('uploaded', $this, $this->client, $stream, $response);
+		$this->client->emit('uploaded', $this, $this->client, $stream, $response);
 
 		return $response->getStatusCode() == 201;
 	}

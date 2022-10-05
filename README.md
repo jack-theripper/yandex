@@ -1565,6 +1565,30 @@ $resource->addListeners();
 
 ```
 
+## 1.3.16 Событие `uploaded`
+
+Вызывается после выполнения запроса на загрузку локального файла.
+
+```php
+use Arhitector\Yandex\Disk;
+use Arhitector\Yandex\Disk\Resource\Closed;
+use League\Event\Event;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+
+// ... 
+$disk->addListener('uploaded', function (Event $event, Closed $resource, Disk $disk, StreamInterface $uploadedStream, ResponseInterface $response) {
+	// $event - событие
+	// $resource - тоже самое что и $resource
+	// $disk - клиент
+	// $uploadedStream - в данном примере файл file_path.pdf обернутый в Stream
+	// $response - Ответ от Я.Диска. $response->getBody() - не содержит ничего (см. документацию API Я.Диска)
+});
+
+// ...
+$resource->upload(__DIR__.'/file_path.pdf');
+
+```
 
 
 
