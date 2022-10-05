@@ -60,7 +60,7 @@ class Progress extends Stream implements StreamInterface
 	 *     if no bytes are available.
 	 * @throws \RuntimeException if an error occurs.
 	 */
-	public function read($length)
+	public function read($length): string
 	{
 		$this->readSize += $length;
 		$percent = round(100 / $this->totalSize * $this->readSize, 2);
@@ -76,7 +76,7 @@ class Progress extends Stream implements StreamInterface
 	 * @throws \RuntimeException if unable to read or an error occurs while
 	 *     reading.
 	 */
-	public function getContents()
+	public function getContents(): string
 	{
 		$this->readSize = $this->totalSize;
 		$this->emit('progress', 100.0);
@@ -94,17 +94,14 @@ class Progress extends Stream implements StreamInterface
 	 *                    offset bytes SEEK_CUR: Set position to current location plus offset
 	 *                    SEEK_END: Set position to end-of-stream plus offset.
 	 *
-	 * @return bool
+	 * @return void
 	 * @throws \RuntimeException on failure.
 	 */
-	public function seek($offset, $whence = SEEK_SET)
+	public function seek($offset, $whence = SEEK_SET): void
 	{
 		if (parent::seek($offset, $whence)) {
 			$this->readSize = $offset;
-
-			return true;
 		}
-
-		return false;
 	}
+
 }
