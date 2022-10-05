@@ -13,6 +13,7 @@
 
 namespace Arhitector\Yandex\Client\Stream;
 
+use Laminas\Diactoros\Exception\UnseekableStreamException;
 use League\Event\EmitterTrait;
 use Psr\Http\Message\StreamInterface;
 use Laminas\Diactoros\Stream;
@@ -99,8 +100,11 @@ class Progress extends Stream implements StreamInterface
 	 */
 	public function seek($offset, $whence = SEEK_SET): void
 	{
-		if (parent::seek($offset, $whence)) {
+		try {
+			parent::seek($offset, $whence); // <-- catch
 			$this->readSize = $offset;
+		} catch (UnseekableStreamException $exception) {
+
 		}
 	}
 
