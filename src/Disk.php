@@ -322,7 +322,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	public function getPublishResources($limit = 20, $offset = 0)
 	{
 		$callback = function ($parameters) {
-			$previous = $this->setAccessTokenRequired(false);
+			$previous = $this->setAccessTokenRequired(true);
 			$response = $this->send(
 				new Request(
 					$this->uri
