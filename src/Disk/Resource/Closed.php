@@ -88,7 +88,7 @@ class Closed extends AbstractResource
 			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'path' => $this->getPath()
-				]), null, '&')), 'GET'));
+				]), '', '&')), 'GET'));
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -179,7 +179,7 @@ class Closed extends AbstractResource
 		}*/
 
 		$request = (new Request($this->uri->withPath($this->uri->getPath() . 'resources')
-			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'PATCH'));
+			->withQuery(http_build_query(['path' => $this->getPath()], '', '&')), 'PATCH'));
 
 		$request->getBody()
 			->write(json_encode(['custom_properties' => $meta]));
@@ -316,7 +316,7 @@ class Closed extends AbstractResource
 				'from'      => $this->getPath(),
 				'path'      => $destination,
 				'overwrite' => (bool) $overwrite
-			], null, '&')), 'POST'));
+			], '', '&')), 'POST'));
 
 		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201) {
 			$this->path = $destination;
@@ -348,7 +348,7 @@ class Closed extends AbstractResource
 			$this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources')
 				->withQuery(http_build_query([
 					'path' => $this->getPath()
-				], null, '&')), 'PUT'));
+				], '', '&')), 'PUT'));
 			$this->setContents([]);
 		} catch (\Exception $exc) {
 			throw $exc;
@@ -375,7 +375,7 @@ class Closed extends AbstractResource
 		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . $request)
 			->withQuery(http_build_query([
 				'path' => $this->getPath()
-			], null, '&')), 'PUT'));
+			], '', '&')), 'PUT'));
 
 		if ($response->getStatusCode() == 200) {
 			$this->setContents([]);
@@ -436,7 +436,7 @@ class Closed extends AbstractResource
 		}
 
 		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/download')
-			->withQuery(http_build_query(['path' => $this->getPath()], null, '&')), 'GET'));
+			->withQuery(http_build_query(['path' => $this->getPath()], '', '&')), 'GET'));
 
 		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
@@ -488,7 +488,7 @@ class Closed extends AbstractResource
 				'from'      => $this->getPath(),
 				'path'      => $destination,
 				'overwrite' => (bool) $overwrite
-			], null, '&')), 'POST'));
+			], '', '&')), 'POST'));
 
 		if ($response->getStatusCode() == 201) {
 			$response = json_decode($response->getBody(), true);
@@ -532,7 +532,7 @@ class Closed extends AbstractResource
 							'url'  => $file_path,
 							'path' => $this->getPath(),
 							'disable_redirects' => (int) $disable_redirects
-						], null, '&')), 'POST'));
+						], '', '&')), 'POST'));
 				} catch (AlreadyExistsException $exc) {
 					// параметр $overwrite не работает т.к. диск не поддерживает {AlreadyExistsException:409}->rename->delete
 					throw new AlreadyExistsException(
@@ -570,7 +570,7 @@ class Closed extends AbstractResource
 			->withQuery(http_build_query([
 				'path'      => $this->getPath(),
 				'overwrite' => (int) ((bool) $overwrite),
-			], null, '&')), 'GET'))
+			], '', '&')), 'GET'))
 			->getBody(), true);
 
 		if (!isset($access_upload['href'])) {
@@ -611,7 +611,7 @@ class Closed extends AbstractResource
 		$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'resources/download')
 			->withQuery(http_build_query([
 				'path'       => (string) $this->getPath()
-			], null, '&')), 'GET'));
+			], '', '&')), 'GET'));
 
 		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
@@ -644,7 +644,7 @@ class Closed extends AbstractResource
 			$docviewer['url'] = "ya-disk:///disk/{$docviewer['url']}";
 
 			return (string) (new Uri('https://docviewer.yandex.ru'))
-				->withQuery(http_build_query($docviewer, null, '&'));
+				->withQuery(http_build_query($docviewer, '', '&'));
 		}
 
 		return false;

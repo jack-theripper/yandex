@@ -78,7 +78,7 @@ class Removed extends AbstractResource
 			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
 				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'path' => $this->getPath()
-				]), null, '&')), 'GET')));
+				]), '', '&')), 'GET')));
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -134,7 +134,7 @@ class Removed extends AbstractResource
 				'path'      => $this->getPath(),
 				'name'      => (string) $name,
 				'overwrite' => (bool) $overwrite
-			], null, '&')), 'PUT');
+			], '', '&')), 'PUT');
 
 		$response = $this->client->send($request);
 
@@ -170,7 +170,7 @@ class Removed extends AbstractResource
 			$response = $this->client->send(new Request($this->uri->withPath($this->uri->getPath() . 'trash/resources')
 				->withQuery(http_build_query([
 					'path' => $this->getPath()
-				], null, '&')), 'DELETE'));
+				], '', '&')), 'DELETE'));
 
 			if ($response->getStatusCode() == 202) {
 				$this->setContents([]);

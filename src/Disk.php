@@ -256,7 +256,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 				new Request(
 					$this->uri
 						->withPath($this->uri->getPath() . 'resources/files')
-						->withQuery(http_build_query($parameters, null, '&')),
+						->withQuery(http_build_query($parameters, '', '&')),
 					'GET'
 				)
 			);
@@ -327,7 +327,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 				new Request(
 					$this->uri
 						->withPath($this->uri->getPath() . 'resources/public')
-						->withQuery(http_build_query($parameters, null, '&')),
+						->withQuery(http_build_query($parameters, '', '&')),
 					'GET'
 				)
 			);
@@ -398,7 +398,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 				new Request(
 					$this->uri
 						->withPath($this->uri->getPath() . 'trash/resources')
-						->withQuery(http_build_query($parameters + ['path' => 'trash:/'], null, '&')),
+						->withQuery(http_build_query($parameters + ['path' => 'trash:/'], '', '&')),
 					'GET'
 				)
 			);
@@ -460,7 +460,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 				new Request(
 					$this->uri
 						->withPath($this->uri->getPath() . 'resources/last-uploaded')
-						->withQuery(http_build_query($parameters, null, '&')),
+						->withQuery(http_build_query($parameters, '', '&')),
 					'GET'
 				)
 			);

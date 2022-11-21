@@ -97,7 +97,7 @@ class Opened extends AbstractResource
 			$response = $this->client->send((new Request($this->uri->withPath($this->uri->getPath() . 'public/resources')
 				->withQuery(http_build_query(array_merge($this->getParameters($this->parametersAllowed), [
 					'public_key' => $this->getPublicKey()
-				]), null, '&')), 'GET')));
+				]), '', '&')), 'GET')));
 
 			if ($response->getStatusCode() == 200) {
 				$response = json_decode($response->getBody(), true);
@@ -144,7 +144,7 @@ class Opened extends AbstractResource
 			->withQuery(http_build_query([
 				'public_key' => $this->getPublicKey(),
 				'path'       => (string) $this->getPath()
-			], null, '&')), 'GET'));
+			], '', '&')), 'GET'));
 
 		if ($response->getStatusCode() == 200) {
 			$response = json_decode($response->getBody(), true);
@@ -294,7 +294,7 @@ class Opened extends AbstractResource
 			. 'public/resources/save-to-disk')
 			->withQuery(http_build_query([
 				'public_key' => $this->getPublicKey()
-			] + $parameters, null, '&')), 'POST')));
+			] + $parameters, '', '&')), 'POST')));
 
 		if ($response->getStatusCode() == 202 || $response->getStatusCode() == 201) {
 			$response = json_decode($response->getBody(), true);
@@ -352,7 +352,7 @@ class Opened extends AbstractResource
 			];
 
 			return (string) (new Uri('https://docviewer.yandex.ru/'))
-				->withQuery(http_build_query($docviewer, null, '&'));
+				->withQuery(http_build_query($docviewer, '', '&'));
 		}
 
 		return false;

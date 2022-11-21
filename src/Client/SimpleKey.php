@@ -86,7 +86,7 @@ class SimpleKey extends AbstractClient
 	protected function authentication(RequestInterface $request)
 	{
 		$uri = $request->getUri();
-		$key = http_build_query(['key' => $this->getAccessKey()], null, '&');
+		$key = http_build_query(['key' => $this->getAccessKey()], '', '&');
 
 		if (strlen($uri->getQuery()) > 0)
 		{
