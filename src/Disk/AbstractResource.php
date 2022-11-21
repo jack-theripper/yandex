@@ -16,7 +16,7 @@ use Arhitector\Yandex\Client\Container\ContainerTrait;
 use League\Event\EmitterTrait;
 
 /**
- * Базовый касс, описывающий ресурс.
+ * Базовый класс, описывающий ресурс.
  *
  * @package Arhitector\Yandex\Disk
  */
@@ -28,7 +28,7 @@ abstract class AbstractResource implements \ArrayAccess, \Countable, \IteratorAg
 	}
 
 	/**
-	 * @var string  путь к ресурсу
+	 * @var string  Путь к ресурсу.
 	 */
 	protected $path;
 

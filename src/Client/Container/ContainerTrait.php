@@ -20,7 +20,7 @@ namespace Arhitector\Yandex\Client\Container;
 trait ContainerTrait
 {
 	/**
-	 * @var    array  контейнер данных
+	 * @var    array  Контейнер данных.
 	 */
 	protected $store = [];
 
@@ -28,8 +28,9 @@ trait ContainerTrait
 	/**
 	 * Countable
 	 *
-	 * @return    integer    размер контейнера
+	 * @return    integer    Размер контейнера.
 	 */
+	#[\ReturnTypeWillChange]
 	public function count()
 	{
 		return count($this->toArray());
@@ -79,6 +80,7 @@ trait ContainerTrait
 	 *
 	 * @return \IteratorAggregate    итератор
 	 */
+	#[\ReturnTypeWillChange]
 	public function getIterator()
 	{
 		return new \ArrayIterator($this->toArray());
@@ -132,7 +134,7 @@ trait ContainerTrait
 	 * Получить значение из контейнера по ключу
 	 *
 	 * @param   string $index
-	 * @param   mixed  $default может быть функцией
+	 * @param   mixed  $default Может быть функцией.
 	 *
 	 * @return  mixed
 	 */
@@ -158,6 +160,7 @@ trait ContainerTrait
 	 *
 	 * @return    bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists($key)
 	{
 		return $this->has($key);
@@ -171,6 +174,7 @@ trait ContainerTrait
 	 * @return    mixed
 	 * @throws    \OutOfBoundsException
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet($key)
 	{
 		return $this->get($key, function() use ($key) {
@@ -186,6 +190,7 @@ trait ContainerTrait
 	 * @return  null
 	 * @throws  \RuntimeException
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset($key)
 	{
 		return null;
@@ -199,6 +204,7 @@ trait ContainerTrait
 	 *
 	 * @return  null
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet($key, $value)
 	{
 		return null;
@@ -207,7 +213,7 @@ trait ContainerTrait
 	/**
 	 * Заменить все данные контейнера другими.
 	 *
-	 * @param   array $content новые данные
+	 * @param   array $content Новые данные.
 	 *
 	 * @return  $this
 	 */

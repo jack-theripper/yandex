@@ -502,6 +502,7 @@ class Disk extends OAuth implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @return int
 	 */
+	#[\ReturnTypeWillChange]
 	public function count()
 	{
 		return sizeof($this->getOperations());

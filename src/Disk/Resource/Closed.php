@@ -202,6 +202,7 @@ class Closed extends AbstractResource
 	 *
 	 * @return  void
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet($key, $value)
 	{
 		$this->set($key, $value);
@@ -225,6 +226,7 @@ class Closed extends AbstractResource
 	 * @return  void
 	 * @throws  \RuntimeException
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset($key)
 	{
 		$this->set($key, null);
